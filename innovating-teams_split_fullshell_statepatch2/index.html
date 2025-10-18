@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Innovating Teams — Fases 1 a 7 (prueba)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{sea:{500:'#2e5e8c',600:'#254c72'},mint:{500:'#00B8A9'},accent:{500:'#FF7B39'}}}}};
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Inter',system-ui;background:#2e5e8c;color:#fff}
+  .card{background:#fff;color:#0b1f3a;border-radius:1.25rem;box-shadow:0 16px 44px rgba(0,0,0,.18)}
+  .btn{border:0;border-radius:1rem;padding:.6rem 1rem;font-weight:800}
+  .btn-ghost{background:#ffffff22;color:#fff;border:1px solid #ffffff40}
+  .progress{display:grid;grid-auto-flow:column;gap:.5rem}
+  .step{background:#ffffff22;border:1px solid #ffffff33;color:#fff;border-radius:999px;padding:.35rem .8rem;font-weight:800;font-size:.85rem;opacity:.7}
+  .step.active{background:#00B8A9;opacity:1}
+  .bubble-map{position:relative;min-height:420px;border-radius:18px;background:#f4f7fb;overflow:hidden}
+  .bubble{position:absolute;border-radius:999px;padding:10px 14px;background:#e6f4ff;color:#0b1f3a;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.08);user-select:none;cursor:grab; touch-action:none;}
+  .bubble.lock{cursor:default}
+  .bubble.center{background:#102a4b;color:#fff;cursor:default}
+  .grid-letters{display:grid;grid-template-columns:repeat(12, 32px);gap:6px;justify-content:center}
+  .cell{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#eef3fb;border-radius:.5rem;font-weight:800;border:1px solid #d7e2f1;cursor:pointer}
+  .cell.sel{background:#ffdbaa;border-color:#ffc067}
+</style>
+
+<style>
+/* ===== Misión Emprende — Roulette Modal (namespaced) ===== */
+.me-roulette-backdrop{
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  display: none; align-items: center; justify-content: center; z-index: 9999;
+}
+.me-roulette-backdrop.me-open{ display:flex }
+.me-roulette-modal{
+  width: min(880px, 92vw); background: #fff; border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25); padding: 24px;
+}
+.me-roulette-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px }
+.me-roulette-title{ font-size: 20px; font-weight: 700 }
+.me-roulette-close{
+  border: 1px solid #e5eef7; background:#f4f7fb; border-radius:999px; padding:8px 12px; cursor:pointer; font-weight:700
+}
+.me-roulette-body{ display:grid; place-items:center; padding: 8px 0 0 }
+.me-wheel-wrap{ position:relative; width:min(520px, 82vw); height:min(520px, 82vw); background:#0e2b47; border-radius:20px; display:grid; place-items:center; padding:18px }
+.me-wheel{
+  width:100%; height:100%; border-radius:50%; background:#0e2b47; position:relative; overflow:hidden;
+  box-shadow: inset 0 0 0 10px #0e2b47, 0 8px 24px rgba(0,0,0,.2);
+  transform: rotate(0deg); transition: transform 6s cubic-bezier(.17,.67,.21,1);
+}
+.me-pointer{ position:absolute; top:8px; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent; border-bottom:18px solid #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+.me-pointer { left: calc(50% - 12px); }
+.me-wheel slice{ display:block }
+.me-roulette-controls{ display:flex; gap:12px; justify-content:center; margin-top:16px }
+.me-roulette-btn{
+  background:#ff7a3c; color:#fff; border:none; padding:10px 16px; border-radius:12px; font-weight:700; cursor:pointer
+}
+.me-roulette-sub{ text-align:center; color:#667; font-size:14px; margin-top:8px }
+.me-winner{ text-align:center; font-weight:800; margin-top:12px; font-size:18px }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+const arr=(v)=>Array.isArray(v)?v:[];
+const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k)||'null') ?? def}catch{ return def }};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function useRole(){const [role,setRole]=useState(localStorage.getItem('it_role')||'profesor');useEffect(()=>localStorage.setItem('it_role',role),[role]);return {role,setRole,isProf:role==='profesor'};}
+
+const AREAS=[{id:'salud',name:'Salud'},{id:'sustentabilidad',name:'Sustentabilidad'},{id:'educacion',name:'Educación'}];
+const CHALL={
+  salud:[{id:'adultos-mayores-tecnologia',title:'Tecnología adultos mayores',persona:{name:'Osvaldo',age:70,story:'Le cuesta adaptarse a trámites digitales y apps; depende de su familia para gestiones en línea.'}}],
+  sustentabilidad:[
+    {id:'fast-fashion',title:'Fast fashion y zonas de desechos',persona:{name:'Gabriela',age:18,story:'Vive cerca de vertederos; olores y residuos afectan su vida diaria.'}},
+    {id:'agua-agricultura',title:'Sustentabilidad del agua en la agricultura',persona:{name:'Camila',age:50,story:'Productora agrícola preocupada por la escasez de agua dulce.'}},
+  ],
+  educacion:[{id:'brecha-digital',title:'Brecha digital en educación',persona:{name:'Luis',age:12,story:'Acceso limitado a internet y dispositivos; se atrasa en clases.'}}]
+};
+const CATS=[
+  {id:'necesidades',name:'Necesidades',cls:'bg-emerald-100 text-emerald-900 border-emerald-200'},
+  {id:'dolores',name:'Dolores',cls:'bg-rose-100 text-rose-900 border-rose-200'},
+  {id:'objetivos',name:'Objetivos',cls:'bg-indigo-100 text-indigo-900 border-indigo-200'},
+  {id:'contexto',name:'Contexto',cls:'bg-amber-100 text-amber-900 border-amber-200'},
+  {id:'restricciones',name:'Restricciones',cls:'bg-slate-100 text-slate-900 border-slate-200'},
+  {id:'tecnologia',name:'Tecnología',cls:'bg-cyan-100 text-cyan-900 border-cyan-200'},
+  {id:'recursos',name:'Recursos',cls:'bg-lime-100 text-lime-900 border-lime-200'},
+  {id:'exito',name:'Criterios de éxito',cls:'bg-purple-100 text-purple-900 border-purple-200'},
+];
+
+// --- Fase 1 (votación + sopa sencilla) ---
+const defaultPoll={options:[
+  {id:'sopa',label:'Sopa de letras'},
+  {id:'armar',label:'Armar palabras con letras'},
+  {id:'ice',label:'Romper el hielo con el grupo'},
+], votes:{}, myVote:null};
+
+function WordSearch({onComplete}){
+  const words=['UDD','TOKEN','GRUPO','JUEGO','INNOVA'];
+  const size=12;
+  const letters=React.useMemo(()=>{
+    const grid=Array(size).fill(0).map(()=>Array(size).fill(''));
+    const rows=[1,3,5,7,9];
+    words.forEach((w,i)=>{
+      const r=rows[i%rows.length];
+      const start= i*2 % (size - w.length);
+      for(let j=0;j<w.length;j++){ grid[r][start+j]=w[j]; }
+    });
+    const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for(let r=0;r<size;r++){ for(let c=0;c<size;c++){ if(!grid[r][c]) grid[r][c]=alphabet[Math.floor(Math.random()*alphabet.length)]; }}
+    return grid;
+  },[]);
+  const [sel,setSel]=useState([]);
+  const [found,setFound]=useState([]);
+  const toggle=(r,c)=>{const key=r+'-'+c; setSel(s=> s.includes(key)? s.filter(k=>k!==key) : s.concat(key));};
+  useEffect(()=>{
+    const groups={}; sel.forEach(k=>{const [r,c]=k.split('-').map(Number); (groups[r]=groups[r]||[]).push(c);});
+    let newly=[];
+    for(const r in groups){
+      const cols=groups[r].sort((a,b)=>a-b);
+      if(cols.length<2) continue;
+      let run=[];
+      for(let i=0;i<cols.length;i++){
+        if(i===0 || cols[i]===cols[i-1]+1) run.push(cols[i]); else {
+          if(run.length>1){ const w=run.map(c=>letters[r][c]).join(''); if(words.includes(w)&&!found.includes(w)) newly.push(w); }
+          run=[cols[i]];
+        }
+      }
+      if(run.length>1){ const w=run.map(c=>letters[r][c]).join(''); if(words.includes(w)&&!found.includes(w)) newly.push(w); }
+    }
+    if(newly.length){ setFound(f=>[...f,...newly]); setSel([]); }
+  },[sel]);
+  useEffect(()=>{ if(found.length===words.length) onComplete?.(); },[found]);
+  return(<div className="grid md:grid-cols-[1fr,260px] gap-6">
+    <div className="card p-6">
+      <div className="grid-letters">
+        {letters.map((row,r)=>(row.map((ch,c)=>(<div key={r+'-'+c} className={'cell '+(sel.includes(r+'-'+c)?'sel':'')} onClick={()=>toggle(r,c)}>{ch}</div>))))}
+      </div>
+    </div>
+    <div className="card p-6">
+      <b>Palabras</b>
+      <ul className="list-disc pl-5 mt-2 text-sm">{words.map(w=>(<li key={w} className={found.includes(w)?'line-through text-emerald-700':''}>{w}</li>))}</ul>
+      <div className="mt-4 text-sm text-slate-600">Encontradas: {found.length}/{words.length}</div>
+    </div>
+  </div>);
+}
+
+function Phase1({role,onNext}){
+  const [poll,setPoll]=useState(()=>load('it_poll',defaultPoll));
+  useEffect(()=>save('it_poll',poll),[poll]);
+  const castVote=(id)=>{
+    setPoll(p=>{ const me=role+'-'+(localStorage.getItem('it_user')||'solo'); const votes={...p.votes,[me]:id}; return {...p,myVote:id,votes}; });
+  };
+  const tally = Object.values(poll.votes).reduce((acc,id)=>((acc[id]=(acc[id]||0)+1),acc),{});
+  const winner = poll.options.reduce((best,o)=> (tally[o.id]||0)>(tally[best?.id]||0)?o:best, poll.options[0]);
+  const [wsDone,setWsDone]=useState(false);
+
+  return(<div className="max-w-6xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-4">Fase 1 · Votación de actividades</h1>
+    <div className="grid md:grid-cols-2 gap-6 items-start">
+      <div className="card p-6">
+        <b>Votación de actividades</b>
+        <div className="mt-4 flex flex-col gap-3">
+          {poll.options.map(o=>(
+            <label key={o.id} className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200">
+              <input type="radio" name="opt" checked={poll.myVote===o.id} onChange={()=>castVote(o.id)}/>
+              <span className="font-semibold">{o.label}</span>
+              <span className="ml-auto text-xs bg-slate-100 rounded-full px-2 py-1">{tally[o.id]||0} voto(s)</span>
+            </label>
+          ))}
+        </div>
+        <div className="mt-4 text-sm">Ganando: <b>{winner.label}</b></div>
+        <div className="mt-3 text-right"><button className="btn bg-accent-500 text-white" onClick={onNext}>Ir a Fase 2</button></div>
+      </div>
+      <div className="card p-6">
+        <b>Actividad: Sopa de letras</b>
+        <p className="text-sm text-slate-600">Encuentra todas las palabras para marcar la actividad como realizada.</p>
+        <div className="mt-4"><WordSearch onComplete={()=>setWsDone(true)}/></div>
+        {wsDone && <div className="mt-3 text-emerald-600 text-sm">✔ Actividad completada.</div>}
+      </div>
+    </div>
+  </div>);
+}
+
+// --- Fase 2 (selección + bubble map interactivo para alumno) ---
+function DraggableMap({persona,bubbles,applyBubbles,canDrag}){
+  const boxRef=useRef(null);
+  useEffect(()=>{
+    const box=boxRef.current;if(!box)return;
+    const rect=box.getBoundingClientRect();const cx=rect.width/2,cy=rect.height/2;
+    const list=arr(bubbles);
+    const center=list.find(b=>b.center);
+    const centerText = `${persona?.name||'Persona'} · ${persona?.age||''}`;
+    if(!center){
+      const newCenter = {id:'center',text:centerText,x:cx-60,y:cy-18,center:true};
+      applyBubbles([...list, newCenter]);
+    }else if(center.text !== centerText){
+      applyBubbles(list.map(b=>b.center?{...b,text:centerText}:b));
+    }
+  },[persona?.name,persona?.age]);
+  const onDown=(e,id)=>{
+    if(!canDrag) return;
+    e.preventDefault(); e.stopPropagation();
+    const rect=boxRef.current.getBoundingClientRect();
+    const startX=e.clientX,startY=e.clientY;
+    const list=arr(bubbles); const i=list.findIndex(x=>x.id===id); if(i<0||list[i].center) return;
+    let sx=list[i].x||0, sy=list[i].y||0;
+    const move=(ev)=>{
+      const nx=Math.max(10,Math.min(rect.width-10,sx+(ev.clientX-startX)));
+      const ny=Math.max(10,Math.min(rect.height-10,sy+(ev.clientY-startY)));
+      applyBubbles(prevList=>{
+        const base=arr(prevList); const clone=base.map(x=>({...x}));
+        const ix=clone.findIndex(x=>x.id===id);
+        if(ix>=0 && !clone[ix].center){ clone[ix].x=nx; clone[ix].y=ny; }
+        return clone;
+      });
+    };
+    const up=()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); };
+    window.addEventListener('pointermove',move,{passive:false});
+    window.addEventListener('pointerup',up,{passive:false});
+  };
+  return(<div ref={boxRef} className="bubble-map" onPointerDown={(e)=>e.stopPropagation()}>
+    {arr(bubbles).map(b=>(
+      <div key={b.id} className={"bubble "+(b.center?'center':'')+" "+(!canDrag||b.center?'lock':'')}
+           style={{left:b.x,top:b.y}} onPointerDown={(b.center||!canDrag)?undefined:(e)=>onDown(e,b.id)}>{b.text}</div>
+    ))}
+  </div>);
+}
+
+function Phase2({role,onNext}){
+  const init=()=>load('it_phase2_store',{area:null,challengeId:null,persona:null,bubbles:[],confirmed:false});
+  const [state,setState]=useState(init);
+  useEffect(()=>save('it_phase2_store',state),[state]);
+  const list = state.area ? CHALL[state.area] : [];
+  const ch = list.find(c=>c.id===state.challengeId)||null;
+  const persona=ch?.persona||null;
+  const [txt,setTxt]=useState(''); const [cat,setCat]=useState(CATS[0].id);
+  const add=()=>{const t=txt.trim(); if(!t) return; const id=Math.random().toString(36).slice(2);
+    const x=60+Math.random()*300, y=60+Math.random()*240;
+    setState(s=>({...s,bubbles:arr(s.bubbles).concat({id,text:t,cat,x,y})})); setTxt('');
+  };
+  const rm=(id)=>setState(s=>({...s,bubbles:arr(s.bubbles).filter(b=>b.id!==id)}));
+  const canDrag=role==='alumno' && !state.confirmed;
+  const nonCenterCount = arr(state.bubbles).filter(b=>!b.center).length;
+  const canContinue = !!state.area && !!state.challengeId && nonCenterCount>=1;
+  const [editMap,setEditMap]=useState(false);
+  const applyBubbles=(next)=>{ setState(s=>{ const prev=arr(s.bubbles); const computed=(typeof next==='function')?next(prev):next; return {...s,bubbles:arr(computed)}; }); };
+  return(<div className="max-w-6xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-4">Fase 2 · Selección y Mapa de Empatía</h1>
+    <div className="grid md:grid-cols-3 gap-6">
+      <div className="md:col-span-1 card p-6">
+        <h2 className="font-bold mb-2">Área</h2>
+        <div className="flex flex-col gap-2">
+          {AREAS.map(a=>(<button key={a.id} className={"btn text-left "+(state.area===a.id?"bg-mint-500 text-white":"bg-slate-100")} onClick={()=>setState(s=>({...s,area:a.id,challengeId:null,persona:null}))}>{a.name}</button>))}
+        </div>
+        <h2 className="font-bold mt-6 mb-2">Desafío</h2>
+        <div className="flex flex-col gap-2">
+          {!list.length && <div className="text-slate-500 text-sm">Primero elige un área</div>}
+          {list.map(c=>(<button key={c.id} className={"btn text-left "+(state.challengeId===c.id?"bg-mint-500 text-white":"bg-slate-100")} onClick={()=>setState(s=>({...s,challengeId:c.id,persona:c.persona}))}>{c.title}</button>))}
+        </div>
+      </div>
+      <div className="md:col-span-2 card p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold">Ficha de la Persona</h2>
+          {persona && arr(state.bubbles).length>0 && <button className="btn bg-slate-100" onClick={()=>setEditMap(true)}>Ver / Editar bubble map</button>}
+        </div>
+        {!persona && <div className="text-slate-500 text-sm">Selecciona un desafío para ver la persona base.</div>}
+        {persona && (
+          <div className="mt-2 grid md:grid-cols-[260px,1fr] gap-6 items-start">
+            <div className="rounded-2xl p-6" style={{background:'linear-gradient(135deg,#162b52 0%, #2c5ea0 100%)'}}>
+              <div className="text-sm uppercase tracking-wider text-slate-300 mb-1">Empatía</div>
+              <div className="text-3xl font-extrabold text-white">{persona.name}</div>
+              <div className="mt-1 text-slate-300">Edad: {persona.age}</div>
+              <p className="mt-3 text-slate-200 leading-relaxed">{persona.story}</p>
+            </div>
+            <div>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium">Nuevo atributo</label>
+                  <input value={txt} onChange={e=>setTxt(e.target.value)} className="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Ej: No confía en pagos online"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">Categoría</label>
+                  <select value={cat} onChange={e=>setCat(e.target.value)} className="rounded-xl border border-slate-300 px-3 py-2">
+                    {CATS.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <button onClick={add} className="btn bg-mint-500 text-white">Añadir</button>
+              </div>
+              <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                {arr(state.bubbles).filter(b=>!b.center).map(b=>{
+                  const cc=CATS.find(x=>x.id===b.cat);
+                  return(<div key={b.id} className={"px-3 py-2 rounded-full border text-sm font-semibold flex items-center justify-between "+(cc?.cls||'bg-slate-100 text-slate-900 border-slate-200')}>
+                    <span className="truncate">{b.text}</span>
+                    <button onClick={()=>rm(b.id)} className="ml-2 text-xs opacity-70 hover:opacity-100">✕</button>
+                  </div>);
+                })}
+              </div>
+              {state.confirmed && <p className="text-xs text-emerald-600 mt-2">✔ Mapa confirmado (bloqueado para el alumno).</p>}
+            </div>
+          </div>
+        )}
+        <div className="mt-6 flex justify-end gap-3">
+          <button className="btn bg-slate-100" onClick={()=>setEditMap(true)} disabled={!persona||arr(state.bubbles).length===0}>Vista previa</button>
+          <button className={"btn "+(!canContinue?"bg-slate-200 text-slate-500 cursor-not-allowed":"bg-accent-500 text-white")} disabled={!canContinue} onClick={()=>{setEditMap(false);setState(s=>({...s,confirmed:true}));onNext();}}>Continuar a Fase 3</button>
+        </div>
+      </div>
+    </div>
+
+    {editMap && persona && (
+      <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/50" onMouseDown={(e)=>{ if(e.target===e.currentTarget){ e.stopPropagation(); setEditMap(false);} }}></div>
+        <div className="relative card w-[min(980px,95vw)] p-5" onMouseDown={(e)=>e.stopPropagation()}>
+          <div className="flex items-center justify-between"><b>Mapa de Empatía</b><button className="btn btn-ghost" onClick={()=>setEditMap(false)}>Cerrar</button></div>
+          <div className="text-sm mt-1 mb-2">{(role==='alumno' && !state.confirmed)?'Arrastra las burbujas para acomodar y confirma':'Solo vista o bloqueado'}</div>
+          <DraggableMap persona={persona} bubbles={arr(state.bubbles)} applyBubbles={(next)=>{ setState(s=>{ const prev=arr(s.bubbles); const computed=(typeof next==='function')?next(prev):next; return {...s,bubbles:arr(computed)}; }); }} canDrag={role==='alumno' && !state.confirmed}/>
+          <div className="mt-3 text-right flex gap-2 justify-end">
+            {!state.confirmed && role==='alumno' && <button className="btn bg-accent-500 text-white" onClick={()=>{setState(s=>({...s,confirmed:true})); setEditMap(false);}}>Confirmar mapa</button>}
+            <button className="btn bg-mint-500 text-white" onClick={()=>{setEditMap(false);}}>Listo</button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>);
+}
+
+// --- Fase 3 ---
+function beep(){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.type='sine';o.frequency.value=880;g.gain.value=0.05;o.connect(g);g.connect(ctx.destination);o.start();setTimeout(()=>{o.stop();ctx.close();},120);}catch(e){}}
+function Phase3({role,onNext,onBack}){
+  const p2 = load('it_phase2_store',null)||{};
+  const [seconds,setSeconds]=useState(300); const [running,setRunning]=useState(false); const [showMap,setShowMap]=useState(false);
+  const tickRef=useRef(null); const lastBeepRef=useRef(null);
+  useEffect(()=>{
+    if(!running){ if(tickRef.current){clearInterval(tickRef.current); tickRef.current=null;} return; }
+    tickRef.current=setInterval(()=>{
+      setSeconds(s=>{ const next=Math.max(0,s-1);
+        if(next>0 && next<=5 && lastBeepRef.current!==next){beep(); lastBeepRef.current=next;}
+        if(next===0){ if(tickRef.current){clearInterval(tickRef.current); tickRef.current=null;} setRunning(false); lastBeepRef.current=null; setTimeout(()=>alert('⏱️ ¡Tiempo terminado!')); }
+        return next; });
+    },1000);
+    return ()=>{if(tickRef.current){clearInterval(tickRef.current); tickRef.current=null;}};
+  },[running]);
+  const mm=String(Math.floor(seconds/60)).padStart(2,'0'), ss=String(seconds%60).padStart(2,'0');
+  const isProf=role==='profesor';
+  return(<div className="max-w-4xl mx-auto p-6 text-center">
+    <h1 className="text-3xl font-extrabold mb-1">Fase 3 · Construcción con LEGO</h1>
+    <p className="opacity-80 mb-4">Tiempo para crear con LEGO. Puedes ver el mapa de empatía confirmado.</p>
+    <div className="card p-6 flex flex-col items-center">
+      <img src="lego.gif" className="w-[280px] h-[158px] object-cover rounded-xl mb-4" alt="gif lego"/>
+      <div className="text-6xl font-extrabold tracking-widest">{mm}:{ss}</div>
+      <div className="mt-5 flex gap-2">
+        <button className="btn bg-slate-200" onClick={()=>setShowMap(true)}>Ver bubble map</button>
+        {isProf && <>
+          <button className="btn bg-mint-500 text-white" onClick={()=>setRunning(true)}>Iniciar</button>
+          <button className="btn bg-slate-100" onClick={()=>setRunning(false)}>Pausar</button>
+          <button className="btn bg-accent-500 text-white" onClick={()=>{setRunning(false); setSeconds(300); lastBeepRef.current=null;}}>Reiniciar</button>
+        </>}
+      </div>
+      {!isProf && <div className="text-xs text-slate-500 mt-2">El profesor controla el temporizador.</div>}
+      <div className="mt-6 flex gap-2"><button className="btn bg-slate-100" onClick={onBack}>← Volver</button><button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 4</button></div>
+    </div>
+    {showMap && <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50" onMouseDown={(e)=>{if(e.target===e.currentTarget) setShowMap(false)}}></div>
+      <div className="relative card w-[min(980px,95vw)] p-5" onMouseDown={(e)=>e.stopPropagation()}>
+        <div className="flex items-center justify-between"><b>Mapa de Empatía</b><button className="btn btn-ghost" onClick={()=>setShowMap(false)}>Cerrar</button></div>
+        <ReadOnlyMap persona={p2?.persona} bubbles={p2?.bubbles||[]}/>
+      </div>
+    </div>}
+  </div>);
+}
+function ReadOnlyMap({persona,bubbles}){
+  const list=arr(bubbles).map(b=>({...b}));
+  if(!list.find(b=>b.center)) list.unshift({id:'center',text:`${persona?.name||'Persona'} · ${persona?.age||''}`,x:120,y:80,center:true});
+  return(<div className="bubble-map">{list.map(b=>(<div key={b.id} className={'bubble '+(b.center?'center':'lock')} style={{left:b.x,top:b.y}}>{b.text}</div>))}</div>);
+}
+
+// --- Fase 4 ---
+function Phase4({role,onNext,onBack}){
+  const [members,setMembers]=useState(load('it_members',['Ana','Bruno','Carla','Diego']));
+  const [selected,setSelected]=useState(load('it_selected',[]));
+  useEffect(()=>{save('it_members',members); save('it_selected',selected)},[members,selected]);
+  const remaining = members.filter(m=>!selected.includes(m));
+  const [mode,setMode]=useState('ruleta');
+  const isProf = role==='profesor';
+  const pick=()=>{
+    if(remaining.length===0) return;
+    const i=Math.floor(Math.random()*remaining.length);
+    const name=remaining[i];
+    setSelected(s=>s.concat(name));
+    alert('🎤 Pitch por: '+name);
+  };
+  return(<div className="max-w-5xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-1">Fase 4 · Pitch del equipo</h1>
+    <p className="opacity-80 mb-4">El profesor elige o sortea quién presenta. Si no se elige, usa un método aleatorio.</p>
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="card p-6">
+        <b>Miembros del grupo</b>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {members.map(m=>(<span key={m} className={"px-3 py-1 rounded-full text-sm font-semibold "+(selected.includes(m)?'bg-slate-200 text-slate-500 line-through':'bg-slate-100')}>{m}</span>))}
+        </div>
+        {isProf && <div className="mt-4 flex gap-2">
+          <input className="rounded-xl border border-slate-300 px-3 py-2 flex-1" placeholder="Agregar miembro" onKeyDown={(e)=>{if(e.key==='Enter'){const v=e.currentTarget.value.trim(); if(v && !members.includes(v)){setMembers([...members,v]); e.currentTarget.value='';}}}}/>
+          <button className="btn bg-slate-100" onClick={()=>{setSelected([])}}>Reset elegidos</button>
+        </div>}
+      </div>
+      <div className="card p-6">
+        <b>Seleccionar aleatoriamente</b>
+        <div className="mt-3 flex gap-2">
+          {['ruleta','palito','vasos'].map(k=>(<button key={k} className={"btn "+(mode===k?'bg-mint-500 text-white':'bg-slate-100')} onClick={()=>setMode(k)}>
+            {k==='ruleta'?'Ruleta':k==='palito'?'Palito más corto':'Juego de vasos'}
+          </button>))}
+        </div>
+        <div className="mt-4 text-sm text-slate-600">Método visual cambia, pero la selección es justa. No se repiten presentadores.</div>
+        {isProf ? <button className="mt-4 btn bg-accent-500 text-white" onClick={pick}>Elegir al azar</button> : <div className="mt-4 text-xs text-slate-500">Solo el profesor puede sortear.</div>}
+        <div className="mt-6">
+          <button className="btn bg-slate-100 mr-2" onClick={onBack}>← Volver</button>
+          <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 5</button>
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+// --- Fase 5 ---
+function Phase5({role,onNext,onBack}){
+  const [scores,setScores]=useState(load('it_scores',{creatividad:0,solucion:0,empatia:0,comentarios:''}));
+  useEffect(()=>save('it_scores',scores),[scores]);
+  const set=(k,v)=>setScores(s=>({...s,[k]:v}));
+  const note="Escala 1–8: 1 = no reflejó para nada la habilidad; 8 = reflejó totalmente la habilidad evaluada.";
+  return(<div className="max-w-4xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-2">Fase 5 · Evaluación a otros grupos</h1>
+    <p className="opacity-80">{note}</p>
+    <div className="card p-6 mt-4">
+      {['creatividad','solucion','empatia'].map(k=>(
+        <div key={k} className="mb-4">
+          <div className="font-bold capitalize">{k}</div>
+          <div className="flex gap-2 mt-2 flex-wrap">{Array.from({length:8},(_,i)=>i+1).map(n=>(<button key={n} className={"btn "+(scores[k]===n?'bg-mint-500 text-white':'bg-slate-100')} onClick={()=>set(k,n)}>{n}</button>))}</div>
+        </div>
+      ))}
+      <div><div className="font-bold">Comentarios</div><textarea className="w-full rounded-xl border border-slate-300 px-3 py-2" rows="3" value={scores.comentarios} onChange={e=>set('comentarios',e.target.value)} placeholder="Comentarios constructivos..."></textarea></div>
+      <div className="mt-6 flex gap-2"><button className="btn bg-slate-100" onClick={onBack}>← Volver</button><button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 6</button></div>
+    </div>
+  </div>);
+}
+
+// --- Fase 6 ---
+function Phase6({role,onNext,onBack}){
+  const scores=load('it_scores',{creatividad:0,solucion:0,empatia:0});
+  const avg=(scores.creatividad+scores.solucion+scores.empatia)/3 || 0;
+  const computedTokens=Math.round(avg*10);
+  const [tokens,setTokens]=useState(load('it_tokens',computedTokens));
+  useEffect(()=>save('it_tokens',tokens),[tokens]);
+  const isProf = role==='profesor';
+  const groups=[{name:'Grupo 1',tokens}];
+  const winner=groups[0];
+  return(<div className="max-w-4xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-2">Fase 6 · Ranking por Tokens</h1>
+    <div className="card p-6">
+      <div className="flex items-center justify-between"><b>Clasificación</b>{isProf && <div className="text-sm">Ajustar tokens: <input className="rounded-xl border border-slate-300 px-2 py-1 w-24 text-right" type="number" value={tokens} onChange={e=>setTokens(parseInt(e.target.value||'0'))}/></div>}</div>
+      <div className="mt-4">{groups.sort((a,b)=>b.tokens-a.tokens).map((g,i)=>(<div key={g.name} className={"flex items-center justify-between p-3 rounded-xl mb-2 "+(i===0?'bg-amber-100':'bg-slate-100')}><div className="font-bold">{i+1}. {g.name}</div><div className="font-extrabold">{g.tokens} tokens</div></div>))}</div>
+      <div className="mt-4 text-emerald-700 font-semibold">🏆 Ganador: {winner.name}</div>
+      <div className="mt-6 flex gap-2"><button className="btn bg-slate-100" onClick={onBack}>← Volver</button><button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 7</button></div>
+    </div>
+  </div>);
+}
+
+// --- Fase 7 ---
+function Phase7({onBack}){
+  const [f,setF]=useState(load('it_feedback',{satisfaccion:5,utilidad:5,comentarios:''}));
+  useEffect(()=>save('it_feedback',f),[f]);
+  return(<div className="max-w-3xl mx-auto p-6">
+    <h1 className="text-3xl font-extrabold mb-2">Fase 7 · Encuesta de satisfacción</h1>
+    <div className="card p-6">
+      {['satisfaccion','utilidad'].map(k=>(
+        <div key={k} className="mb-4"><div className="font-bold capitalize">{k}</div><input type="range" min="1" max="10" value={f[k]} onChange={e=>setF(s=>({...s,[k]:parseInt(e.target.value)}))} className="w-full"/><div className="text-sm text-slate-600">Valor: {f[k]}</div></div>
+      ))}
+      <div className="mb-4"><div className="font-bold">Comentarios</div><textarea className="w-full rounded-xl border border-slate-300 px-3 py-2" rows="4" value={f.comentarios} onChange={e=>setF(s=>({...s,comentarios:e.target.value}))} placeholder="¿Qué te gustó? ¿Qué mejorarías?"></textarea></div>
+      <div className="mt-2 text-emerald-700">¡Gracias por jugar Innovating Teams!</div>
+      <div className="mt-6"><button className="btn bg-slate-100" onClick={onBack}>← Volver al ranking</button></div>
+    </div>
+  </div>);
+}
+
+// --- App ---
+function App(){
+  const {role,setRole,isProf}=useRole();
+  const [phase,setPhase]=useState(1);
+  const go=(n)=>setPhase(n);
+  return(<div>
+    <div className="sticky top-0 z-20 bg-sea-600/80 backdrop-blur border-b border-white/20">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="font-extrabold">Innovating Teams</div>
+          <div className="progress ml-3">{Array.from({length:7},(_,i)=>i+1).map(n=>(<span key={n} className={"step "+(phase===n?'active':'')}>Fase {n}</span>))}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm opacity-80">Rol: <b>{isProf?'Profesor':'Alumno'}</b></span>
+          <button className="btn btn-ghost" onClick={()=>setRole(isProf?'alumno':'profesor')}>{isProf?'Cambiar a Alumno':'Cambiar a Profesor'}</button>
+        </div>
+      </div>
+    </div>
+    <div className="max-w-6xl mx-auto p-6">
+      {phase===1 && <Phase1 role={role} onNext={()=>go(2)}/>}
+      {phase===2 && <Phase2 role={role} onNext={()=>go(3)}/>}
+      {phase===3 && <Phase3 role={role} onBack={()=>go(2)} onNext={()=>go(4)}/>}
+      {phase===4 && <Phase4 role={role} onBack={()=>go(3)} onNext={()=>go(5)}/>}
+      {phase===5 && <Phase5 role={role} onBack={()=>go(4)} onNext={()=>go(6)}/>}
+      {phase===6 && <Phase6 role={role} onBack={()=>go(5)} onNext={()=>go(7)}/>}
+      {phase===7 && <Phase7 onBack={()=>go(6)}/>}
+    </div>
+  </div>);
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+<script>
+// --- Phase4 layout adapter ---
+document.addEventListener('DOMContentLoaded', () => {
+  function findCardByHeading(text){
+    const hs = Array.from(document.querySelectorAll('h3, h2, .card h3, .card h2'));
+    const h = hs.find(el => (el.textContent || '').trim().toLowerCase().includes(text));
+    return h ? h.closest('.card') || h.closest('section') || h.parentElement : null;
+  }
+
+  const leftCard = findCardByHeading('miembros del grupo');
+  const rightCard = findCardByHeading('seleccionar aleatoriamente');
+
+  // If both original cards exist, proceed
+  if(leftCard && rightCard){
+    // 1) Hide original right card (keep its logic & modal alive)
+    rightCard.classList.add('me-hidden');
+
+    // 2) Insert "Aleatorio" button inside the left card header area (near existing controls)
+    const btn = document.createElement('button');
+    btn.className = (rightCard.querySelector('button')?.className || '') + ' me-fwd-btn';
+    btn.textContent = 'Aleatorio';
+    // Try to place next to "Reset elegidos" or input
+    const anchor = leftCard.querySelector('button, input, .controls') || leftCard;
+    anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+
+    // On click, forward to the original "Elegir al azar" button
+    btn.addEventListener('click', () => {
+      const allBtns = Array.from(rightCard.querySelectorAll('button'));
+      // Try to find a button whose text includes "Elegir al azar"
+      const target = allBtns.find(b => (b.textContent || '').toLowerCase().includes('elegir al azar')) || allBtns[0];
+      if(target){ target.click(); }
+    });
+
+    // 3) Build the big timer card and place it AFTER the row of the two cards
+    // Find the smallest common ancestor containing both cards
+    function commonAncestor(a,b){
+      const parentsA = [];
+      let x = a;
+      while(x){ parentsA.push(x); x = x.parentElement; }
+      let y = b;
+      while(y){
+        if(parentsA.includes(y)) return y;
+        y = y.parentElement;
+      }
+      return a.parentElement;
+    }
+    const grid = commonAncestor(leftCard, rightCard);
+
+    const timerCard = document.createElement('div');
+    // Try to reuse card styling classes from the hidden right card
+    timerCard.className = (rightCard.className || 'card') + ' me-pitch-card me-row-gap';
+    timerCard.innerHTML = `
+      <div class="me-pitch-inner">
+        <div class="me-pitch-head"><h3>Pitch</h3></div>
+        <div class="me-timer" id="mePitchTimer">01:30</div>
+        <p class="muted">Presenta: <span id="mePresenter">—</span> · Grupo: <strong>Grupo 1</strong></p>
+      </div>
+    `;
+    // Insert after grid
+    grid.parentElement.insertBefore(timerCard, grid.nextSibling);
+
+    // 4) Minimal timer logic (click to start/pause; long-press to reset)
+    const timerEl = timerCard.querySelector('#mePitchTimer');
+    let baseSeconds = 90;
+    let t = baseSeconds;
+    let running = false;
+    let iv = null;
+    function fmt(s){ const m = Math.floor(s/60); const r = s%60; return (m<10?'0'+m:m)+':'+(r<10?'0'+r:r); }
+    function render(){ timerEl.textContent = fmt(t); }
+    function start(){ if(running) return; running = True; iv = setInterval(()=>{ t--; render(); if(t<=0){ stop(); t=0; render(); } }, 1000); }
+    function stop(){ running = false; if(iv){ clearInterval(iv); iv=null; } }
+    function reset(){ stop(); t = baseSeconds; render(); }
+    render();
+    // Click to start/pause
+    timerEl.addEventListener('click', ()=> running ? stop() : start() );
+    // Long-press to reset
+    let pressT = null;
+    timerEl.addEventListener('mousedown', ()=> { pressT = Date.now(); });
+    timerEl.addEventListener('mouseup', ()=> { if(pressT && Date.now()-pressT>700){ reset(); } pressT=null; });
+
+    // 5) Try to update presenter name whenever roulette assigns someone.
+    // Heuristic: monitor text changes inside the hidden right card for a name highlight.
+    const presenterEl = document.getElementById('mePresenter');
+    const obs = new MutationObserver(()=>{
+      // look for highlighted winner text within rightCard (common patterns)
+      const winner = rightCard.querySelector('.winner, .presenter, [data-winner], [data-presenter]');
+      if(winner && winner.textContent){ presenterEl.textContent = winner.textContent.trim(); }
+    });
+    obs.observe(rightCard, { childList: true, subtree: true, characterData: true });
+
+    // 6) Also, if user clicks a chip in leftCard, mirror it as presenter
+    leftCard.addEventListener('click', (e)=>{
+      const chip = e.target.closest('button, .chip, .tag, .pill');
+      if(chip && (chip.textContent||'').trim().length && (chip.textContent||'').trim().length < 30){
+        presenterEl.textContent = (chip.textContent||'').trim();
+      }
+    });
+  }
+
+  // Add a small style tag if not present
+  const st = document.createElement('style');
+  st.textContent = `
+/* --- Phase4 stacked timer override (non-invasive) --- */
+.me-pitch-card .me-timer {
+  font-size: clamp(48px, 12vw, 144px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1px;
+  margin: 18px 0 8px;
+}
+.me-pitch-card .muted { opacity: .9 }
+.me-hidden { display:none !important }
+.me-row-gap { margin-top: 22px }
+`;
+  document.head.appendChild(st);
+});
+</script>
+
+
+<div class="me-roulette-backdrop" id="meRoulette">
+  <div class="me-roulette-modal">
+    <div class="me-roulette-header">
+      <div class="me-roulette-title">Seleccionar aleatoriamente</div>
+      <button class="me-roulette-close" data-me-close> Cerrar </button>
+    </div>
+    <div class="me-roulette-body">
+      <div class="me-wheel-wrap">
+        <div class="me-pointer"></div>
+        <canvas id="meWheelCanvas" width="480" height="480" class="me-wheel"></canvas>
+      </div>
+      <div class="me-roulette-controls">
+        <button class="me-roulette-btn" id="meSpinBtn">Girar ruleta</button>
+      </div>
+      <div class="me-roulette-sub">Tip: se toman los nombres desde la lista de integrantes.</div>
+      <div class="me-winner" id="meWinnerText"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Roulette logic (no external deps) =====
+(function(){
+  const backdrop = document.getElementById('meRoulette');
+  if(!backdrop) return;
+  const canvas = document.getElementById('meWheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const spinBtn = document.getElementById('meSpinBtn');
+  const winnerEl = document.getElementById('meWinnerText');
+  const presenterEl = document.getElementById('mePresenter'); // from timer card
+
+  let names = [];
+  let currentRotation = 0;
+
+  function getChips(){
+    // Try to pull from "Miembros del grupo" card
+    const leftCard = Array.from(document.querySelectorAll('h3, h2')).find(h=>/miembros del grupo|integrantes del grupo/i.test(h.textContent||''));
+    const card = leftCard ? (leftCard.closest('.card') || leftCard.parentElement) : document.body;
+    const chipSelector = 'button, .chip, .pill, .tag, .badge'; // best effort
+    const chips = Array.from(card.querySelectorAll(chipSelector));
+    const result = [];
+    chips.forEach(x=>{
+      const t = (x.textContent||'').trim();
+      if(t && t.length < 28 and not any(c in t for c in ['Reset','Agregar','Añadir','Aleatorio','Volver','Continuar'])):
+        result.push(t);
+    });
+    // Fallback if nothing detected
+    return result.length ? result : ['Ana','Bruno','Carla','Diego'];
+  }
+
+  function drawWheel(labels){
+    const W = canvas.width, H = canvas.height;
+    const cx = W/2, cy = H/2, r = Math.min(cx, cy)-6;
+    ctx.clearRect(0,0,W,H);
+    const n = labels.length;
+    const step = (Math.PI*2)/n;
+    for(let i=0;i<n;i++){
+      const start = i*step + currentRotation;
+      const end = start + step;
+      // slice color alternating
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, end);
+      ctx.closePath();
+      const hue = (i*360/n);
+      ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+      ctx.fill();
+      // text
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(start + step/2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px ui-sans-serif, system-ui';
+      ctx.fillText(labels[i], r-16, 6);
+      ctx.restore();
+    }
+    // center
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28, 0, Math.PI*2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  function openModal(){
+    names = getChips();
+    winnerEl.textContent = '';
+    currentRotation = 0;
+    drawWheel(names);
+    backdrop.classList.add('me-open');
+  }
+  function closeModal(){ backdrop.classList.remove('me-open'); }
+
+  // Open trigger: look for "Aleatorio" button we injected, else add one
+  function ensureOpenButton(){
+    const leftHead = Array.from(document.querySelectorAll('h3,h2')).find(h=>/miembros del grupo|integrantes del grupo/i.test(h.textContent||''));
+    const leftCard = leftHead ? (leftHead.closest('.card') || leftHead.parentElement) : null;
+    if(leftCard && !leftCard.querySelector('.me-open-roulette')){
+      const btn = document.createElement('button');
+      btn.className = 'me-open-roulette';
+      // copy class from an existing orange button if found
+      const refBtn = document.querySelector('button, .btn');
+      btn.className = (refBtn? refBtn.className : '') + ' me-open-roulette';
+      btn.textContent = 'Aleatorio';
+      // put next to "Reset elegidos" or input
+      const anchor = leftCard.querySelector('button, input') || leftCard;
+      anchor.parentElement.insertBefore(btn, anchor.nextSibling);
+      btn.addEventListener('click', openModal);
+    }
+  }
+
+  ensureOpenButton();
+
+  // Spin
+  spinBtn.addEventListener('click', ()=>{
+    names = getChips();
+    if(names.length===0) return;
+    // choose a random index ensuring no immediate repeat
+    const idx = Math.floor(Math.random()*names.length);
+    // compute final rotation so that chosen index lands at pointer (top)
+    const n = names.length;
+    const step = 360/n;
+    const targetAngle = 360 - (idx*step + step/2); // pointer at 0deg/top
+    // add several full spins for flair
+    const spins = 5 * 360;
+    const finalDeg = spins + targetAngle;
+    canvas.style.transition = 'transform 5.2s cubic-bezier(.17,.67,.21,1)';
+    canvas.style.transform = `rotate(${finalDeg}deg)`;
+
+    // After animation ends
+    function onEnd(){
+      canvas.removeEventListener('transitionend', onEnd);
+      canvas.style.transition = 'none';
+      // normalize rotation
+      currentRotation = (finalDeg % 360) * Math.PI/180;
+      winnerEl.textContent = `Presenta: ${names[idx]}`;
+      if(presenterEl) presenterEl.textContent = names[idx];
+    }
+    canvas.addEventListener('transitionend', onEnd);
+  });
+
+  // Close
+  backdrop.addEventListener('click', (e)=>{
+    if(e.target.matches('.me-roulette-backdrop,[data-me-close]')) closeModal();
+  });
+
+  // Expose a minimal API for other buttons (optional)
+  window.meOpenRoulette = openModal;
+})();
+</script>
+</body>
+</html>
