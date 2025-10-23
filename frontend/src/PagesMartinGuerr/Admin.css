@@ -1,0 +1,59 @@
+/* Sidebar */
+.sidebaradmin {
+  height: 100%;  /* se ajusta al 100% de su Col */
+  background: linear-gradient(180deg, #1e4d96, #1f3f78);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Logo */
+.brand-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.logo-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #1ad1b9;
+  color: #053a37;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu .item {
+  text-decoration: none;
+  color: #e8eef9;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.menu .item:hover {
+  background: #2a559a;
+}
+
+.menu .item[aria-current="page"] {
+  background: #376abc;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Área de contenido */
+.admin-workspace {
+  background: #f5f6fa;
+  overflow-y: auto;
+}
