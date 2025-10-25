@@ -11,6 +11,10 @@ import HomeAdmin from "./PagesMartinGuerr/Pages/HomeAdmin";
 import ProfileAdmin from "./PagesMartinGuerr/Pages/ProfileAdmin";
 import StatsAdmin from "./PagesMartinGuerr/Pages/StatsAdmin";
 import AboutPage from "./PagesMartinGuerr/Pages/AboutPage";
+import PaginaTesteo from './PagesMartinGuerr/Pages/PaginaTesteo';
+
+
+
 
 function App() {
   return (
@@ -30,6 +34,11 @@ function App() {
         {/* --- Redirecciones --- */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
+
+
+        {/* ---Rutas para testar API --- */}
+        <Route path="/testeo-api" element={<PaginaTesteo />} />
+
 
       </Routes>
     </Router>
