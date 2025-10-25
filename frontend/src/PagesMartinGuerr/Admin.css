@@ -1,0 +1,149 @@
+/* Sidebar 
+
+
+*/
+.sidebaradmin {
+  height: 100%;  /* se ajusta al 100% de su Col */
+  background: linear-gradient(180deg, #1e4d96, #1f3f78);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* --- NUEVO: Estilos para Sidebar Fijo --- */
+/* (Solo se aplica en pantallas 'md' (768px) o más grandes) */
+@media (min-width: 768px) {
+  .sidebaradmin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
+    width: 25%; /* Coincide con el 'col-md-3' de AdminLayout.jsx */
+    z-index: 1000; /* Se asegura que esté por encima de todo */
+    overflow-y: auto; /* Añade scroll al sidebar si tiene muchos links */
+  }
+
+  /* La regla 'margin-left' fue ELIMINADA de .admin-workspace */
+  /* Bootstrap se encarga del espaciado con sus <Col> */
+}
+
+/* En pantallas 'lg' (992px) o más grandes, ajustamos al 'col-lg-2' */
+@media (min-width: 992px) {
+  .sidebaradmin {
+    width: 16.666667%; /* Coincide con el 'col-lg-2' */
+  }
+
+  /* La regla 'margin-left' fue ELIMINADA de .admin-workspace */
+}
+
+
+
+/* Logo */
+.brand-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.logo-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #1ad1b9;
+  color: #053a37;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu .item {
+  text-decoration: none;
+  color: #e8eef9;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.menu .item:hover {
+  background: #2a559a;
+}
+
+.menu .item[aria-current="page"] {
+  background: #376abc;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Área de contenido */
+.admin-workspace {
+  background: #f5f6fa;
+  overflow-y: auto;
+}
+
+
+/*
+Colores para el dashboard o generales
+
+
+*/
+
+
+.btn-csv {
+  background-color: #0d6efd; /* Azul primario de Bootstrap */
+  border-color: #0d6efd;
+  color: #ffffff;
+}
+
+.btn-csv:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+  color: #ffffff;
+}
+
+.btn-pdf {
+  background-color: #6c757d; /* Gris secundario de Bootstrap */
+  border-color: #6c757d;
+  color: #ffffff;
+}
+
+.btn-pdf:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+  color: #ffffff;
+}
+
+/* --- Placeholder para Gráficos --- */
+.graph-placeholder {
+  width: 100%;
+  min-height: 250px; /* Damos una altura mínima para que las tarjetas se vean bien */
+  background-color: #f8f9fa;
+  border: 1px dashed #ced4da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #adb5bd;
+  border-radius: .375rem; /* Bootstrap 5 border radius */
+  font-size: 0.9rem;
+}
+
+/* --- Placeholder para Filtro --- */
+.filter-icon {
+  color: #6c757d;
+  cursor: pointer;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  transform: scale(1.5, 1); /* Hace el '▼' un poco más estilizado */
+}
+
+.filter-icon:hover {
+  color: #343a40;
+}
