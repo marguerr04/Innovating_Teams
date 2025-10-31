@@ -1,8 +1,12 @@
 // src/PagesAlejandro/Pages/Phase1.jsx
 import React, { useState, useEffect } from 'react';
 // Ajusta las rutas de importación según tu estructura
-import { load, save, defaultPoll } from '../../utils/helpers'; 
-import WordSearch from '../Components/WordSearch';
+// Sube 3 niveles (de 'Phase1', 'features', 'student')
+// Sube 3 niveles (de 'Phase1' a 'features', de 'features' a 'student', de 'student' a 'modules')
+import { load, save, defaultPoll } from '../../../../utils/helpers.js';
+
+// Importa desde su propia carpeta 'components' local
+import WordSearch from './components/WordSearch';
 
 function Phase1({ role, onNext }) {
   const [poll, setPoll] = useState(() => load('it_poll', defaultPoll));
