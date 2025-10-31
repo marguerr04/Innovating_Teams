@@ -1,59 +1,55 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// src/App.js
+import React, { useState } from 'react';
+import { useRole } from './utils/helpers'; // Importamos nuestro hook
+import Phase1 from './PagesAlejandro/Pages/Phase1'; // Importamos la Fase 1
 
-// Importaciones de Martin Olivares (Profesor)
-import ProfessorLayout from './PagesMartinOlivares/Components/ProfessorLayout.jsx';
-import HomeView from './PagesMartinOlivares/Pages/HomeView.jsx';
-import CrearJuegoView from './PagesMartinOlivares/Pages/CrearJuegoView.jsx';
-import PerfilView from './PagesMartinOlivares/Pages/PerfilView.jsx';
-import { ProfesorProvider } from './PagesMartinOlivares/Components/ProfessorContext.jsx';
-
-// Importaciones de Martin Guerr (Admin)
-import AdminLayout from "./PagesMartinGuerr/Components/AdminLayout";
-import HomeAdmin from "./PagesMartinGuerr/Pages/HomeAdmin";
-import ProfileAdmin from "./PagesMartinGuerr/Pages/ProfileAdmin";
-import StatsAdmin from "./PagesMartinGuerr/Pages/StatsAdmin";
-import AboutPage from "./PagesMartinGuerr/Pages/AboutPage";
-import PaginaTesteo from './PagesMartinGuerr/Pages/PaginaTesteo';
+// --- Dejamos las otras fases como placeholders (marcadores de posición) ---
+const Phase2 = () => <div>Fase 2 (en construcción)</div>;
+const Phase3 = () => <div>Fase 3 (en construcción)</div>;
+const Phase4 = () => <div>Fase 4 (en construcción)</div>;
+const Phase5 = () => <div>Fase 5 (en construcción)</div>;
+const Phase6 = () => <div>Fase 6 (en construcción)</div>;
+const Phase7 = () => <div>Fase 7 (en construcción)</div>;
+// -------------------------------------------------------------------
 
 function App() {
+  const { role, setRole, isProf } = useRole();
+  const [phase, setPhase] = useState(1); // Empezamos en la Fase 1
+  const go = (n) => setPhase(n);
+
   return (
-    <BrowserRouter>
-      {/* Proveedor de contexto para Profesor (si es necesario para Admin también, ajustar) */}
-      <ProfesorProvider>
-        <Routes>
-          
-          {/* --- RUTAS DE PROFESOR (Martin Olivares) --- */}
-          <Route path="/profesor" element={<ProfessorLayout />}>
-            <Route path="home" element={<HomeView />} />
-            <Route path="crear" element={<CrearJuegoView />} />
-            <Route path="perfil" element={<PerfilView />} />
-            {/* Ruta por defecto para /profesor */}
-            <Route index element={<Navigate to="home" replace />} />
-          </Route>
-          
-          {/* --- RUTAS DE ADMINISTRACIÓN (Martin Guerr) --- */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<HomeAdmin />} /> 
-            <Route path="profile" element={<ProfileAdmin />} /> 
-            <Route path="stats" element={<StatsAdmin />} /> 
-          </Route>
+    <div>
+      {/* --- Este es el Header/Navbar del código original --- */}
+      <div className="sticky top-0 z-20 bg-sea-600/80 backdrop-blur border-b border-white/20">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="font-extrabold">Innovating Teams</div>
+            <div className="progress ml-3">
+              {Array.from({ length: 7 }, (_, i) => i + 1).map(n => (
+                <span key={n} className={"step " + (phase === n ? 'active' : '')}>Fase {n}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm opacity-80">Rol: <b>{isProf ? 'Profesor' : 'Alumno'}</b></span>
+            <button className="btn btn-ghost" onClick={() => setRole(isProf ? 'alumno' : 'profesor')}>
+              {isProf ? 'Cambiar a Alumno' : 'Cambiar a Profesor'}
+            </button>
+          </div>
+        </div>
+      </div>
 
-          {/* --- RUTAS PÚBLICAS --- */}
-          <Route path="/about" element={<AboutPage />} />
-          
-          {/* --- RUTAS PARA TESTEO --- */}
-          <Route path="/testeo-api" element={<PaginaTesteo />} />
-
-          {/* --- REDIRECCIONES PRINCIPALES --- */}
-          {/* Puedes elegir a dónde redirigir por defecto */}
-          <Route path="/" element={<Navigate to="/profesor/home" replace />} />
-          {/* <Route path="/" element={<Navigate to="/admin" replace />} /> */}
-          
-          {/* Ruta para páginas no encontradas */}
-          <Route path="*" element={<Navigate to="/profesor/home" replace />} />
-        </Routes>
-      </ProfesorProvider>
-    </BrowserRouter>
+      {/* --- Aquí se renderiza la fase actual --- */}
+      <div className="max-w-6xl mx-auto p-6">
+        {phase === 1 && <Phase1 role={role} onNext={() => go(2)} />}
+        {phase === 2 && <Phase2 role={role} onNext={() => go(3)} />}
+        {phase === 3 && <Phase3 role={role} onBack={() => go(2)} onNext={() => go(4)} />}
+        {phase === 4 && <Phase4 role={role} onBack={() => go(3)} onNext={() => go(5)} />}
+        {phase === 5 && <Phase5 role={role} onBack={() => go(4)} onNext={() => go(6)} />}
+        {phase === 6 && <Phase6 role={role} onBack={() => go(5)} onNext={() => go(7)} />}
+        {phase === 7 && <Phase7 onBack={() => go(6)} />}
+      </div>
+    </div>
   );
 }
 
