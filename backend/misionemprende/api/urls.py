@@ -10,4 +10,9 @@ router.register(r'usuarios', views.UsuarioViewSet, basename='usuario')
 
 urlpatterns = [
     path('', include(router.urls)),
+
+
+     path('equipos/<int:equipo_id>/estudiantes/', views.get_estudiantes_por_equipo, name='get-estudiantes-equipo'),
+
+    
 ]

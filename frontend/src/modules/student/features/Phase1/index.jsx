@@ -1,29 +1,59 @@
-// src/PagesAlejandro/Pages/Phase1.jsx
+// src/modules/student/features/Phase1/index.jsx
 import React, { useState, useEffect } from 'react';
-// Ajusta las rutas de importación según tu estructura
-// Sube 3 niveles (de 'Phase1', 'features', 'student')
-// Sube 3 niveles (de 'Phase1' a 'features', de 'features' a 'student', de 'student' a 'modules')
+// Sube 4 niveles
 import { load, save, defaultPoll } from '../../../../utils/helpers.js';
 
-// Importa desde su propia carpeta 'components' local
+// 1. --- Importar TODOS los juegos ---
 import WordSearch from './components/WordSearch';
+import ArmarPalabras from './components/ArmarPalabras';
+import RomperHielo from './components/RomperHielo';
+
+// 2. --- Un componente "helper" para elegir el juego ---
+const ActividadGanadora = ({ winner, onComplete }) => {
+  // Usamos el ID del ganador para decidir qué componente mostrar
+  switch (winner.id) {
+    case 'sopa':
+      return <WordSearch onComplete={onComplete} />;
+    case 'armar':
+      return <ArmarPalabras onComplete={onComplete} />;
+    case 'ice':
+      return <RomperHielo onComplete={onComplete} />;
+    default:
+      return <p>Juego no encontrado</p>;
+  }
+};
 
 function Phase1({ role, onNext }) {
   const [poll, setPoll] = useState(() => load('it_poll', defaultPoll));
   useEffect(() => save('it_poll', poll), [poll]);
 
   const castVote = (id) => {
+    // Lógica de votación (funciona con tu API cuando la conectes)
+    // Por ahora, usa localStorage
     setPoll(p => { const me = role + '-' + (localStorage.getItem('it_user') || 'solo'); const votes = { ...p.votes, [me]: id }; return { ...p, myVote: id, votes }; });
+
+    // --- AQUÍ IRÍA LA LLAMADA A TU API (PASO 2) ---
+    // fetch('http://127.0.0.1:8000/api/v1/fase1/votar/', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ voto: id, alumno_id: 'tu_id_de_alumno' })
+    // });
   };
 
-  const tally = Object.values(poll.votes).reduce((acc, id) => ((acc[id] = (acc[id] || 0) + 1), acc), {});
+  // Lógica de conteo (esto vendrá de la API después)
+  const tally = Object.values(poll.votes).reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
   const winner = poll.options.reduce((best, o) => (tally[o.id] || 0) > (tally[best?.id] || 0) ? o : best, poll.options[0]);
+
   const [wsDone, setWsDone] = useState(false);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
       <h1 className="text-3xl font-extrabold mb-4">Fase 1 · Votación de actividades</h1>
       <div className="grid md:grid-cols-2 gap-6 items-start">
+
+        {/* --- TARJETA DE VOTACIÓN (Sin cambios) --- */}
         <div className="card p-6">
           <b>Votación de actividades</b>
           <div className="mt-4 flex flex-col gap-3">
@@ -36,14 +66,33 @@ function Phase1({ role, onNext }) {
             ))}
           </div>
           <div className="mt-4 text-sm">Ganando: <b>{winner.label}</b></div>
-          <div className="mt-3 text-right"><button className="btn bg-accent-500 text-white" onClick={onNext}>Ir a Fase 2</button></div>
+          <div className="mt-3 text-right">
+            <button 
+              className="btn bg-accent-500 text-white" 
+              onClick={onNext}
+              disabled={!wsDone} // 3. Deshabilitar el botón si la actividad no está hecha
+            >
+              Ir a Fase 2
+            </button>
+          </div>
         </div>
+
+        {/* --- TARJETA DE ACTIVIDAD (AHORA ES DINÁMICA) --- */}
         <div className="card p-6">
-          <b>Actividad: Sopa de letras</b>
+          <b>Actividad: {winner.label}</b> {/* Título dinámico */}
           <p className="text-sm text-slate-600">Encuentra todas las palabras para marcar la actividad como realizada.</p>
-          <div className="mt-4"><WordSearch onComplete={() => setWsDone(true)} /></div>
+
+          {/* 4. --- Renderizado dinámico del juego --- */}
+          <div className="mt-4">
+            <ActividadGanadora 
+              winner={winner} 
+              onComplete={() => setWsDone(true)} 
+            />
+          </div>
+
           {wsDone && <div className="mt-3 text-emerald-600 text-sm">✔ Actividad completada.</div>}
         </div>
+
       </div>
     </div>
   );

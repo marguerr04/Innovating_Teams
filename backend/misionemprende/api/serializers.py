@@ -34,8 +34,15 @@ class EstudianteSerializer(serializers.ModelSerializer):
 
 
 
+
 class CursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
         fields = '__all__'
+
+
+
+
+
+
 

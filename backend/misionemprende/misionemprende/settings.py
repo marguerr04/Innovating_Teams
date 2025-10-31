@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     # --- Tus Apps ---
     'rest_framework',        # <--- Añade esta
     'corsheaders',           # <--- Añade esta
-    'api.apps.ApiConfig',    # <--- O simplemente 'api'
+    'django_extensions',
+
+    'api'
 ]
 
 MIDDLEWARE = [
