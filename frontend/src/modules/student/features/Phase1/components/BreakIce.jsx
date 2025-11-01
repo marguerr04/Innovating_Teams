@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 const EQUIPO_ID_TEST = 1;
 const API_URL = `http://127.0.0.1:8000/api/equipos/${EQUIPO_ID_TEST}/estudiantes/`;
 
-function RomperHielo({ onComplete }) {
+function BreakIce({ onComplete }) {
   const [alumnos, setAlumnos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -101,4 +101,4 @@ function RomperHielo({ onComplete }) {
   );
 }
 
-export default RomperHielo;
+export default BreakIce;

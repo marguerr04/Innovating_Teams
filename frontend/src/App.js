@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Importamos la App de Estudiante
-import StudentApp from './modules/student/pages/StudentApp';
+import StudentApp from "./modules/student/pages/StudentApp";
 
 function App() {
   return (

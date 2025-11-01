@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ArmarPalabras({ onComplete }) {
+function MakeWords({ onComplete }) {
   return (
     <div className="text-center p-8 bg-slate-100 rounded-lg">
       <h3 className="text-xl font-bold text-slate-800">Armar Palabras</h3>
@@ -18,4 +18,4 @@ function ArmarPalabras({ onComplete }) {
   );
 }
 
-export default ArmarPalabras;
+export default MakeWords;

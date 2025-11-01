@@ -1,4 +1,3 @@
-// src/PagesAlejandro/Components/WordSearch.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 
 function WordSearch({ onComplete }) {
