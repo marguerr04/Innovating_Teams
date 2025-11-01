@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup, Badge, ButtonGroup, Stack } from 'react-bootstrap';
 
-// Importa los helpers (ajusta la ruta según tu estructura)
+// Ajusta la ruta para que coincida con tu archivo helpers.js
 import { load, save } from '../../../../utils/helpers.js';
 
 // Importa el modal de la ruleta
@@ -49,94 +48,80 @@ export default function Phase4({ role, onNext, onBack }) {
 
   return (
     <>
-      <Container style={{ maxWidth: '56rem' }}> {/* max-w-5xl */}
-        <h1 className="h3 fw-bold mb-1 text-white">Fase 4 · Pitch del equipo</h1>
-        <p className="text-white-50 mb-4">El profesor elige o sortea quién presenta.</p>
+      {/* Contenedor principal (de index.html) */}
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-extrabold mb-1">Fase 4 · Pitch del equipo</h1>
+        <p className="opacity-80 mb-4">El profesor elige o sortea quién presenta.</p>
         
-        <Row>
-          {/* Card 1: Miembros (traducida a Bootstrap) */}
-          <Col md={6} className="mb-4">
-            <Card>
-              <Card.Body>
-                <Card.Title as="h5" className="fw-bold">Miembros del grupo</Card.Title>
-                <div className="mt-3 d-flex flex-wrap gap-2">
-                  {members.map(m => (
-                    <Badge 
-                      key={m} 
-                      pill
-                      bg={selected.includes(m) ? 'secondary' : 'light'} 
-                      text={selected.includes(m) ? 'white' : 'dark'}
-                      className={`p-2 fs-6 ${selected.includes(m) ? 'text-decoration-line-through' : ''}`}
-                    >
-                      {m}
-                    </Badge>
-                  ))}
-                </div>
-                {isProf && (
-                  <InputGroup className="mt-4">
-                    <Form.Control 
-                      placeholder="Agregar miembro" 
-                      onKeyDown={handleAddMember} 
-                    />
-                    <Button variant="outline-secondary" onClick={() => setSelected([])}>
-                      Reset elegidos
-                    </Button>
-                  </InputGroup>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
+        {/* Grid de 2 columnas (de index.html) */}
+        <div className="grid md:grid-cols-2 gap-6">
           
-          {/* Card 2: Seleccionar (traducida a Bootstrap) */}
-          <Col md={6} className="mb-4">
-            <Card>
-              <Card.Body>
-                <Card.Title as="h5" className="fw-bold">Seleccionar aleatoriamente</Card.Title>
-                <ButtonGroup className="mt-3 d-flex gap-2">
-                  {['ruleta', 'palito', 'vasos'].map(k => (
-                    <Button 
-                      key={k} 
-                      variant={mode === k ? 'primary' : 'light'}
-                      // Asigna el color 'mint' de tu index.html
-                      style={mode === k ? { backgroundColor: '#00B8A9', borderColor: '#00B8A9' } : {}}
-                      onClick={() => setMode(k)}
-                    >
-                      {k === 'ruleta' ? 'Ruleta' : k === 'palito' ? 'Palito más corto' : 'Juego de vasos'}
-                    </Button>
-                  ))}
-                </ButtonGroup>
-                
-                <p className="text-muted small mt-4">Método visual cambia, pero la selección es justa. No se repiten presentadores.</p>
-                
-                {isProf ? (
-                  <Button 
-                    variant="warning" // Asigna el color 'accent'
-                    style={{ backgroundColor: '#FF7B39', color: 'white', borderColor: '#FF7B39' }} 
-                    className="mt-4" 
-                    onClick={() => setShowRoulette(true)}
-                    disabled={remaining.length === 0}
-                  >
-                    {remaining.length === 0 ? 'Todos han presentado' : 'Elegir al azar'}
-                  </Button>
-                ) : (
-                  <p className="text-muted small mt-4">Solo el profesor puede sortear.</p>
-                )}
-                
-                <Stack direction="horizontal" gap={2} className="mt-5">
-                  <Button variant="light" onClick={onBack}>← Volver</Button>
-                  <Button 
-                    variant="warning" 
-                    style={{ backgroundColor: '#FF7B39', color: 'white', borderColor: '#FF7B39' }} 
-                    onClick={onNext}
-                  >
-                    Continuar a Fase 5
-                  </Button>
-                </Stack>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+          {/* Card 1: Miembros (de index.html) */}
+          <div className="card p-6">
+            <b>Miembros del grupo</b>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {members.map(m => (
+                <span 
+                  key={m} 
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${selected.includes(m) ? 'bg-slate-200 text-slate-500 line-through' : 'bg-slate-100'}`}
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
+            {isProf && (
+              <div className="mt-4 flex gap-2">
+                <input 
+                  className="rounded-xl border border-slate-300 px-3 py-2 flex-1" 
+                  placeholder="Agregar miembro" 
+                  onKeyDown={handleAddMember} 
+                />
+                <button 
+                  className="btn bg-slate-100" 
+                  onClick={() => setSelected([])}
+                >
+                  Reset elegidos
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Card 2: Seleccionar (de index.html) */}
+          <div className="card p-6">
+            <b>Seleccionar aleatoriamente</b>
+            <div className="mt-3 flex gap-2">
+              {['ruleta', 'palito', 'vasos'].map(k => (
+                <button 
+                  key={k} 
+                  className={`btn ${mode === k ? 'bg-mint-500 text-white' : 'bg-slate-100'}`} 
+                  onClick={() => setMode(k)}
+                >
+                  {k === 'ruleta' ? 'Ruleta' : k === 'palito' ? 'Palito más corto' : 'Juego de vasos'}
+                </button>
+              ))}
+            </div>
+            
+            <div className="mt-4 text-sm text-slate-600">Método visual cambia, pero la selección es justa. No se repiten presentadores.</div>
+            
+            {isProf ? (
+              <button 
+                className="mt-4 btn bg-accent-500 text-white" 
+                onClick={() => setShowRoulette(true)} // <-- CAMBIO: Abre el modal
+                disabled={remaining.length === 0}
+              >
+                {remaining.length === 0 ? 'Todos han presentado' : 'Elegir al azar'}
+              </button>
+            ) : (
+              <div className="mt-4 text-xs text-slate-500">Solo el profesor puede sortear.</div>
+            )}
+            
+            <div className="mt-6 flex gap-2">
+              <button className="btn bg-slate-100" onClick={onBack}>← Volver</button>
+              <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 5</button>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* El Modal de la Ruleta (se renderiza aquí) */}
       <RouletteModal

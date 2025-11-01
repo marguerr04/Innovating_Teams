@@ -1,17 +1,17 @@
 import React from 'react';
-import { arr } from '../../../../../utils/helpers'; // Ajusta la ruta a tus utils
 
-// Componente 'ReadOnlyMap' (de index.html)
+// Ajusta la ruta para que coincida con tu archivo helpers.js
+import { arr } from '../../../../../utils/helpers.js'; 
+
 export default function ReadOnlyMap({ persona, bubbles }) {
+  // Lógica de ReadOnlyMap (copiada de index.html)
   const list = arr(bubbles).map(b => ({ ...b }));
-  
-  // Añade la burbuja central si no existe
   if (!list.find(b => b.center)) {
-    const centerText = `${persona?.name || 'Persona'} · ${persona?.age || ''}`;
-    list.unshift({ id: 'center', text: centerText, x: 120, y: 80, center: true });
+    list.unshift({ id: 'center', text: `${persona?.name || 'Persona'} · ${persona?.age || ''}`, x: 120, y: 80, center: true });
   }
 
   return (
+    // JSX de ReadOnlyMap (copiado de index.html)
     // Estas clases (.bubble-map, .bubble) deben estar en tu CSS global
     <div className="bubble-map">
       {list.map(b => (

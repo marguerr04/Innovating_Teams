@@ -52,55 +52,109 @@ body {
 /* Estilos adicionales para tu aplicación */
 
 /* ===== Misión Emprende — Roulette Modal (de index.html) ===== , fase 4*/
+/* ===== Misión Emprende — Roulette Modal (de index.html) ===== */
 .me-roulette-backdrop {
   position: fixed; 
   inset: 0; 
   background: rgba(0,0,0,.5);
-  display: flex; /* Cambiado de 'none' para que el 'show' de React-Bootstrap funcione */
+  display: none; 
   align-items: center; 
   justify-content: center; 
-  z-index: 1050; /* Z-index de Bootstrap para backdrop */
+  z-index: 9999;
 }
-
-/* Oculta el modal cuando no tiene la clase 'show' de Bootstrap */
-.me-roulette-backdrop:not(.show) {
-  display: none;
+.me-roulette-backdrop.me-open { 
+  display: flex; 
 }
-
-/* Clases para el diálogo y contenido del modal */
-.me-roulette-modal-dialog {
-  width: min(880px, 92vw);
-  max-width: min(880px, 92vw);
-}
-
 .me-roulette-modal {
+  width: min(880px, 92vw); 
   background: #fff; 
   border-radius: 18px;
   box-shadow: 0 20px 60px rgba(0,0,0,.25); 
   padding: 24px;
-  color: #0b1f3a;
-  border: none;
+  color: #0b1f3a; /* Añadido para que el texto sea visible */
 }
-
-/* (El resto de las clases de 'me-' de tu index.html) */
-.me-roulette-header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px }
-.me-roulette-title { font-size: 20px; font-weight: 700 }
+.me-roulette-header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin-bottom: 12px;
+}
+.me-roulette-title { 
+  font-size: 20px; 
+  font-weight: 700;
+}
 .me-roulette-close {
-  border: 1px solid #e5eef7; background:#f4f7fb; border-radius:999px; padding:8px 12px; cursor:pointer; font-weight:700
+  border: 1px solid #e5eef7; 
+  background: #f4f7fb; 
+  border-radius: 999px; 
+  padding: 8px 12px; 
+  cursor: pointer; 
+  font-weight: 700;
 }
-.me-roulette-body { display:grid; place-items:center; padding: 8px 0 0 }
-.me-wheel-wrap { position:relative; width:min(520px, 82vw); height:min(520px, 82vw); background:#0e2b47; border-radius:20px; display:grid; place-items:center; padding:18px }
+.me-roulette-body { 
+  display: grid; 
+  place-items: center; 
+  padding: 8px 0 0;
+}
+.me-wheel-wrap { 
+  position: relative; 
+  width: min(520px, 82vw); 
+  height: min(520px, 82vw); 
+  background: #0e2b47; 
+  border-radius: 20px; 
+  display: grid; 
+  place-items: center; 
+  padding: 18px;
+}
 .me-wheel {
-  width:100%; height:100%; border-radius:50%; background:#0e2b47; position:relative; overflow:hidden;
+  width: 100%; 
+  height: 100%; 
+  border-radius: 50%; 
+  background: #0e2b47; 
+  position: relative; 
+  overflow: hidden;
   box-shadow: inset 0 0 0 10px #0e2b47, 0 8px 24px rgba(0,0,0,.2);
   transform: rotate(0deg);
 }
-.me-pointer { position:absolute; top:8px; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent; border-bottom:18px solid #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); z-index: 10; }
-.me-pointer { left: calc(50% - 12px); }
-.me-roulette-controls { display:flex; gap:12px; justify-content:center; margin-top:16px }
-.me-roulette-btn {
-  background:#ff7a3c; color:#fff; border:none; padding:10px 16px; border-radius:12px; font-weight:700; cursor:pointer
+.me-pointer { 
+  position: absolute; 
+  top: 8px; 
+  width: 0; 
+  height: 0; 
+  border-left: 12px solid transparent; 
+  border-right: 12px solid transparent; 
+  border-bottom: 18px solid #fff; 
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); 
+  z-index: 10; 
+  left: calc(50% - 12px);
 }
-.me-roulette-btn:disabled { background: #ccc; }
-.me-roulette-sub { text-align:center; color:#667; font-size:14px; margin-top:8px }
-.me-winner { text-align:center; font-weight:800; margin-top:12px; font-size:18px }
+.me-roulette-controls { 
+  display: flex; 
+  gap: 12px; 
+  justify-content: center; 
+  margin-top: 16px;
+}
+.me-roulette-btn {
+  background: #ff7a3c; 
+  color: #fff; 
+  border: none; 
+  padding: 10px 16px; 
+  border-radius: 12px; 
+  font-weight: 700; 
+  cursor: pointer;
+}
+.me-roulette-btn:disabled { 
+  background: #ccc; 
+}
+.me-roulette-sub { 
+  text-align: center; 
+  color: #667; 
+  font-size: 14px; 
+  margin-top: 8px;
+}
+.me-winner { 
+  text-align: center; 
+  font-weight: 800; 
+  margin-top: 12px; 
+  font-size: 18px;
+}

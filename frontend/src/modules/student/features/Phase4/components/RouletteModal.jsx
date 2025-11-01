@@ -1,8 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Modal } from 'react-bootstrap';
-
-// Este componente usa clases CSS personalizadas ('me-roulette-*')
-// que DEBES añadir a tu 'src/styles.css'
 
 export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
   const canvasRef = useRef(null);
@@ -58,7 +54,7 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
       // Dibuja la rueda en el siguiente frame
       requestAnimationFrame(() => drawWheel(0));
     }
-  }, [isOpen, names]); // Depende de 'names' para redibujar si los miembros restantes cambian
+  }, [isOpen, names]); // Depende de 'names' para redibujar
 
   // Lógica para girar (de index.html)
   const handleSpin = () => {
@@ -90,31 +86,38 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
     canvas.addEventListener('transitionend', onEnd);
   };
   
-  // Usamos 'Modal' de Bootstrap pero sin 'fade'
-  // y aplicamos las clases CSS personalizadas para el estilo
+  if (!isOpen) return null;
+
+  // JSX del Modal (copiado de index.html)
+  // Estas clases 'me-roulette-*' deben estar en tu CSS global
   return (
-    <Modal show={isOpen} onHide={onClose} centered dialogClassName="me-roulette-modal-dialog" contentClassName="me-roulette-modal" backdropClassName="me-roulette-backdrop" backdrop="static" keyboard={false} animation={false}>
-      <div className="me-roulette-header">
-        <div className="me-roulette-title">Seleccionar aleatoriamente</div>
-        <button className="me-roulette-close" onClick={onClose}> Cerrar </button>
-      </div>
-      <div className="me-roulette-body">
-        <div className="me-wheel-wrap">
-          <div className="me-pointer"></div>
-          <canvas ref={canvasRef} width="480" height="480" className="me-wheel"></canvas>
+    <div 
+      className="me-roulette-backdrop me-open" 
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="me-roulette-modal">
+        <div className="me-roulette-header">
+          <div className="me-roulette-title">Seleccionar aleatoriamente</div>
+          <button className="me-roulette-close" onClick={onClose}> Cerrar </button>
         </div>
-        <div className="me-roulette-controls">
-          <button 
-            className="me-roulette-btn" 
-            onClick={handleSpin} 
-            disabled={isSpinning || names.length === 0}
-          >
-            {isSpinning ? 'Girando...' : (names.length === 0 ? 'No hay nombres' : 'Girar ruleta')}
-          </button>
+        <div className="me-roulette-body">
+          <div className="me-wheel-wrap">
+            <div className="me-pointer"></div>
+            <canvas ref={canvasRef} width="480" height="480" className="me-wheel"></canvas>
+          </div>
+          <div className="me-roulette-controls">
+            <button 
+              className="me-roulette-btn" 
+              onClick={handleSpin} 
+              disabled={isSpinning || names.length === 0}
+            >
+              {isSpinning ? 'Girando...' : (names.length === 0 ? 'No hay nombres' : 'Girar ruleta')}
+            </button>
+          </div>
+          <div className="me-roulette-sub">Tip: se toman los nombres desde la lista de integrantes.</div>
+          <div className="me-winner">{winner ? `Presenta: ${winner}` : ''}</div>
         </div>
-        <div className="me-roulette-sub">Se toman los nombres de la lista de integrantes.</div>
-        <div className="me-winner">{winner ? `Presenta: ${winner}` : ''}</div>
       </div>
-    </Modal>
+    </div>
   );
 }

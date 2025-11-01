@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Container } from 'react-bootstrap';
-import { load } from '../../../../utils/helpers'; // Ajusta la ruta a tus utils
+
+// Ajusta la ruta para que coincida con tu archivo helpers.js
+import { load } from '../../../../utils/helpers.js'; 
 
 // Importa los componentes que creamos
 import LegoTimer from './components/LegoTimer';
@@ -13,22 +14,13 @@ export default function Phase3({ role, onNext, onBack }) {
   // Estado para controlar la visibilidad del modal
   const [showMap, setShowMap] = useState(false);
 
-  // Función para manejar los botones (Volver y Ver Mapa)
-  const handleBack = (verMapa = false) => {
-    if (verMapa) {
-      setShowMap(true);
-    } else {
-      onBack(); // Llama a la función 'onBack' del 'App' principal
-    }
-  };
-
   return (
-    // Contenedor principal de Bootstrap (traducido de 'max-w-4xl...')
-    <Container style={{ maxWidth: '42rem' }}> 
+    // Contenedor principal (copiado de index.html)
+    <div className="max-w-4xl mx-auto text-center"> 
       
-      {/* Títulos (traducidos de Tailwind) */}
-      <h1 className="h3 fw-bold mb-1 text-white text-center">Fase 3 · Construcción con LEGO</h1>
-      <p className="text-white-50 mb-4 text-center">
+      {/* Títulos (copiados de index.html) */}
+      <h1 className="text-3xl font-extrabold mb-1">Fase 3 · Construcción con LEGO</h1>
+      <p className="opacity-80 mb-4">
         Tiempo para crear con LEGO. Puedes ver el mapa de empatía confirmado.
       </p>
       
@@ -36,17 +28,18 @@ export default function Phase3({ role, onNext, onBack }) {
       <LegoTimer 
         role={role} 
         onNext={onNext} 
-        onBack={handleBack} // Pasa nuestra función 'handleBack'
+        onBack={onBack} 
+        onShowMap={() => setShowMap(true)} // Pasa la función para abrir el modal
       />
       
       {/* Componente del Modal */}
       <MapModal 
         show={showMap} 
-        onHide={() => setShowMap(false)} 
+        onClose={() => setShowMap(false)} 
         persona={p2?.persona} 
         bubbles={p2?.bubbles || []} 
       />
       
-    </Container>
+    </div>
   );
 }
