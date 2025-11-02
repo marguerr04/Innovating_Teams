@@ -10,10 +10,9 @@ import Phase2 from "../features/Phase2";
 import Phase3 from '../features/Phase3'; // <-- Importa la Fase 3 real
 import Phase4 from '../features/Phase4'; // <-- Importa la Fase 4 real
 
-// ✅ Placeholders para futuras fases
-const Phase2 = () => <div>Fase 2 (en construcción)</div>;
-const Phase3 = () => <div>Fase 3 (en construcción)</div>;
-const Phase4 = () => <div>Fase 4 (en construcción)</div>;
+
+
+
 // --- Dejamos las otras fases como placeholders (marcadores de posición) ---
 const Phase5 = () => <div>Fase 5 (en construcción)</div>;
 const Phase6 = () => <div>Fase 6 (en construcción)</div>;

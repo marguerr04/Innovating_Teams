@@ -5,7 +5,7 @@ import { load, save, defaultPoll } from '../../../../utils/helpers.js';
 
 // 1. Importa tus componentes de juego Y el nuevo Modal
 import WordSearch2 from './components/WordSearch2/WordSearch2.jsx';
-import MakeWords from './components/MakeWords.jsx';
+import MakeWords from './components/MakeWords/MakeWords.jsx';
 import BreakIce from './components/BreakIce.jsx';
 import ActivityModal from '../../components/ActivityModal.jsx'; // <-- IMPORTA EL MODAL
 
