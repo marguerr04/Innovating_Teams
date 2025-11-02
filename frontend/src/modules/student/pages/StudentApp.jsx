@@ -1,22 +1,27 @@
-// src/modules/student/pages/StudentApp.jsx
-import React, { useState } from "react";
-import { useRole } from "../../../utils/helpers.js";
+// src/App.js
+import React, { useState } from 'react';
+// Sube un nivel (de 'pages') y luego baja a 'utils'
+// para encontrar la carpeta 'utils'
+import { useRole } from '../../../utils/helpers.js'; 
 
 // ✅ Fases reales importadas
 import Phase1 from "../features/Phase1";
 import Phase2 from "../features/Phase2";
+import Phase3 from '../features/Phase3'; // <-- Importa la Fase 3 real
+import Phase4 from '../features/Phase4'; // <-- Importa la Fase 4 real
 
 // ✅ Placeholders para futuras fases
+const Phase2 = () => <div>Fase 2 (en construcción)</div>;
 const Phase3 = () => <div>Fase 3 (en construcción)</div>;
 const Phase4 = () => <div>Fase 4 (en construcción)</div>;
+// --- Dejamos las otras fases como placeholders (marcadores de posición) ---
 const Phase5 = () => <div>Fase 5 (en construcción)</div>;
 const Phase6 = () => <div>Fase 6 (en construcción)</div>;
 const Phase7 = () => <div>Fase 7 (en construcción)</div>;
 
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
-  const [phase, setPhase] = useState(1);
-
+  const [phase, setPhase] = useState(1); // Empezamos en la Fase 1
   const go = (n) => setPhase(n);
 
   return (
