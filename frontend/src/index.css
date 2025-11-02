@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /*
 Codigo de estilos GLOBALES
 */
+
 
 body{font-family:'Inter',system-ui;background:#2e5e8c;color:#fff}
 .card{background:#fff;color:#0b1f3a;border-radius:1.25rem;box-shadow:0 16px 44px rgba(0,0,0,.18)}
@@ -40,3 +42,5 @@ code {
 font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
 monospace;
 }
+
+
