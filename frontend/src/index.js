@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-// 1. Asegúrate de que este sea el archivo CSS que tiene las 3 líneas de @tailwind
-import './index.css'; // (o './styles.css', el que estés usando)
+
+import './index.css';
 
 import App from './App'; // <-- Importa tu componente App
 
