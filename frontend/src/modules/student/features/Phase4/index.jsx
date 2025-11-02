@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Ajusta la ruta para que coincida con tu archivo helpers.js
 import { load, save } from '../../../../utils/helpers.js';
 
 // Importa el modal de la ruleta

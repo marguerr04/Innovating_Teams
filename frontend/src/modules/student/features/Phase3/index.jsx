@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 
-// Ajusta la ruta para que coincida con tu archivo helpers.js
 import { load } from '../../../../utils/helpers.js'; 
 
-// Importa los componentes que creamos
+// Importa los componentes
 import LegoTimer from './components/LegoTimer';
 import MapModal from './components/MapModal';
 
@@ -15,10 +14,10 @@ export default function Phase3({ role, onNext, onBack }) {
   const [showMap, setShowMap] = useState(false);
 
   return (
-    // Contenedor principal (copiado de index.html)
+    // Contenedor principal 
     <div className="max-w-4xl mx-auto text-center"> 
       
-      {/* Títulos (copiados de index.html) */}
+      {/* Títulos  */}
       <h1 className="text-3xl font-extrabold mb-1">Fase 3 · Construcción con LEGO</h1>
       <p className="opacity-80 mb-4">
         Tiempo para crear con LEGO. Puedes ver el mapa de empatía confirmado.

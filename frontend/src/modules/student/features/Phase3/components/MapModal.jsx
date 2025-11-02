@@ -7,7 +7,7 @@ export default function MapModal({ show, onClose, persona, bubbles }) {
     return null; 
   }
 
-  // JSX del Modal (copiado de index.html)
+  // JSX del Modal 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
       <div 

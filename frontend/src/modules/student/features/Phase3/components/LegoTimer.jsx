@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Ajusta la ruta para que coincida con tu archivo helpers.js
 import { beep } from '../../../../../utils/helpers.js'; 
 
 export default function LegoTimer({ role, onNext, onBack, onShowMap }) {
-  // --- Lógica del Timer (copiada de index.html) ---
+  // --- Lógica del Timer ---
   const [seconds, setSeconds] = useState(300);
   const [running, setRunning] = useState(false);
   const tickRef = useRef(null);
@@ -42,7 +41,7 @@ export default function LegoTimer({ role, onNext, onBack, onShowMap }) {
   return (
     // JSX de la Card (copiado de index.html)
     <div className="card p-6 flex flex-col items-center">
-      {/* Asumo que 'lego.gif' está en tu carpeta /public */}
+      {/* 'lego.gif' */}
       <img 
         src="/lego.gif" 
         className="w-[280px] h-[158px] object-cover rounded-xl mb-4" 
