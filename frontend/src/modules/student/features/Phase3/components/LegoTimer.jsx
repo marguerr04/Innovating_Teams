@@ -1,74 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+// Archivo: src/modules/student/features/Phase3/components/LegoTimer.jsx
 
-import { beep } from '../../../../../utils/helpers.js'; 
+import React from 'react';
 
-export default function LegoTimer({ role, onNext, onBack, onShowMap }) {
-  // --- Lógica del Timer ---
-  const [seconds, setSeconds] = useState(300);
-  const [running, setRunning] = useState(false);
-  const tickRef = useRef(null);
-  const lastBeepRef = useRef(null);
+// 1. Importa el NUEVO componente Timer
+// (Ajusta la ruta '..' para subir a 'src/' y bajar a 'components/')
+import Timer from '../../../../../components/Timer'; 
 
-  useEffect(() => {
-    if (!running) {
-      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-      return;
-    }
-    tickRef.current = setInterval(() => {
-      setSeconds(s => {
-        const next = Math.max(0, s - 1);
-        if (next > 0 && next <= 5 && lastBeepRef.current !== next) { 
-          beep(); 
-          lastBeepRef.current = next; 
-        }
-        if (next === 0) {
-          if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-          setRunning(false); 
-          lastBeepRef.current = null;
-          setTimeout(() => alert('⏱️ ¡Tiempo terminado!'));
-        }
-        return next;
-      });
-    }, 1000);
-    return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
-  }, [running]);
-  // --- Fin Lógica del Timer ---
+// 2. Define la duración de esta fase (10 minutos)
+const PHASE_3_DURATION = 300;
 
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const ss = String(seconds % 60).padStart(2, '0');
-  const isProf = role === 'profesor';
+export default function LegoTimer({ isProf, onNext, onBack, onShowMap }) {
+  
+  // --- 3. BORRA toda la lógica del timer (useState, useEffect, etc.) ---
 
   return (
-    // JSX de la Card (copiado de index.html)
+    // Card de Tailwind (de index.html)
     <div className="card p-6 flex flex-col items-center">
-      {/* 'lego.gif' */}
       <img 
         src="/lego.gif" 
         className="w-[280px] h-[158px] object-cover rounded-xl mb-4" 
         alt="gif lego"
       />
-      <div className="text-6xl font-extrabold tracking-widest">{mm}:{ss}</div>
       
-      {/* Botones de control */}
-      <div className="mt-5 flex gap-2">
+      {/* 4. Renderiza el componente Timer aquí */}
+      <Timer 
+        initialSeconds={PHASE_3_DURATION} 
+        isProf={isProf} 
+      />
+      
+      {/* Botón 'Ver bubble map' (de index.html) */}
+      <div className="mt-5">
         <button className="btn bg-slate-200" onClick={onShowMap}>Ver bubble map</button>
-        {isProf && (
-          <>
-            <button className="btn bg-mint-500 text-white" onClick={() => setRunning(true)}>Iniciar</button>
-            <button className="btn bg-slate-100" onClick={() => setRunning(false)}>Pausar</button>
-            <button 
-              className="btn bg-accent-500 text-white" 
-              onClick={() => { setRunning(false); setSeconds(300); lastBeepRef.current = null; }}
-            >
-              Reiniciar
-            </button>
-          </>
-        )}
       </div>
-      
-      {!isProf && <div className="text-xs text-slate-500 mt-2">El profesor controla el temporizador.</div>}
-      
-      {/* Botones de navegación de fase */}
+
+      {/* Botones de navegación de fase (de index.html) */}
       <div className="mt-6 flex gap-2">
         <button className="btn bg-slate-100" onClick={onBack}>← Volver</button>
         <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 4</button>

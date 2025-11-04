@@ -1,5 +1,5 @@
 // src/utils/helpers.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const arr = (v) => (Array.isArray(v) ? v : []);
 
@@ -65,3 +65,4 @@ export function beep() {
     setTimeout(() => { o.stop(); ctx.close(); }, 120); 
   } catch (e) { } 
 }
+
