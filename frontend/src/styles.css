@@ -158,3 +158,36 @@ body {
   margin-top: 12px; 
   font-size: 18px;
 }
+
+
+/* --- efectos opcionales de resplandor --- */
+.bg-shapes::before,
+.bg-shapes::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  animation: glow 6s ease-in-out infinite alternate;
+}
+@keyframes glow {
+  from { transform: translateY(-10px); opacity: 0.25; }
+  to { transform: translateY(10px); opacity: 0.4; }
+}
+
+
+@keyframes floatBtn {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+.btn-float {
+  animation: floatBtn 4s ease-in-out infinite;
+}
+
+/* Variante más suave para el logo */
+.logo-float {
+  animation: floatBtn 6s ease-in-out infinite;
+  animation-delay: 1s;
+}
