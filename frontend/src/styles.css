@@ -159,35 +159,30 @@ body {
   font-size: 18px;
 }
 
+/* Instrucciones del juego */
 
-/* --- efectos opcionales de resplandor --- */
-.bg-shapes::before,
-.bg-shapes::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.3;
-  animation: glow 6s ease-in-out infinite alternate;
-}
-@keyframes glow {
-  from { transform: translateY(-10px); opacity: 0.25; }
-  to { transform: translateY(10px); opacity: 0.4; }
-}
+:root {
+      --udd-bg: #f7f6f2;
+      --udd-blue: #005a8d;
+      --udd-blue-soft: #e6f0f7;
+      --udd-accent: #fbb03b;
+    }
+    body { background: #0f172a; min-height: 100vh; }
+    .step-pill { transition: all .25s ease; }
+    .step-pill-active {
+      background: #ffffff;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.03);
+      border-radius: 9999px;
+    }
+    .hidden-modal {
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+    }
+    .show-modal {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
 
-
-@keyframes floatBtn {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-6px); }
-  100% { transform: translateY(0px); }
-}
-
-.btn-float {
-  animation: floatBtn 4s ease-in-out infinite;
-}
-
-/* Variante más suave para el logo */
-.logo-float {
-  animation: floatBtn 6s ease-in-out infinite;
-  animation-delay: 1s;
-}
+    
