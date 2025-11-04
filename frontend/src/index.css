@@ -22,7 +22,7 @@ body{font-family:'Inter',system-ui;background:#2e5e8c;color:#fff}
 .bubble.lock{cursor:default}
 .bubble.center{background:#102a4b;color:#fff;cursor:default}
 
-/* ESTILOS DE FASE 4 (Roulette) */
+/* ESTILOS DE FASE 4 (Roulette) t*/
 /* ===== Misión Emprende — Roulette Modal (namespaced) ===== */
 .me-roulette-backdrop{
 position: fixed; inset: 0; background: rgba(0,0,0,.5);
