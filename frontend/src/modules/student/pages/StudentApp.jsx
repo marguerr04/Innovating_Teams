@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 // para encontrar la carpeta 'utils'
 import { useRole } from '../../../utils/helpers.js'; 
 
+import InstructionsModal from '../../../components/InstructionsModal';
+
 // ✅ Fases reales importadas
 import Phase1 from "../features/Phase1";
 import Phase2 from "../features/Phase2";
@@ -23,8 +25,23 @@ export default function StudentApp() {
   const [phase, setPhase] = useState(1); // Empezamos en la Fase 1
   const go = (n) => setPhase(n);
 
+  const [showInstructions, setShowInstructions] = useState(false);
+
   return (
+
     <div>
+      <button 
+        id="openModal"
+        className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
+        onClick={() => setShowInstructions(true)}
+      >
+        📘 Ver instrucciones
+      </button>
+
+      <InstructionsModal 
+        isOpen={showInstructions} 
+        onClose={() => setShowInstructions(false)} 
+      />
       {/* Header de navegación */}
       <div className="sticky top-0 z-20 bg-sea-600/80 backdrop-blur border-b border-white/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
