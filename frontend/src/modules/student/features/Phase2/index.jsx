@@ -1,12 +1,22 @@
+// 1. Importa 'useEffect' junto con 'useState'
+import React, { useState, useEffect } from "react";
 
-import React, { useState } from "react";
+// 2. Importa 'load' y 'save' de tus helpers
+// (La ruta se basa en tu estructura de carpetas)
+import { load, save } from '../../../../utils/helpers.js';
+
+// Importa los componentes de la Fase 2
 import AreaSelector from "./components/AreaSelector";
 import PersonaCard from "./components/PersonCard";
 import EmpathyEditor from "./components/EmpathyEditor";
 import DraggableMap from "./components/DraggableMap";
 import "./Phase2.css"; // Estilos locales de la Fase 2
 
+// 3. Define la clave de localStorage (para conectar con Fase 3)
+const STORAGE_KEY = 'it_phase2_store';
+
 export default function Phase2({ onNext }) {
+  // Constantes de la Fase 2 (de tu archivo)
   const AREAS = [
     { id: "salud", name: "Salud" },
     { id: "sustentabilidad", name: "Sustentabilidad" },
@@ -54,16 +64,25 @@ export default function Phase2({ onNext }) {
     { id: "dolores", name: "Dolores", cls: "bg-rose-100 text-rose-900 border-rose-200" },
     { id: "objetivos", name: "Objetivos", cls: "bg-indigo-100 text-indigo-900 border-indigo-200" },
   ];
+  // --- Fin Constantes ---
 
-  const [state, setState] = useState({
+
+  // 4. Cambia 'useState' para usar 'load' y cargar datos guardados
+  const [state, setState] = useState(() => load(STORAGE_KEY, {
     area: null,
     challengeId: null,
     persona: null,
     bubbles: [],
-  });
+  }));
+
+  // 5. Añade 'useEffect' para usar 'save' y guardar en localStorage
+  useEffect(() => {
+    save(STORAGE_KEY, state);
+  }, [state]); // Guarda cada vez que el estado cambia
 
   const [showMap, setShowMap] = useState(false);
 
+  // Función para añadir burbuja (sin cambios)
   const handleAdd = (bubble) => {
     const id = Math.random().toString(36).slice(2);
     setState((s) => ({
@@ -81,6 +100,7 @@ export default function Phase2({ onNext }) {
         Fase 2 · Selección y Mapa de Empatía
       </h1>
 
+      {/* (El JSX de grid, AreaSelector, card, etc. no cambia) */}
       <div className="grid md:grid-cols-3 gap-6">
         <AreaSelector
           area={state.area}
@@ -110,10 +130,7 @@ export default function Phase2({ onNext }) {
           </div>
 
           <div className="grid md:grid-cols-[260px,1fr] gap-6">
-            {/* Tarjeta de persona */}
             <PersonaCard persona={state.persona} />
-
-            {/* Editor de empatía */}
             {state.persona && (
               <EmpathyEditor
                 persona={state.persona}
@@ -134,21 +151,39 @@ export default function Phase2({ onNext }) {
         </div>
       </div>
 
-      {/* Modal del mapa */}
+      {/* --- Modal del mapa (Con correcciones) --- */}
       {showMap && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+        // 6. Clic en el fondo (onMouseDown) para cerrar
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center"
+          onMouseDown={(e) => { 
+            if (e.target === e.currentTarget) {
+              setShowMap(false);
+            }
+          }}
+        >
           <div className="card bg-white p-6 w-[90%] max-w-4xl relative">
+            
+            {/* 7. Botón 'X' visible (texto oscuro) */}
             <button
-              className="absolute top-4 right-4 btn btn-ghost"
+              className="absolute top-4 right-5 text-2xl text-slate-400 hover:text-slate-600"
               onClick={() => setShowMap(false)}
             >
-              ✕
+              &times;
             </button>
+            
             <DraggableMap
               persona={state.persona}
               bubbles={state.bubbles}
-              applyBubbles={(b) =>
-                setState((s) => ({ ...s, bubbles: b }))
+              
+              // 8. Corrección del error 'updater is not a function'
+              applyBubbles={(updater) =>
+                setState((s) => {
+                  const newBubbles = typeof updater === 'function' 
+                    ? updater(s.bubbles) // Si es una función, ejecútala
+                    : updater;           // Si es un array, úsalo directamente
+                  return { ...s, bubbles: newBubbles };
+                })
               }
               canDrag
             />
