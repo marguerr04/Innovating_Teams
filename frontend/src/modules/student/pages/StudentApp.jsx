@@ -40,7 +40,8 @@ export default function StudentApp() {
 
       <InstructionsModal 
         isOpen={showInstructions} 
-        onClose={() => setShowInstructions(false)} 
+        onClose={() => setShowInstructions(false)}
+        initialPhase={phase} 
       />
       {/* Header de navegación */}
       <div className="sticky top-0 z-20 bg-sea-600/80 backdrop-blur border-b border-white/20">

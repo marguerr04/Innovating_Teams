@@ -1,6 +1,6 @@
 // Archivo: src/components/InstructionsModal.jsx
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // 1. Pega el array 'stages' de tu index.html
 const stages = [
@@ -131,12 +131,25 @@ const stages = [
 ];
 
 
-export default function InstructionsModal({ isOpen, onClose }) {
+export default function InstructionsModal({ isOpen, onClose, initialPhase = 1 }) {
   const [currentStage, setCurrentStage] = useState(0);
   const audioRef = useRef(null);
   const touchStartXRef = useRef(0);
   const contentRef = useRef(null);
   const stg = stages[currentStage];
+
+  useEffect(() => {
+    if (isOpen) {
+      // Sincroniza la página interna con la fase actual del juego
+      // Restamos 1 porque las fases son (1, 2, 3) y los arrays son (0, 1, 2)
+      const newPageIndex = Math.max(0, initialPhase - 1);
+      
+      setCurrentStage(newPageIndex);
+      
+      // Resetea el scroll al abrir
+      if (contentRef.current) contentRef.current.scrollTop = 0; 
+    }
+  }, [isOpen, initialPhase]); // Se ejecuta cuando 'isOpen' o 'initialPhase' cambian
 
   // 2. Traduce las funciones de JS a React
   const playSound = () => {
