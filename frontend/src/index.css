@@ -43,4 +43,7 @@ font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
 monospace;
 }
 
-
+/* Pega esto en tu src/index.css */
+.podio-glow {
+  box-shadow: 0 12px 35px rgba(255,215,0,0.6) !important;
+}

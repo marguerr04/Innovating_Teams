@@ -11,13 +11,12 @@ import Phase1 from "../features/Phase1";
 import Phase2 from "../features/Phase2";
 import Phase3 from '../features/Phase3'; // <-- Importa la Fase 3 real
 import Phase4 from '../features/Phase4'; // <-- Importa la Fase 4 real
-
+import Phase5 from '../features/Phase5';
+import Phase6 from '../features/Phase6';
 
 
 
 // --- Dejamos las otras fases como placeholders (marcadores de posición) ---
-const Phase5 = () => <div>Fase 5 (en construcción)</div>;
-const Phase6 = () => <div>Fase 6 (en construcción)</div>;
 const Phase7 = () => <div>Fase 7 (en construcción)</div>;
 
 export default function StudentApp() {
@@ -40,7 +39,8 @@ export default function StudentApp() {
 
       <InstructionsModal 
         isOpen={showInstructions} 
-        onClose={() => setShowInstructions(false)} 
+        onClose={() => setShowInstructions(false)}
+        initialPhase={phase} 
       />
       {/* Header de navegación */}
       <div className="sticky top-0 z-20 bg-sea-600/80 backdrop-blur border-b border-white/20">
