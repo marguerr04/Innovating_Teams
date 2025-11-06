@@ -6,7 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.utils import timezone
 
 """
 Se borro el managed = False para que Django pueda manejar las tablas
@@ -306,3 +306,43 @@ class Video(models.Model):
 
     class Meta:
         db_table = 'video'
+
+
+
+
+
+
+
+
+
+from usuarios.models import Usuario 
+from .models import Equipo, Etapa
+
+class ProgresoEtapa(models.Model):
+    """
+    Trackeo estado equipo y cumplpoir RT02
+    """
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE)
+    
+    # Campos pedidos por RT-02 (Estado actual)
+    start_at = models.DateTimeField(default=timezone.now)
+    end_at = models.DateTimeField(null=True, blank=True)
+    
+    # --- CORRECCIÓN CLAVE ---
+    # Distingue evento de sistema vs. usuario (como pide el feedback)
+    
+    finished_by_system = models.BooleanField(default=False) # True si el timer lo terminó
+    
+    # 'finished_by_user' ahora apunta a tu tabla genérica 'Usuario'.
+    # Esto te permite registrar si fue un estudiante O un profesor quien
+    # marcó la etapa como finalizada.
+    finished_by_user = models.ForeignKey(
+        Usuario, 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+
+    class Meta:
+        unique_together = ('equipo', 'etapa') # Un equipo solo pasa una vez por etapa
