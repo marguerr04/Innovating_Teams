@@ -1,7 +1,7 @@
 // src/App.js
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import "./index.css"; // Tailwind
+
 import Login from "./pages/Login";
 import StudentApp from "./modules/student/pages/StudentApp";
 import AdminApp from "./modules/admin/AdminApp";
