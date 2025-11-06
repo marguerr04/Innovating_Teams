@@ -41,8 +41,9 @@ INSTALLED_APPS = [
 
 
     # --- Tus Apps ---
-    'rest_framework',        # <--- Añade esta
-    'corsheaders',           # <--- Añade esta
+    'rest_framework',
+    "rest_framework.authtoken",      
+    'corsheaders',          
     'django_extensions',
 
     'api'

@@ -4,9 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css"; // Tailwind
 import Login from "./pages/Login";
 import StudentApp from "./modules/student/pages/StudentApp";
-import PreLogin from "./pages/PreLogin"; // 
-
-
+import AdminApp from "./modules/admin/AdminApp";
+import PreLogin from "./pages/PreLogin";
+import ProfessorApp from "./modules/profesor/ProfessorApp";
 
 export default function App() {
   return (
@@ -19,6 +19,8 @@ export default function App() {
         <Route path="/prelogin" element={<PreLogin />} />
 
         <Route path="/estudiante/*" element={<StudentApp />} />
+        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/profesor/*" element={<ProfessorApp />} />
       </Routes>
     </BrowserRouter>
   );
