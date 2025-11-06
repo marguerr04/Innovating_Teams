@@ -5,11 +5,35 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Estudiante, Curso, Usuario, PartidaUsuario
 from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
 
+User = get_user_model()
 
+@api_view(["POST"])
+def login_view(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=400)
+
+    # Autenticamos con el username real del usuario
+    user = authenticate(username=user.username, password=password)
+    if not user:
+        return Response({"error": "Credenciales inválidas"}, status=400)
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({
+        "token": token.key,
+        "username": user.username,
+        "role": "admin",  # como esta demo es solo para admin
+    })
 
 
 # Esta clase ES la que hace la query
