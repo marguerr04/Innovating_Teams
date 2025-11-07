@@ -26,34 +26,88 @@ export default function Phase2({ onNext }) {
   const CHALL = {
     salud: [
       {
-        id: "adultos",
-        title: "Adultos mayores y tecnología",
+        id: "tto",
+        title: "Autogestión de tratamientos",
         persona: {
-          name: "Osvaldo",
-          age: 70,
-          story: "Le cuesta adaptarse a trámites digitales y apps; depende de su familia para gestiones en línea.",
+          name: "Humberto",
+          age: 50,
+          story: "Fue dado de alta con indicaciones médicas complejas, pero no entendió qué debía seguir tomando ni a quién acudir si se sentía mal.",
+        },
+      },
+      {
+        id: "obesidad",
+        title: "Obesidad",
+        persona: {
+          name: "Simona",
+          age: 27,
+          story: "Sabe que la alimentación es clave, pero no ha podido organizar ni aprender a darle una nutrición buena a su hija.",
+        },
+      },
+      {
+        id: "envejecimiento",
+        title: "Envejecimiento activo",
+        persona: {
+          name: "Juana",
+          age: 72,
+          story: "Vive sola. Le gustaría mantenerse activa, pero no conoce programas accesibles que la motiven a hacer ejercicio y socializar.",
         },
       },
     ],
     sustentabilidad: [
       {
+        id: "fast-fashion",
+        title: "Contaminación por fast fashion",
+        persona: {
+          name: "Gabriela",
+          age: 18,
+          story: "Vive cerca de vertederos y basurales; debe pasar a diario por lugares con desagradables olores.",
+        },
+      },
+      {
         id: "agua",
-        title: "Sustentabilidad del agua en agricultura",
+        title: "Acceso al agua en la agricultura",
         persona: {
           name: "Camila",
           age: 50,
-          story: "Productora agrícola preocupada por la escasez de agua dulce.",
+          story: "Agricultora de paltas, está complicada de perder su negocio por la cantidad de agua que debe utilizar.",
+        },
+      },
+      {
+        id: "residuos",
+        title: "Gestión de residuos electrónicos",
+        persona: {
+          name: "Francisco",
+          age: 29,
+          story: "Cambió su celular y computador, pero no sabe dónde llevar los antiguos. Terminó guardándolos en un cajón.",
         },
       },
     ],
     educacion: [
       {
-        id: "brecha",
-        title: "Brecha digital en educación",
+        id: "financiera",
+        title: "Educación financiera accesible",
         persona: {
-          name: "Luis",
-          age: 12,
-          story: "Acceso limitado a internet y dispositivos; se atrasa en clases.",
+          name: "Martina",
+          age: 22,
+          story: "Emprendedora que vende por redes sociales. No sabe cómo organizar su dinero, lo que la mantiene en constante inestabilidad.",
+        },
+      },
+      {
+        id: "laboral",
+        title: "Inicio de vida laboral",
+        persona: {
+          name: "Andrés",
+          age: 23,
+          story: "Recién egresado de odontología, ninguna clínica lo ha llamado porque no tiene experiencia previa.",
+        },
+      },
+      {
+        id: "adultos-tec",
+        title: "Tecnología adultos mayores",
+        persona: {
+          name: "Osvaldo",
+          age: 70,
+          story: "Adulto mayor que debe pedir ayuda a sus hijos o nietos cada vez que debe hacer tramites digitales.",
         },
       },
     ],
@@ -129,7 +183,7 @@ export default function Phase2({ onNext }) {
             )}
           </div>
 
-          <div className="grid md:grid-cols-[260px,1fr] gap-6">
+          <div className="grid lg:grid-cols-[260px,1fr] gap-6">
             <PersonaCard persona={state.persona} />
             {state.persona && (
               <EmpathyEditor
