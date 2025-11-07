@@ -5,6 +5,11 @@ import ListaEquiposCard from '../components/ListaEquiposCard';
 import MetadatosJuegoCard from '../components/MetadatosJuegoCard';
 import InformacionBasicaCard from '../components/InformacionBasicaCard';
 
+
+
+
+
+
 const CrearJuegoView = () => {
   const navigate = useNavigate();
   const { addJuego } = useProfesor();
@@ -19,7 +24,7 @@ const CrearJuegoView = () => {
     
     // Configuración CSV
     archivoCSV: null,
-    tieneEncabezado: false,
+    tieneEncabezado: true,
     modo: 'aleatoria',
     cantidadGrupos: 4,
     tamanoGrupo: '',
@@ -52,43 +57,40 @@ const CrearJuegoView = () => {
   };
 
   const crearRepartirGrupos = async () => {
-    if (!formData.archivoCSV) {
-      alert('Por favor, selecciona un archivo primero.');
-      return;
+  if (!formData.archivoCSV) {
+    alert('Por favor, selecciona un archivo primero.');
+    return;
+  }
+
+  // Prepara el FormData
+  const dataToSend = new FormData();
+  dataToSend.append('archivo_lista', formData.archivoCSV);
+  dataToSend.append('cantidad_grupos', formData.cantidadGrupos);
+  dataToSend.append('tiene_encabezado', formData.tieneEncabezado);
+  dataToSend.append('modo', formData.modo);
+
+  try {
+    const response = await fetch('http://localhost:8000/api/groups/assign', {
+      method: 'POST',
+      body: dataToSend,
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log(' Grupos creados:', result);
+      alert(`Grupos creados exitosamente (${result.grupos.length} equipos)`);
+      setGruposCreados(result.grupos);
+    } else {
+      alert(` Error: ${result.error || 'Error desconocido'}`);
+      console.error('Detalles del error:', result);
     }
+  } catch (error) {
+    console.error('Error al conectar con el servidor:', error);
+    alert(' Error al conectar con el backend. Revisa consola.');
+  }
+};
 
-    // 1. Prepara los datos para enviar
-    const dataToSend = new FormData();
-    dataToSend.append('archivo_lista', formData.archivoCSV);
-    dataToSend.append('cantidad_grupos', formData.cantidadGrupos);
-    dataToSend.append('tiene_encabezado', formData.tieneEncabezado);
-    dataToSend.append('modo', formData.modo);
-
-    try {
-      // 2. Llama al endpoint de tu backend (Django)
-      const response = await fetch('/api/groups/assign', { // Asegúrate que esta URL coincida con la de tu backend
-        method: 'POST',
-        // No necesitas 'Content-Type', FormData lo maneja solo
-        body: dataToSend, 
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // 3. Muestra los resultados del backend
-        alert('Grupos creados con éxito');
-        setGruposCreados(result.grupos); // Asumiendo que el backend devuelve los grupos
-        // (Actualiza también los estudiantes sin asignar si el backend los devuelve)
-      } else {
-        // Muestra el error que envía el backend
-        alert(`Error al crear grupos: ${result.error}`);
-        setGruposCreados(false);
-      }
-    } catch (error) {
-      console.error('Error de red al repartir grupos:', error);
-      alert('Error de conexión con el servidor. Revisa la consola.');
-    }
-  };
 
   const reiniciarFormulario = () => {
     setFormData({
