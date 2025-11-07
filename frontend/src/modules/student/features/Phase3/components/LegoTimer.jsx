@@ -7,7 +7,7 @@ import React from 'react';
 import Timer from '../../../../../components/Timer'; 
 
 // 2. Define la duración de esta fase (5 minutos)
-const PHASE_3_DURATION = 300;
+const PHASE_3_DURATION = 600;
 
 export default function LegoTimer({ isProf, onNext, onBack, onShowMap }) {
   
