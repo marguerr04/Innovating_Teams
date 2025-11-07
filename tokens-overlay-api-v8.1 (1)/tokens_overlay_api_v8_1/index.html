@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Overlay de Tokens (API v8.1 – audio robusto)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="tokenOverlay" class="overlay" aria-hidden="false">
+    <div class="card">
+      <h1 class="title">¡Felicitaciones, equipo!</h1>
+      <p id="tokenSubtitle" class="subtitle"></p>
+      <img src="assets/token.png" alt="Tokens" class="token-img">
+      <button id="btnContinue" class="btn">Continuar a la intro</button>
+
+      <!-- Fallback audio element -->
+      <audio id="tokenSfx" src="assets/token-sound.mp3" preload="auto" playsinline></audio>
+
+      <!-- Lateral confetti lanes -->
+      <div id="laneLeft" class="lane left"></div>
+      <div id="laneRight" class="lane right"></div>
+    </div>
+  </div>
+
+  <script src="tokens-overlay.js"></script>
+
+  <script>
+    // DEMO: fases 1..5
+    let demo = 1;
+    function nextDemo(){
+      if (demo>5) return;
+      showTokensOverlay(demo, { onContinue: () => { demo++; if(demo<=5) setTimeout(nextDemo, 500);} });
+    }
+    window.addEventListener('DOMContentLoaded', nextDemo);
+  </script>
+</body>
+</html>

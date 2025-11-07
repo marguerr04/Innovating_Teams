@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Misión Emprende – Instrucciones (touch)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --udd-bg: #f7f6f2;
+      --udd-blue: #005a8d;
+      --udd-blue-soft: #e5f0f7;
+      --udd-blue-dark: #003a5c;
+      --udd-accent: #fbb03b;
+      --udd-border: #d6e0ea;
+    }
+    body { background: var(--udd-bg); min-height: 100vh; }
+    .sidebar-btn-active {
+      background: #ffffff;
+      color: var(--udd-blue);
+      box-shadow: inset 3px 0 0 0 var(--udd-accent);
+    }
+    .content-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.03);
+      border-radius: 1.25rem;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.03);
+      touch-action: pan-y;
+    }
+    .pill { border-radius: 9999px; }
+  </style>
+</head>
+<body class="text-slate-800">
+  <div class="min-h-screen flex flex-col">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-[color:var(--udd-blue)] flex items-center justify-center">
+          <span class="text-white font-bold text-lg">ME</span>
+        </div>
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400">Misión Emprende</p>
+          <h1 class="text-sm font-semibold text-slate-800">Lee las etapas antes de comenzar</h1>
+        </div>
+      </div>
+      <div class="hidden sm:flex items-center gap-3 text-xs text-slate-500">
+        <span class="inline-flex items-center gap-1 bg-slate-100 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+          Touch habilitado
+        </span>
+      </div>
+    </header>
+
+    <main class="flex-1 flex flex-col md:flex-row">
+      <!-- sidebar -->
+      <aside class="w-full md:w-64 bg-[color:var(--udd-blue)] text-white py-4 md:py-6 flex md:flex-col gap-2 overflow-x-auto md:overflow-visible" id="sidebarScroll" style="scroll-snap-type:x mandatory;">
+        <div class="px-4 pb-2 md:px-6 md:pb-2 shrink-0 md:shrink">
+          <p class="text-xs uppercase tracking-[0.3em] text-white/50 mb-3 hidden md:block">Etapas</p>
+          <p class="text-sm text-white/90 leading-snug hidden md:block">Selecciona una etapa o desliza en el contenido.</p>
+        </div>
+        <nav class="flex md:flex-col gap-2 px-2 md:px-3 w-max md:w-auto" id="navSteps">
+          <!-- items via JS -->
+        </nav>
+        <div class="px-4 pt-2 mt-auto hidden md:block">
+          <button id="btnVolver" class="w-full bg-white/5 hover:bg-white/10 text-sm py-2 rounded-lg border border-white/10">Volver</button>
+        </div>
+      </aside>
+
+      <!-- content -->
+      <section class="flex-1 p-4 md:p-8">
+        <div class="content-card p-5 md:p-7" id="content">
+          <!-- via JS -->
+        </div>
+        <div class="flex md:hidden justify-between gap-4 mt-4">
+          <button id="prevMobile" class="flex-1 py-2 rounded-lg bg-white border border-slate-200 text-sm">← Anterior</button>
+          <button id="nextMobile" class="flex-1 py-2 rounded-lg bg-[color:var(--udd-blue)] text-white text-sm">Siguiente →</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const stages = [
+      {
+        key: "etapa1",
+        title: "Etapa 1: Habilidad de Equipo",
+        intro: "En esta primera etapa los equipos pondrán a prueba su capacidad de colaboración y comunicación.",
+        bullets: [
+          "<strong>Dinámica:</strong> elegir si se conocen o no.",
+          "<strong>Opción A: Nos conocemos.</strong> Realizan un juego corto.",
+          "<strong>Opción B: No nos conocemos.</strong> Hacen una breve presentación personal y luego juegan."
+        ],
+        time: "5 minutos",
+        reward: "Tokens por orden de finalización: 1° 4 tokens, 2° 3 tokens, 3° 2 tokens, 4° 1 token.",
+        skill: "Comunicación efectiva"
+      },
+      {
+        key: "etapa2",
+        title: "Etapa 2: Desafío y Empatía",
+        intro: "Aquí el equipo debe escoger un problema real y describir a la persona que lo vive.",
+        bullets: [
+          "<strong>Dinámica:</strong> elegir temática (Salud, Sustentabilidad o Educación) y luego un desafío.",
+          "El desafío incluye una descripción breve y una persona afectada (nombre y edad).",
+          "Completar el Bubble Map con necesidades, dolores, motivaciones y entorno."
+        ],
+        time: "8 minutos",
+        reward: "1 token si el equipo completa la etapa dentro del tiempo.",
+        skill: "Empatía"
+      },
+      {
+        key: "etapa3",
+        title: "Etapa 3: Creatividad",
+        intro: "Etapa para transformar la empatía en una idea concreta y visible.",
+        bullets: [
+          "<strong>Dinámica:</strong> construir una solución usando LEGO físico.",
+          "<strong>Evidencia opcional:</strong> pueden subir una foto del prototipo."
+        ],
+        time: "10 minutos",
+        reward: "1 token si el equipo completa la etapa dentro del tiempo.",
+        skill: "Pensamiento creativo y prototipado"
+      },
+      {
+        key: "etapa4",
+        title: "Etapa 4: Comunicación",
+        intro: "Los equipos deben preparar un pitch breve y claro para presentar su solución.",
+        bullets: [
+          "<strong>Dinámica:</strong> preparar un pitch de 90 segundos.",
+          "El sistema muestra la estructura del pitch: equipo, desafío, empatía, idea creativa.",
+          "<strong>Cronómetro de preparación:</strong> máximo 6 minutos."
+        ],
+        time: "6 minutos",
+        reward: "1 token si el equipo completa la preparación dentro del tiempo.",
+        skill: "Habilidad de comunicación"
+      },
+      {
+        key: "etapa5",
+        title: "Etapa 5: Evaluación entre equipos",
+        intro: "Se evalúan entre sí para practicar retroalimentación respetuosa.",
+        bullets: [
+          "<strong>Dinámica:</strong> cada equipo evalúa al resto (no se autoevalúa) usando 4 criterios: Equipo, Empatía, Creatividad y Comunicación.",
+          "<strong>Tokens de participación:</strong> 1 token por completar la evaluación.",
+          "<strong>Tokens por puntuación:</strong> 1° 5 tokens, 2° 4 tokens, 3° 3 tokens, 4° 2 tokens."
+        ],
+        time: "Tiempo variable",
+        reward: "1 token fijo + tokens por ranking de evaluación.",
+        skill: "Pensamiento crítico y feedback"
+      },
+      {
+        key: "etapa6",
+        title: "Etapa 6: Cierre y Apoyo",
+        intro: "Se cierra la experiencia, se muestran resultados y se invita a seguir emprendiendo.",
+        bullets: [
+          "<strong>Mensaje pedagógico:</strong> repaso de las habilidades trabajadas (equipo, empatía, creatividad, comunicación, feedback).",
+          "<strong>Autoevaluación:</strong> los estudiantes acceden a un QR de autoevaluación de habilidades emprendedoras.",
+          "<strong>Apoyo UDD:</strong> QR a encuesta de satisfacción y a programas de emprendimiento."
+        ],
+        time: "5 minutos",
+        reward: "No aplica tokens nuevos (se muestra ranking final).",
+        skill: "Reflexión y proyección"
+      }
+    ];
+
+    const nav = document.getElementById("navSteps");
+    const content = document.getElementById("content");
+    const prevMobile = document.getElementById("prevMobile");
+    const nextMobile = document.getElementById("nextMobile");
+    let activeIndex = 0;
+
+    function renderNav() {
+      nav.innerHTML = "";
+      stages.forEach((stg, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "flex items-center gap-3 px-3 py-2 rounded-lg transition shrink-0 md:shrink " + (idx === activeIndex ? "sidebar-btn-active" : "hover:bg-white/5");
+        btn.innerHTML = `
+          <div class="w-9 h-9 rounded-full flex items-center justify-center ${idx === activeIndex ? "bg-[color:var(--udd-blue)]/5" : "bg-white/5"}">
+            <span class="text-sm font-semibold">${idx+1}</span>
+          </div>
+          <span class="text-sm font-medium whitespace-nowrap md:whitespace-normal">${stg.title}</span>
+        `;
+        btn.addEventListener("click", () => {
+          activeIndex = idx;
+          renderNav();
+          renderContent();
+        });
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderContent() {
+      const stg = stages[activeIndex];
+      content.innerHTML = `
+        <p class="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Misión Emprende · Instrucciones</p>
+        <h2 class="text-2xl font-bold text-[color:var(--udd-blue)] mb-2">${stg.title}</h2>
+        <p class="text-sm text-slate-700 mb-4">${stg.intro}</p>
+        <div class="flex gap-3 mb-5 flex-wrap">
+          <span class="pill bg-[color:var(--udd-blue-soft)] text-[color:var(--udd-blue)] text-xs px-3 py-1 inline-flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[color:var(--udd-blue)]"></span>
+            Tiempo: ${stg.time}
+          </span>
+          <span class="pill bg-slate-100 text-slate-800 text-xs px-3 py-1 inline-flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Habilidad: ${stg.skill}
+          </span>
+          <span class="pill bg-emerald-50 text-emerald-800 text-xs px-3 py-1 inline-flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Recompensa: ${stg.reward}
+          </span>
+        </div>
+        <div class="space-y-2 mb-6">
+          ${stg.bullets.map(b => `<p class="text-sm leading-relaxed">${b}</p>`).join("")}
+        </div>
+        <p class="text-xs text-slate-400 border-t border-slate-100 pt-4">
+          Consejo: puedes deslizar hacia la izquierda o derecha en tablets y celulares para cambiar de etapa.
+        </p>
+      `;
+    }
+
+    // touch for content
+    let startX = 0;
+    let isSwiping = false;
+    content.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      isSwiping = true;
+    }, {passive: true});
+
+    content.addEventListener("touchmove", (e) => {
+      if (!isSwiping) return;
+      const diffX = e.touches[0].clientX - startX;
+      // don't do anything here, just record
+    }, {passive: true});
+
+    content.addEventListener("touchend", (e) => {
+      if (!isSwiping) return;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+      const threshold = 50; // px
+      if (diff < -threshold && activeIndex < stages.length - 1) {
+        // swipe left -> next
+        activeIndex++;
+        renderNav();
+        renderContent();
+      } else if (diff > threshold && activeIndex > 0) {
+        // swipe right -> prev
+        activeIndex--;
+        renderNav();
+        renderContent();
+      }
+      isSwiping = false;
+    });
+
+    // mobile buttons
+    prevMobile.addEventListener("click", () => {
+      if (activeIndex > 0) {
+        activeIndex--;
+        renderNav();
+        renderContent();
+      }
+    });
+    nextMobile.addEventListener("click", () => {
+      if (activeIndex < stages.length - 1) {
+        activeIndex++;
+        renderNav();
+        renderContent();
+      }
+    });
+
+    document.getElementById("btnVolver")?.addEventListener("click", () => {
+      alert("Aquí volverías al menú principal del juego.");
+    });
+
+    // init
+    renderNav();
+    renderContent();
+  </script>
+</body>
+</html>
