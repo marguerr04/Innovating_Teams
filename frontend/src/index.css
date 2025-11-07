@@ -272,3 +272,152 @@ monospace;
   background: #5eead4;
   box-shadow: 0 0 12px #5eead4;
 }
+
+
+/* --- INICIO: ESTILOS DEL OVERLAY DE TOKENS --- */
+
+/* Variables: Las renombro para evitar conflictos 
+  con las variables :root que ya tienes. 
+*/
+:root {
+  --token-bg: #0b1220;
+  --token-card: #101a31;
+  --token-txt: #e9f0ff;
+  --token-muted: #9fb2d9;
+  --token-accent: #3ee0ff;
+  --token-accent2: #2ad3a6;
+}
+
+/* Usamos clases con prefijo 'tk-' para 
+  asegurar que no haya conflictos con tu .card o .btn 
+*/
+.tk-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(5, 10, 18, .55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+.tk-overlay.tk-show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tk-card {
+  width: min(720px, 92vw);
+  text-align: center;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(62, 224, 255, .12), rgba(0, 0, 0, .35) 60%), var(--token-card);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  padding: 24px 22px 34px;
+  box-shadow: 0 24px 100px rgba(0, 0, 0, .55);
+  position: relative;
+  overflow: hidden;
+  color: var(--token-txt);
+  /* Animación de entrada */
+  transform: scale(0.95);
+  transition: transform .3s ease;
+}
+.tk-overlay.tk-show .tk-card {
+  transform: scale(1);
+}
+
+.tk-title {
+  margin: .2rem 0 .2rem;
+  font-size: 2.2rem;
+  font-weight: 700; /* Agregado para Tailwind */
+}
+.tk-subtitle {
+  margin: .2rem 0 1rem;
+  color: var(--token-muted);
+}
+.tk-token-img {
+  width: min(240px, 60vw);
+  display: block;
+  margin: 0 auto 16px;
+  border-radius: 8px;
+  background: #0b1220;
+}
+.tk-btn {
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--token-accent), var(--token-accent2));
+  color: #06202a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.tk-btn:active {
+  transform: translateY(1px);
+}
+
+/* Lateral confetti */
+.tk-lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  pointer-events: none;
+  overflow: visible;
+}
+.tk-lane.tk-left {
+  left: -6%;
+}
+.tk-lane.tk-right {
+  right: -6%;
+}
+.tk-confetti {
+  position: absolute;
+  top: var(--yStart);
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  border-radius: var(--radius);
+  opacity: .0;
+  transform: translate3d(var(--x), 0, 0) rotate(0deg);
+  animation:
+    tk-slideIn var(--inDur) ease-out forwards,
+    tk-driftDown var(--downDur) linear forwards var(--inDur),
+    tk-spin var(--spinDur) linear infinite;
+  box-shadow: 0 0 10px rgba(170, 230, 255, .18);
+  will-change: transform, opacity;
+}
+
+@keyframes tk-slideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fromX), 0, 0) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--x), calc(var(--lift)), 0) rotate(90deg);
+  }
+}
+@keyframes tk-driftDown {
+  from {
+    transform: translate3d(var(--x), calc(var(--lift)), 0) rotate(90deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(calc(var(--x) + var(--driftX)), 110vh, 0) rotate(720deg);
+    opacity: .9;
+  }
+}
+@keyframes tk-spin {
+  from {
+    rotate: 0deg
+  }
+  to {
+    rotate: 720deg
+  }
+}
+
+/* --- FIN: ESTILOS DEL OVERLAY DE TOKENS --- */

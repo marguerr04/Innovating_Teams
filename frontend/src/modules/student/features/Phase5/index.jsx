@@ -82,7 +82,8 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
         <div className="mb-6 border-b border-slate-200 pb-6">
           <Timer 
             initialSeconds={PHASE_5_DURATION} 
-            isProf={isProf} 
+            isProf={isProf}
+            autoStart={true} 
           />
         </div>
         
