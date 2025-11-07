@@ -36,7 +36,8 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
           <div className="card p-4">
             <Timer 
               initialSeconds={PHASE_4_DURATION} 
-              isProf={isProf} 
+              isProf={isProf}
+              autoStart={true} 
             />
           </div>
         </div>

@@ -25,7 +25,8 @@ export default function LegoTimer({ isProf, onNext, onBack, onShowMap }) {
       {/* 4. Renderiza el componente Timer aquí */}
       <Timer 
         initialSeconds={PHASE_3_DURATION} 
-        isProf={isProf} 
+        isProf={isProf}
+        autoStart={true} 
       />
       
       {/* Botón 'Ver bubble map' (de index.html) */}

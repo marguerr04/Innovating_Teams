@@ -1,20 +1,20 @@
 // Archivo: src/components/Timer.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-// 1. Importa la función 'beep' desde tu archivo de helpers
-// (Ajusta la ruta '..' según dónde guardes este Timer.jsx)
 import { beep } from '../utils/helpers.js'; 
 
 /**
  * Un componente de temporizador reutilizable.
  * @param {number} initialSeconds - El total de segundos para el temporizador.
  * @param {boolean} isProf - Si el usuario es profesor (para mostrar botones).
+ * @param {boolean} autoStart - Si el timer debe empezar automáticamente.
  */
-export default function Timer({ initialSeconds = 300, isProf = false }) {
+export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false }) {
   
-  // --- 2. Lógica del Timer (copiada de Phase3 en index.html) ---
+  // --- Lógica del Timer ---
   const [seconds, setSeconds] = useState(initialSeconds);
-  const [running, setRunning] = useState(false);
+  // CAMBIO: El estado 'running' se inicializa con la prop 'autoStart'
+  const [running, setRunning] = useState(autoStart);
   const tickRef = useRef(null);
   const lastBeepRef = useRef(null);
 
@@ -42,11 +42,14 @@ export default function Timer({ initialSeconds = 300, isProf = false }) {
     return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
   }, [running]); // Se ejecuta solo cuando 'running' cambia
 
-  // Función de reseteo (de index.html)
+  // Función de reseteo
   const reset = () => {
-    setRunning(false);
+    // CAMBIO: Al reiniciar, vuelve al estado 'autoStart'
+    setRunning(autoStart); 
     setSeconds(initialSeconds);
     lastBeepRef.current = null;
+    if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+    // Si autoStart es true, el useEffect de [running] lo reiniciará
   };
   // --- Fin Lógica del Timer ---
 
@@ -56,27 +59,31 @@ export default function Timer({ initialSeconds = 300, isProf = false }) {
 
   return (
     <div className="flex flex-col items-center">
-      {/* 3. Display del Timer (de index.html) */}
+      {/* Display del Timer */}
       <div className="text-6xl font-extrabold tracking-widest text-slate-900">
         {mm}:{ss}
       </div>
 
-      {/* 4. Controles del Profesor (de index.html) */}
+      {/* 4. Controles del Profesor (Actualizados) */}
       <div className="mt-5 flex gap-2">
         {isProf && (
           <>
-            <button 
-              className="btn bg-mint-500 text-white" 
-              onClick={() => setRunning(true)}
-            >
-              Iniciar
-            </button>
-            <button 
-              className="btn bg-slate-100" 
-              onClick={() => setRunning(false)}
-            >
-              Pausar
-            </button>
+            {/* CAMBIO: Muestra Iniciar o Pausar según el estado 'running' */}
+            {!running ? (
+              <button 
+                className="btn bg-mint-500 text-white" 
+                onClick={() => setRunning(true)}
+              >
+                Iniciar
+              </button>
+            ) : (
+              <button 
+                className="btn bg-slate-100" 
+                onClick={() => setRunning(false)}
+              >
+                Pausar
+              </button>
+            )}
             <button 
               className="btn bg-accent-500 text-white" 
               onClick={reset}
@@ -87,11 +94,7 @@ export default function Timer({ initialSeconds = 300, isProf = false }) {
         )}
       </div>
       
-      {!isProf && (
-        <div className="text-xs text-slate-500 mt-2">
-          El profesor controla el temporizador.
-        </div>
-      )}
+      
     </div>
   );
 }
