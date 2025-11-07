@@ -13,7 +13,7 @@ import Phase3 from '../features/Phase3';
 import Phase4 from '../features/Phase4';
 import Phase5 from '../features/Phase5';
 import Phase6 from '../features/Phase6';
-const Phase7 = () => <div>Fase 7 (en construcción)</div>;
+import Phase7 from '../features/Phase7';
 
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
