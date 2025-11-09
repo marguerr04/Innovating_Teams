@@ -6,7 +6,7 @@ import { load } from '../../../../utils/helpers.js';
 import LegoTimer from './components/LegoTimer';
 import MapModal from './components/MapModal';
 
-export default function Phase3({ role, onNext, onBack }) {
+export default function Phase3({ role, isProf, onNext, onBack }) {
   // Carga los datos de la Fase 2 para pasarlos al modal
   const p2 = load('it_phase2_store', null) || {};
   
@@ -25,7 +25,7 @@ export default function Phase3({ role, onNext, onBack }) {
       
       {/* Componente del Timer */}
       <LegoTimer 
-        role={role} 
+        isProf={isProf} 
         onNext={onNext} 
         onBack={onBack} 
         onShowMap={() => setShowMap(true)} // Pasa la función para abrir el modal

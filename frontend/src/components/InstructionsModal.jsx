@@ -73,10 +73,12 @@ const stages = [
           <p><strong>Objetivo:</strong> Entrenar la habilidad de presentar la idea de forma clara y concisa (pitch).</p>
           <p><strong>Dinámica:</strong> Preparar un pitch de <strong>90 segundos</strong>. El sistema muestra una guía con la estructura del pitch:</p>
           <ul class="list-disc list-inside space-y-1 mt-1">
-            <li>Equipo</li>
-            <li>Desafío</li>
-            <li>Empatía (a quién ayuda)</li>
-            <li>Idea creativa / solución</li>
+            <li>Equipo: Cuéntanos cómo se llama tu emprendimiento</li>
+            <li>Desafío y empatía: Expongan cuál es el desafío que están abordando y den a conocer a la
+persona que enfrenta el desafío, destacando sus características</li>
+            <li>Creatividad: Muéstranos la solución para el desafío utilizando la creación con los legos</li>
+            <li>Comunicación: Hagan el pitch de una manera atractiva, cierra invitando a apoyar tu
+emprendimiento</li>
           </ul>
           <p class="mt-2"><strong>Cronómetro de preparación:</strong> máximo 6 minutos.</p>
           <p><strong>Habilidad clave:</strong> Habilidad de comunicación. <span class="text-slate-500 text-xs">Importancia: permite contar el valor de la idea para que otros la entiendan y la evalúen.</span></p>
