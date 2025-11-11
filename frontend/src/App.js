@@ -7,6 +7,8 @@ import StudentApp from "./modules/student/pages/StudentApp";
 import AdminApp from "./modules/admin/AdminApp";
 import PreLogin from "./pages/PreLogin";
 import ProfessorApp from "./modules/profesor/ProfessorApp";
+import TestAnimacion from './pages/Tests';
+
 
 export default function App() {
   return (
@@ -21,6 +23,9 @@ export default function App() {
         <Route path="/estudiante/*" element={<StudentApp />} />
         <Route path="/admin/*" element={<AdminApp />} />
         <Route path="/profesor/*" element={<ProfessorApp />} />
+
+        <Route path="/test-animacion" element={<TestAnimacion />} />
+
       </Routes>
     </BrowserRouter>
   );

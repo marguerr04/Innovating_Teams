@@ -90,6 +90,9 @@ export default function Timer({
   const getTimerColor = () => {
     // Si colorMode es 'red', siempre mostramos en rojo
     if (colorMode === 'red') return 'text-rose-600 dark:text-rose-400';
+    
+    // Si colorMode es 'green', siempre mostramos en verde emerald
+    if (colorMode === 'green') return 'text-emerald-400';
 
     // Colores normales para otros casos
     if (seconds <= 60) return 'text-rose-600 dark:text-rose-400';

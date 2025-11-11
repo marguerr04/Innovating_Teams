@@ -18,6 +18,9 @@ import Phase5 from '../features/Phase5';
 import Phase6 from '../features/Phase6';
 import Phase7 from '../features/Phase7';
 
+import BouncingCircle from '../../../components/BouncingCircle';
+
+
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
   const [phase, setPhase] = useState(1);
