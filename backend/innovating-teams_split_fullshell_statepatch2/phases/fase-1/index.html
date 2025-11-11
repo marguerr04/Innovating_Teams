@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Innovating Teams — Fase 1</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Inter',system-ui;background:#0f1f35;color:#fff}
+  .card{background:#fff;color:#0b1f3a;border-radius:1.25rem;box-shadow:0 16px 44px rgba(0,0,0,.18)}
+  .btn-primary{background:#00B8A9;color:#fff;border-radius:1rem;padding:.7rem 1.2rem;font-weight:800}
+  .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50}
+  .backdrop.open{display:flex}
+
+  .chat-fab{position:fixed;right:20px;bottom:20px;background:#00B8A9;color:#fff;border:none;border-radius:999px;
+    width:58px;height:58px;display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.2);z-index:60;
+    font-size:28px;line-height:1;cursor:pointer}
+  .chat-fab:hover{filter:brightness(.95)}
+
+</style>
+</head>
+<body>
+  <main class="mx-auto max-w-6xl px-4 py-6">
+    <h1 class="text-3xl font-extrabold mb-6">Fase 1 · Votación de actividades</h1>
+    <div class="grid gap-6 md:grid-cols-[1.1fr_1fr]">
+      <section class="card p-5">
+        <h2 class="text-xl font-semibold mb-4">Votación de actividades</h2>
+        <div class="space-y-3" id="vote-list">
+          <!-- Radios generados por JS -->
+        </div>
+        <p class="mt-3 text-sm">Ganando: <b id="winner-name"></b></p>
+        <div class="mt-4 flex justify-end">
+          <button id="btn-start" class="btn-primary">Comenzar Actividad</button>
+        </div>
+      </section>
+      <section class="card p-5">
+        <h3 class="text-lg font-semibold mb-2">Actividad: <span id="current-title"></span></h3>
+        <p class="text-sm text-slate-600">Completa la actividad para continuar.</p>
+        <div class="mt-4 flex items-center gap-3">
+          <button id="btn-start-2" class="btn-primary">¡Comenzar Actividad!</button>
+          <button id="btn-instrucciones" class="btn-primary" style="background:#2e5e8c">Ver Instrucciones</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  
+  <button id="chat-fab" class="chat-fab" title="Chat">💬</button>
+
+
+
+  <!-- Modal -->
+  <div id="modal" class="backdrop" aria-modal="true" role="dialog" aria-label="Minijuego">
+    <div class="relative w-[min(1000px,95vw)] h-[min(86vh,800px)] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between border-b px-5 py-3">
+        <h3 id="modal-title" class="text-lg font-semibold text-slate-900">Minijuego</h3>
+        <button id="btn-close" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200">×</button>
+      </div>
+      <div class="relative flex-1 overflow-hidden">
+        <iframe id="game-frame" class="absolute inset-0 w-full h-full" src="about:blank" title="Juego"></iframe>
+        <div class="pointer-events-auto absolute bottom-4 right-4">
+          <button id="btn-finish" class="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-white shadow hover:bg-emerald-600">Terminar actividad</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const ACTIVIDADES = [
+  { key: 'sopa', title: 'Sopa de letras', src: 'games/sopa/index.html' },
+  { key: 'anagrama', title: 'Armar palabras con letras', src: 'games/anagrama/index.html' },
+  { key: 'rompehielos', title: 'Romper el hielo con el grupo', src: 'games/rompehielos/index.html' }
+];
+
+const votes = { sopa:0, anagrama:0, rompehielos:0 };
+let selected = 'sopa';
+let winner = 'sopa';
+
+const $voteList = document.getElementById('vote-list');
+const $winner = document.getElementById('winner-name');
+const $current = document.getElementById('current-title');
+const $btnStart = document.getElementById('btn-start');
+const $btnStart2 = document.getElementById('btn-start-2');
+const $btnInstr = document.getElementById('btn-instrucciones');
+const $fab = document.getElementById('chat-fab');
+const $modal = document.getElementById('modal');
+const $frame = document.getElementById('game-frame');
+const $title = document.getElementById('modal-title');
+const $btnClose = document.getElementById('btn-close');
+const $btnFinish = document.getElementById('btn-finish');
+
+function renderVotes(){
+  $voteList.innerHTML = '';
+  ACTIVIDADES.forEach(a => {
+    const li = document.createElement('button');
+    li.className = 'flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left ' + (winner===a.key ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50');
+    li.innerHTML = `
+      <span class="flex items-center gap-3">
+        <span class="h-3 w-3 rounded-full ${winner===a.key?'bg-emerald-500':'bg-gray-300'}"></span>
+        ${a.title}
+      </span>
+      <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium">${votes[a.key]} voto(s)</span>
+    `;
+    li.addEventListener('click', () => { votes[a.key]++; selected=a.key; computeWinner(); renderVotes(); updateRight(); });
+    $voteList.appendChild(li);
+  });
+  $winner.textContent = ACTIVIDADES.find(x=>x.key===winner).title;
+}
+
+function computeWinner(){
+  let max = -1; let cand = selected;
+  for(const k in votes){ if(votes[k]>max){ max=votes[k]; cand=k; } }
+  winner = cand;
+}
+
+function updateRight(){
+  $current.textContent = ACTIVIDADES.find(x=>x.key===winner).title;
+}
+
+function openModal(){
+  const act = ACTIVIDADES.find(x=>x.key===winner);
+  $title.textContent = act.title;
+  $frame.src = act.src;
+  $modal.classList.add('open');
+}
+
+function closeModal(){
+  $modal.classList.remove('open');
+  $frame.src = 'about:blank';
+}
+
+$btnStart.addEventListener('click', openModal);
+$btnStart2.addEventListener('click', openModal);
+$btnClose.addEventListener('click', closeModal);
+$btnFinish.addEventListener('click', closeModal);
+$modal.addEventListener('mousedown', (e)=>{ if(e.target=== $modal) closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+
+$btnInstr.addEventListener('click', ()=>{
+  $title.textContent = 'Instrucciones del juego';
+  $frame.src = 'extras/instrucciones/index.html';
+  $modal.classList.add('open');
+});
+$fab.addEventListener('click', ()=>{
+  $title.textContent = 'Chat de Innovating Teams';
+  $frame.src = 'extras/chatbot/index.html';
+  $modal.classList.add('open');
+});
+
+// Allow iframe to auto-close via postMessage
+window.addEventListener('message', (e)=>{ if(e.data==='game:completed') closeModal(); });
+
+computeWinner(); renderVotes(); updateRight();
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Innovating bot – Demo</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;background:#0f172a;color:#e5e7eb}
+    header{padding:16px 20px;background:#0b1220;border-bottom:1px solid #1f2937}
+    main{max-width:900px;margin:24px auto;padding:0 16px 80px}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:18px;margin-top:14px}
+    code{background:#0b1220;border:1px solid #1f2937;border-radius:6px;padding:2px 6px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;cursor:pointer}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  </style>
+</head>
+<body>
+  <header><strong>Innovating bot</strong> — Prueba de integración con Chatbase</header>
+  <main id="content">
+    <div class="card">
+      <p>Este sitio ya viene con el <strong>script de Chatbase</strong> que nos enviaste (Widget setup). No necesitas editar nada.</p>
+      <p>Puedes abrir/cerrar el chat con los botones o extraer el texto de la página para subirlo como fuente.</p>
+      <div class="row">
+        <div>
+          <button class="btn" onclick="openChat()">Abrir chat</button>
+          <button class="btn" onclick="closeChat()">Cerrar chat</button>
+        </div>
+        <div>
+          <button class="btn" onclick="exportVisibleText()">Exportar texto de la página</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Instrucciones base (resumen)</h3>
+      <p><strong>Etapa 1 (5 min):</strong> Colaboración – mini juego/rompehielos. Tokens por orden de término.</p>
+      <p><strong>Etapa 2 (8 min):</strong> Desafío y Empatía – elegir temática, caracterizar persona en Bubble Map. 1 token si terminan a tiempo.</p>
+      <p><strong>Etapa 3 (10 min):</strong> Creatividad – prototipo con LEGO y foto opcional. 1 token si terminan a tiempo.</p>
+      <p><strong>Etapa 4 (6 min):</strong> Comunicación – preparar pitch de 90s. 1 token si terminan a tiempo.</p>
+      <p><strong>Etapa 5 (variable):</strong> Evaluación cruzada con rúbrica (Equipo, Empatía, Creatividad, Comunicación). Tokens por participar y por ranking.</p>
+      <p><strong>Etapa 6 (5 min):</strong> Cierre – ranking + QR de satisfacción y redes UDD.</p>
+      <p><strong>Etapa 7 (5 min):</strong> Autoevaluación y redes de emprendimiento UDD por QR.</p>
+    </div>
+  </main>
+
+  <!-- === BEGIN: Chatbase widget snippet (exactly as you provided) === -->
+  <script>
+  (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="NDIGyY6LjlULvnmM9GEOX";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+  </script>
+  <!-- === END: Chatbase widget snippet === -->
+
+  <script>
+    // Helpers para controlar el widget cuando esté listo
+    function whenChatIsReady(cb){
+      const start = Date.now();
+      const timer = setInterval(()=>{
+        if (window.chatbase && typeof window.chatbase.openChatbot === 'function'){
+          clearInterval(timer); cb();
+        } else if (Date.now() - start > 10000){ // 10s timeout
+          clearInterval(timer);
+          console.warn('Chatbase no inicializó a tiempo.');
+        }
+      }, 250);
+    }
+
+    function openChat(){ whenChatIsReady(()=>window.chatbase.openChatbot()); }
+    function closeChat(){ whenChatIsReady(()=>window.chatbase.closeChatbot()); }
+
+    // Exportar el texto visible del contenedor #content a un archivo .txt
+    function exportVisibleText(){
+      const container = document.querySelector('#content');
+      const text = container ? container.innerText : document.body.innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'texto_pagina_para_entrenamiento.txt';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // (Opcional) Abrir automáticamente en la primera visita:
+    // whenChatIsReady(()=>window.chatbase.openChatbot());
+  </script>
+</body>
+</html>

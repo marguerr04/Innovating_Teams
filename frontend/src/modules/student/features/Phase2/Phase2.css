@@ -1,0 +1,24 @@
+.bubble-map {
+  position: relative;
+  min-height: 420px;
+  border-radius: 18px;
+  background: #f4f7fb;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #e6f4ff;
+  color: #0b1f3a;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  user-select: none;
+}
+
+.bubble.center {
+  background: #102a4b;
+  color: #fff;
+}
