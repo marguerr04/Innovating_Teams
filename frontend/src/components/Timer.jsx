@@ -1,6 +1,8 @@
 // Archivo: src/components/Timer.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+// 1. Importa la función 'beep' desde tu archivo de helpers
+// (Ajusta la ruta '..' según dónde guardes este Timer.jsx)
 import { beep } from '../utils/helpers.js'; 
 
 /**
@@ -8,12 +10,12 @@ import { beep } from '../utils/helpers.js';
  * @param {number} initialSeconds - El total de segundos para el temporizador.
  * @param {boolean} isProf - Si el usuario es profesor (para mostrar botones).
  * @param {boolean} autoStart - Si el timer debe empezar automáticamente.
+ * @param {function} onComplete - (NUEVO) Callback que se ejecuta cuando el timer llega a 0.
  */
-export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false }) {
+export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false, onComplete }) {
   
   // --- Lógica del Timer ---
   const [seconds, setSeconds] = useState(initialSeconds);
-  // CAMBIO: El estado 'running' se inicializa con la prop 'autoStart'
   const [running, setRunning] = useState(autoStart);
   const tickRef = useRef(null);
   const lastBeepRef = useRef(null);
@@ -34,22 +36,24 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
           if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
           setRunning(false); 
           lastBeepRef.current = null;
-          setTimeout(() => alert('⏱️ ¡Tiempo terminado!'));
+          
+          // --- CAMBIO ---
+          // Llama al callback onComplete si existe, en lugar de la alerta
+          if (onComplete) onComplete();
+          // setTimeout(() => alert('⏱️ ¡Tiempo terminado!')); // Eliminado
         }
         return next;
       });
     }, 1000);
     return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
-  }, [running]); // Se ejecuta solo cuando 'running' cambia
+  }, [running, onComplete]); // Añadido onComplete a las dependencias
 
   // Función de reseteo
   const reset = () => {
-    // CAMBIO: Al reiniciar, vuelve al estado 'autoStart'
-    setRunning(autoStart); 
+    setRunning(autoStart);
     setSeconds(initialSeconds);
     lastBeepRef.current = null;
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-    // Si autoStart es true, el useEffect de [running] lo reiniciará
   };
   // --- Fin Lógica del Timer ---
 
@@ -64,11 +68,10 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
         {mm}:{ss}
       </div>
 
-      {/* 4. Controles del Profesor (Actualizados) */}
+      {/* Controles del Profesor (Actualizados) */}
       <div className="mt-5 flex gap-2">
         {isProf && (
           <>
-            {/* CAMBIO: Muestra Iniciar o Pausar según el estado 'running' */}
             {!running ? (
               <button 
                 className="btn bg-mint-500 text-white" 
@@ -94,7 +97,7 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
         )}
       </div>
       
-      
+      {/* Texto de ayuda eliminado */}
     </div>
   );
 }

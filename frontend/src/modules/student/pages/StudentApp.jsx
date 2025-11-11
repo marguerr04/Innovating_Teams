@@ -1,13 +1,13 @@
 // Archivo: src/modules/student/pages/StudentApp.jsx
 
-// 1. IMPORTA useState Y el nuevo overlay
 import React, { useState } from 'react';
-
 import { useRole } from '../../../utils/helpers.js'; 
-import InstructionsModal from '../../../components/InstructionsModal';
+
+// 1. RE-IMPORTA EL MODAL DE INSTRUCCIONES
+import InstructionsModal from '../../../components/InstructionsModal'; 
 import InteractiveBackground from '../../../components/InteractiveBackground.jsx'; 
-import PhaseIntro from '../../../components/PhaseIntro.jsx'; 
-import TokensOverlay from '../../../components/TokensOverlay.jsx'; // <-- 1. AÑADE ESTO
+import PhaseIntro from '../../../components/PhaseIntro.jsx';
+import TokensOverlay from '../../../components/TokensOverlay.jsx'; 
 
 import Phase1 from "../features/Phase1";
 import Phase2 from "../features/Phase2";
@@ -20,35 +20,29 @@ import Phase7 from '../features/Phase7';
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
   const [phase, setPhase] = useState(1);
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
   
-  // 2. AÑADE ESTOS NUEVOS ESTADOS
+  // 2. RE-AGREGA EL ESTADO PARA EL MODAL
+  const [showInstructions, setShowInstructions] = useState(false);
+  
+  const [showIntro, setShowIntro] = useState(true);
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
 
-  // 3. CREA LA FUNCIÓN QUE MUESTRA EL OVERLAY
   const handlePhaseComplete = (phaseJustFinished) => {
-    // No mostramos tokens para Fase 6 o 7
     if (phaseJustFinished >= 6) {
       go(phaseJustFinished + 1);
       return;
     }
-    
     setPhaseToShowTokensFor(phaseJustFinished);
     setShowTokens(true);
-    // La intro se oculta
     setShowIntro(false);
   };
   
-  // 4. CREA LA FUNCIÓN QUE EL OVERLAY LLAMA AL CERRARSE
   const handleTokenContinue = () => {
     setShowTokens(false);
-    // Llama a 'go' para ir a la *siguiente* fase
     go(phaseToShowTokensFor + 1);
   };
 
-  // 'go' sigue igual: muestra la intro de la fase
   const go = (n) => {
     setPhase(n);
     setShowIntro(true); 
@@ -62,13 +56,24 @@ export default function StudentApp() {
     <div className="interactive-background-glow min-h-screen text-white"> 
       
       <InteractiveBackground />
+
+      {/* 3. RE-AGREGA EL BOTÓN DE INSTRUCCIONES */}
+      <button 
+        id="openModal"
+        className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
+        onClick={() => setShowInstructions(true)}
+      >
+        📘 Ver instrucciones
+      </button>
+
+      {/* 4. RE-AGREGA EL COMPONENTE MODAL */}
       <InstructionsModal 
         isOpen={showInstructions} 
         onClose={() => setShowInstructions(false)}
         initialPhase={phase} 
       />
       
-      {/* ... (Tu Navbar no cambia) ... */}
+      {/* ... (Navbar sin cambios) ... */}
       <div className="sticky top-0 z-20 backdrop-blur border-b border-white/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -95,19 +100,14 @@ export default function StudentApp() {
           </div>
       </div>
       
-      {/* 5. AÑADE EL OVERLAY DE TOKENS AQUÍ */}
-      {/* (Se renderiza "encima" de todo lo demás) */}
       <TokensOverlay 
         show={showTokens}
         phase={phaseToShowTokensFor}
         onContinue={handleTokenContinue}
       />
 
-      {/* Contenido de la Fase */}
+      {/* Contenido de la Fase (sin cambios) */}
       <div className="max-w-6xl mx-auto p-6 relative z-10">
-      
-        {/* 6. MODIFICA EL RENDERIZADO CONDICIONAL */}
-        {/* Ahora, solo muestra la intro O la fase si el overlay de tokens NO está visible */ }
         {!showTokens && ( 
           showIntro && phase <= 5 ? (
             <PhaseIntro 
@@ -116,7 +116,6 @@ export default function StudentApp() {
             />
           ) : (
             <>
-              {/* 7. ACTUALIZA TODAS LAS LLAMADAS 'onNext' */}
               {phase === 1 && <Phase1 role={role} isProf={isProf} onNext={() => handlePhaseComplete(1)} />}
               {phase === 2 && <Phase2 role={role} isProf={isProf} onNext={() => handlePhaseComplete(2)} />}
               {phase === 3 && <Phase3 role={role} isProf={isProf} onBack={() => go(2)} onNext={() => handlePhaseComplete(3)} />}
@@ -127,7 +126,6 @@ export default function StudentApp() {
             </>
           )
         )}
-        
       </div>
     </div>
   );
