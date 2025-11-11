@@ -24,7 +24,9 @@ export default function App() {
         <Route path="/admin/*" element={<AdminApp />} />
         <Route path="/profesor/*" element={<ProfessorApp />} />
 
-        <Route path="/test-animacion" element={<TestAnimacion />} />
+  {/* Rutas de prueba para animaciones */}
+  <Route path="/test-animacion" element={<TestAnimacion />} />
+  <Route path="/tests" element={<TestAnimacion />} />
 
       </Routes>
     </BrowserRouter>
