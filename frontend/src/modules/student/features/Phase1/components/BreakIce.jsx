@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-<<<<<<< HEAD
-=======
 import Timer from '../../../../../components/Timer';
->>>>>>> avanceAlejandro/rama_post_certamen_1
 
 const EQUIPO_ID_TEST = 1;
 const API_URL = `http://127.0.0.1:8000/api/equipos/${EQUIPO_ID_TEST}/estudiantes/`;
@@ -40,20 +37,14 @@ function BreakIce({ onComplete }) {
 
   return (
     <div className="p-6 bg-slate-50 rounded-lg shadow">
-<<<<<<< HEAD
-      <h3 className="text-2xl font-bold text-slate-800 mb-4">
-        👥 Integrantes del Grupo
-      </h3>
-=======
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold text-slate-800">
+        <h3 className="text-2xl font-bold text-slate-800 mb-0">
           👥 Integrantes del Grupo
         </h3>
         <div className="text-2xl font-mono font-bold text-emerald-600">
           <Timer initialSeconds={300} autoStart={false} isProf={false} />
         </div>
       </div>
->>>>>>> avanceAlejandro/rama_post_certamen_1
 
       {loading && (
         <p className="text-slate-600 italic">Cargando estudiantes...</p>
