@@ -28,8 +28,12 @@ const SopaLetrasGame = ({ onGameEnd }) => {
   const [selectionDir, setSelectionDir] = useState(null);
   const [foundLines, setFoundLines] = useState([]);
   const [teamName, setTeamName] = useState("Equipo 1 - Naranja");
-  const [seconds, setSeconds] = useState(0);
-  const [timerInterval, setTimerInterval] = useState(null);
+  // --- Nuevo Timer: Cuenta Regresiva ---
+  const TOTAL_SECONDS = 5 * 60; // 5 minutos (ajustable)
+  const [remaining, setRemaining] = useState(TOTAL_SECONDS);
+  const [running, setRunning] = useState(false);
+  const timerRef = useRef(null);
+  const lastTickSoundRef = useRef(null);
   const [liveLine, setLiveLine] = useState(null);
   
   const boardRef = useRef(null);
@@ -39,6 +43,9 @@ const SopaLetrasGame = ({ onGameEnd }) => {
   // Hooks de audio con protección de errores
   const playSuccess = useAudio(SOUNDS.games.success);
   const playClick = useAudio(SOUNDS.ui.click);
+  // Nuevo: hooks para temporizador (los archivos tick.mp3 y alarm.mp3 deben existir)
+  const playTick = useAudio(SOUNDS.ui.tick);      // pequeño "tic" cada segundo último minuto
+  const playAlarm = useAudio(SOUNDS.ui.alarm);    // alarma final
 
   // Funciones de audio seguras
   const safePlaySuccess = useCallback(() => {
@@ -61,29 +68,80 @@ const SopaLetrasGame = ({ onGameEnd }) => {
     }
   }, [playClick]);
 
-  // Timer simple como en el HTML original
+  // Iniciar cuenta regresiva
   const startTimer = useCallback(() => {
-    if (timerInterval) return;
-    const interval = setInterval(() => {
-      setSeconds(prev => prev + 1);
-    }, 1000);
-    setTimerInterval(interval);
-  }, [timerInterval]);
+    if (running) return;
+    setRunning(true);
+  }, [running]);
 
+  // Reiniciar timer
   const resetTimer = useCallback(() => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
+    setRunning(false);
+    setRemaining(TOTAL_SECONDS);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-    setSeconds(0);
-  }, [timerInterval]);
+  }, []);
+
+  // Color dinámico según tiempo restante
+  const getTimerColor = useCallback(() => {
+    if (remaining <= 30) return 'text-rose-500';
+    if (remaining <= 120) return 'text-amber-400'; // menos de 2 min amarillos
+    return 'text-emerald-400'; // >2 min verdes
+  }, [remaining]);
 
   // Formatear tiempo
   const formatTime = useCallback(() => {
-    const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const ss = String(seconds % 60).padStart(2, "0");
+    const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const ss = String(remaining % 60).padStart(2, '0');
     return `${mm}:${ss}`;
-  }, [seconds]);
+  }, [remaining]);
+
+  // Manejo del intervalo para cuenta regresiva
+  useEffect(() => {
+    if (!running) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+    if (!timerRef.current) {
+      timerRef.current = setInterval(() => {
+        setRemaining(prev => {
+          const next = prev - 1;
+          // Reproducción de sonido "tic" cada segundo del último minuto
+          if (next <= 60 && next > 0) {
+            if (lastTickSoundRef.current !== next) {
+              // Intento de reproducción (ignorar errores silenciosamente)
+              try { playTick(); } catch {}
+              lastTickSoundRef.current = next;
+            }
+          }
+          if (next <= 0) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+            setRunning(false);
+            // Al acabar el tiempo reproducir sonido final (alarma)
+            try { playAlarm(); } catch {}
+            setTimeout(() => {
+              alert('⏱️ Tiempo agotado');
+              onGameEnd?.();
+            }, 150);
+            return 0;
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [running, onGameEnd]);
 
   // Crear grid vacío
   const createEmptyGrid = useCallback(() => {
@@ -331,10 +389,12 @@ const SopaLetrasGame = ({ onGameEnd }) => {
       safePlaySuccess();
       
       if (foundWords.size + 1 === WORDS.length) {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          setTimerInterval(null);
+        // Detener cuenta regresiva al completar todas las palabras
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
         }
+        setRunning(false);
         setTimeout(() => {
           onGameEnd?.();
         }, 1500);
@@ -349,7 +409,7 @@ const SopaLetrasGame = ({ onGameEnd }) => {
     
     setSelectedCells([]);
     setSelectionDir(null);
-  }, [selectedCells, grid, foundWords, liveLine, clearSelection, createFinalLine, timerInterval, onGameEnd]);
+  }, [selectedCells, grid, foundWords, liveLine, clearSelection, createFinalLine, onGameEnd]);
 
   // Eventos de selección
   const startSelection = useCallback((e) => {
@@ -448,7 +508,7 @@ const SopaLetrasGame = ({ onGameEnd }) => {
           </div>
           <div className="text-right">
             <p className="text-[0.6rem] uppercase text-slate-200/40">tiempo</p>
-            <p className="text-3xl font-mono text-emerald-300">{formatTime()}</p>
+            <p className={`text-3xl font-mono transition ${getTimerColor()} ${remaining <= 30 ? 'animate-pulse' : ''}`}>{formatTime()}</p>
           </div>
         </div>
       </header>
@@ -542,13 +602,13 @@ const SopaLetrasGame = ({ onGameEnd }) => {
                 onClick={() => { safePlayClick(); resetGame(); }}
                 className="flex-1 bg-slate-950/40 rounded-2xl py-2"
               >
-                Reiniciar
+                Reiniciar tiempo
               </button>
               <button 
-                onClick={() => { safePlayClick(); resetGame(); }}
+                onClick={() => { safePlayClick(); resetGame(); startTimer(); }}
                 className="flex-1 bg-emerald-400/80 text-slate-950 rounded-2xl py-2 font-semibold"
               >
-                Nueva sopa
+                Iniciar
               </button>
             </div>
           </div>

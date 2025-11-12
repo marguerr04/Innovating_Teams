@@ -21,7 +21,7 @@ export default function App() {
   <Route path="/login" element={<Login />} />
   <Route path="/auth" element={<Login />} />
   {/* Flujos de login específicos */}
-  <Route path="/login/profesor" element={<Login redirectToAdmin />} />
+  <Route path="/login/profesor" element={<Login role="profesor" redirectTo="/profesor" />} />
   <Route path="/login/administrador" element={<AdminLogin />} />
         <Route path="/prelogin" element={<PreLogin />} />
 
