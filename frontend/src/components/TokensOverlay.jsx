@@ -2,15 +2,21 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-// --- Lógica de texto (de tokens-overlay.js) ---
-function textForPhase(n) {
-  if (n === 1) return "Felicidades, fueron el primer equipo en terminar. Han ganado 4 tokens.";
-  if (n >= 2 && n <= 4) return "Han ganado 1 token por completar la fase.";
-  if (n === 5) return "¡Fase 5 completa! Los tokens de feedback se sumarán en el podio."; // Texto adaptado
-  return "¡Fase completada!";
+// --- Lógica de Texto y Tokens (Modificada) ---
+function getRewardForPhase(n) {
+  if (n === 1) {
+    return { amount: 4, reason: "¡Fueron el primer equipo en terminar!" };
+  }
+  if (n >= 2 && n <= 4) {
+    return { amount: 1, reason: "¡Por completar la fase!" };
+  }
+  if (n === 5) {
+    return { amount: 0, reason: "¡Fase 5 completa! Los tokens de feedback se sumarán en el podio." };
+  }
+  return { amount: 0, reason: "¡Fase completada!" };
 }
 
-// --- Lógica de Confeti (de tokens-overlay.js) ---
+// --- Lógica de Confeti (Sin cambios) ---
 const COLORS = ["#ffffff", "#f7d778", "#f79ac0", "#96d6ff", "#8df0d2", "#b39cff"];
 const SHAPES = [
   { w: 8, h: 12, r: "2px" }, { w: 10, h: 10, r: "50%" }, { w: 12, h: 5, r: "2px" }
@@ -22,7 +28,7 @@ function gradientBg() {
 }
 function makeConfetti(side) {
   const el = document.createElement("div");
-  el.className = "tk-confetti"; // Usamos la clase CSS
+  el.className = "tk-confetti"; 
   const s = SHAPES[(Math.random() * SHAPES.length) | 0];
   el.style.setProperty("--w", s.w + "px");
   el.style.setProperty("--h", s.h + "px");
@@ -52,12 +58,12 @@ function makeConfetti(side) {
 
 
 export default function TokensOverlay({ show, phase, onContinue }) {
-  const [subtitle, setSubtitle] = useState("");
+  const [reward, setReward] = useState({ amount: 0, reason: "" });
+  
   const audioRef = useRef(null);
   const laneLeftRef = useRef(null);
   const laneRightRef = useRef(null);
 
-  // --- Función para lanzar confeti ---
   const launchConfettiLateral = useCallback(() => {
     const left = laneLeftRef.current;
     const right = laneRightRef.current;
@@ -74,9 +80,8 @@ export default function TokensOverlay({ show, phase, onContinue }) {
       left.innerHTML = "";
       right.innerHTML = "";
     }, 5000);
-  }, []); // Vacío, ya que 'makeConfetti' no depende de props o estado
+  }, []);
 
-  // --- Función para tocar sonido ---
   const playSound = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -86,16 +91,16 @@ export default function TokensOverlay({ show, phase, onContinue }) {
     } catch (e) {}
   }, []);
 
-  // --- Efecto principal: Se dispara cuando 'show' es true ---
   useEffect(() => {
     if (show) {
-      setSubtitle(textForPhase(phase));
-      playSound();
-      launchConfettiLateral();
+      setReward(getRewardForPhase(phase));
+      if (getRewardForPhase(phase).amount > 0) {
+        playSound();
+        launchConfettiLateral();
+      }
     }
   }, [show, phase, playSound, launchConfettiLateral]);
 
-  // --- Renderizado del JSX (de index.html) ---
   return (
     <div 
       className={`tk-overlay ${show ? 'tk-show' : ''}`} 
@@ -103,18 +108,32 @@ export default function TokensOverlay({ show, phase, onContinue }) {
     >
       <div className="tk-card">
         <h1 className="tk-title">¡Felicitaciones, equipo!</h1>
-        <p className="tk-subtitle">{subtitle}</p>
+        
+        {/* === IMAGEN (AHORA SIEMPRE VISIBLE) === */}
         <img 
-          src="/tokens.jpg" 
+          src="./tokens.png" 
           alt="Tokens" 
           className="tk-token-img" 
         />
+        
+        {/* === TEXTO DE RECOMPENSA (CONDICIONAL) === */}
+        {reward.amount > 0 && (
+          <div className="tk-reward-display">
+            <span className="tk-reward-plus">+</span>
+            <span className="tk-reward-amount">{reward.amount}</span>
+            <span className="tk-reward-label">TOKEN{reward.amount > 1 ? 'S' : ''}</span>
+          </div>
+        )}
+        
+        <p className="tk-subtitle">{reward.reason}</p>
+        {/* === FIN DEL BLOQUE === */}
+        
         <button 
           className="tk-btn" 
           onClick={onContinue}
         >
           Continuar
-        </button>
+        </button> 
 
         <audio 
           ref={audioRef} 

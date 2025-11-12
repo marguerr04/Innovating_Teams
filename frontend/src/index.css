@@ -421,3 +421,44 @@ monospace;
 }
 
 /* --- FIN: ESTILOS DEL OVERLAY DE TOKENS --- */
+
+
+/* --- INICIO: ESTILOS PARA EL CONTADOR DE TOKENS (ACTUALIZADO) --- */
+
+.tk-reward-display {
+  /* margin: 1.5rem auto 0.5rem; */ /* Eliminado para que la imagen y el texto estén más juntos */
+  margin: 0.5rem auto 0.5rem; /* Margen superior más pequeño */
+  line-height: 1;
+  color: var(--token-accent); /* Color cian de acento */
+  font-weight: 800;
+  text-shadow: 0 0 20px rgba(62, 224, 255, .5);
+}
+
+/* NUEVA CLASE PARA EL SIGNO + */
+.tk-reward-plus {
+  font-size: 4.5rem; /* 72px */
+  vertical-align: middle;
+  margin-right: 0.25rem;
+}
+
+.tk-reward-amount {
+  font-size: 6rem; /* 96px */
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.tk-reward-label {
+  font-size: 3rem; /* 48px */
+  color: var(--token-accent2); /* Color verde de acento */
+  vertical-align: middle;
+}
+
+/* TAMAÑO DE LA IMAGEN (AHORA ES MÁS GRANDE) */
+.tk-token-img {
+  width: min(240px, 60vw); /* Tamaño original de style.css */
+  display: block; 
+  margin: 1rem auto 0; /* Margen superior 1rem, inferior 0 */
+  border-radius: 8px;
+}
+
+/* --- FIN: ESTILOS PARA EL CONTADOR DE TOKENS --- */
