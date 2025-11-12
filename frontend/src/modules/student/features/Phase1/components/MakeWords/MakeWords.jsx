@@ -1,6 +1,10 @@
 // src/modules/student/features/Phase1/components/MakeWords.jsx
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+<<<<<<< HEAD
 import { useTimer } from '../WordSearch2/hooks/useTimer'; // Reutilizamos el hook del timer
+=======
+import Timer from '../../../../../../components/Timer';
+>>>>>>> avanceAlejandro/rama_post_certamen_1
 
 // --- DATOS DEL JUEGO (Mantenidos dentro del componente) --- t
 const WORDS = [
@@ -39,13 +43,24 @@ const useAudio = (src) => {
 
 // --- Componente Principal ---
 export default function MakeWords({ onComplete }) {
+<<<<<<< HEAD
   const { time, start: startTimer, stop: stopTimer } = useTimer();
+=======
+>>>>>>> avanceAlejandro/rama_post_certamen_1
   const [currentIndex, setCurrentIndex] = useState(0);
   const [solvedWords, setSolvedWords] = useState(new Set());
   const [answerEntries, setAnswerEntries] = useState([]); // [{ letter, sourceIndex }]
   const [usedIndices, setUsedIndices] = useState(Array(WORDS[0].length).fill(false));
   const [feedback, setFeedback] = useState({ msg: '', type: '' });
   
+<<<<<<< HEAD
+=======
+
+  // Timer cuenta regresiva
+  const PHASE_DURATION = 300;
+
+
+>>>>>>> avanceAlejandro/rama_post_certamen_1
   // Sonidos
   const playTap = useAudio("computer-mouse-click-352734.mp3");
   const playCorrect = useAudio("button_09-190435.mp3");
@@ -72,7 +87,10 @@ export default function MakeWords({ onComplete }) {
 
   // Handler para clic en una letra disponible
   const handleLetterClick = (letter, index) => {
+<<<<<<< HEAD
     startTimer();
+=======
+>>>>>>> avanceAlejandro/rama_post_certamen_1
     playTap();
     setUsedIndices(prev => prev.map((used, i) => i === index ? true : used));
     setAnswerEntries(prev => [...prev, { letter, sourceIndex: index }]);
@@ -128,10 +146,16 @@ export default function MakeWords({ onComplete }) {
   // Efecto que comprueba si el juego se ha completado
   useEffect(() => {
     if (solvedWords.size === WORDS.length) {
+<<<<<<< HEAD
       stopTimer();
       onComplete(); // Llama a la función onComplete del padre
     }
   }, [solvedWords, onComplete, stopTimer]);
+=======
+      onComplete(); // Llama a la función onComplete del padre
+    }
+  }, [solvedWords, onComplete]);
+>>>>>>> avanceAlejandro/rama_post_certamen_1
 
   const getFeedbackClass = () => {
     if (feedback.type === 'ok') return 'bg-emerald-400/10 text-emerald-100 border border-emerald-400/40';
@@ -143,6 +167,7 @@ export default function MakeWords({ onComplete }) {
     // Usamos la estructura y clases de Tailwind del HTML
     <div className="max-w-5xl mx-auto space-y-6">
       
+<<<<<<< HEAD
       {/* Header (se puede mover al modal si se prefiere) */}
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">Anagrama actual</h2>
@@ -150,6 +175,22 @@ export default function MakeWords({ onComplete }) {
         <div className="text-right">
           <p className="text-[0.6rem] uppercase text-slate-200/40">tiempo</p>
           <p className="text-3xl font-mono text-emerald-300">{time}</p>
+=======
+      {/* Header con Timer estilo Phase2 */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-extrabold">Anagrama actual</h2>
+          <span className="text-sm text-slate-200/50 ml-3">{currentIndex + 1} / {WORDS.length}</span>
+        </div>
+        <div className="card p-4">
+          <Timer 
+            initialSeconds={300}
+            isProf={false}
+            autoStart={true}
+            onComplete={onComplete}
+            colorMode="red"
+          />
+>>>>>>> avanceAlejandro/rama_post_certamen_1
         </div>
       </div>
 

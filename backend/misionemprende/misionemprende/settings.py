@@ -59,7 +59,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+<<<<<<< HEAD
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')  # debe estar antes del CommonMiddleware
+=======
+>>>>>>> avanceAlejandro/rama_post_certamen_1
 
 
 
@@ -163,6 +166,7 @@ Configuración para unirse a react
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+<<<<<<< HEAD
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -170,3 +174,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+=======
+]
+>>>>>>> avanceAlejandro/rama_post_certamen_1

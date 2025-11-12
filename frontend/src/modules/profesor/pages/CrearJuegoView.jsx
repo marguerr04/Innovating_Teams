@@ -5,11 +5,14 @@ import ListaEquiposCard from '../components/ListaEquiposCard';
 import MetadatosJuegoCard from '../components/MetadatosJuegoCard';
 import InformacionBasicaCard from '../components/InformacionBasicaCard';
 
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> avanceAlejandro/rama_post_certamen_1
 const CrearJuegoView = () => {
   const navigate = useNavigate();
   const { addJuego } = useProfesor();
@@ -24,7 +27,11 @@ const CrearJuegoView = () => {
     
     // Configuración CSV
     archivoCSV: null,
+<<<<<<< HEAD
     tieneEncabezado: true,
+=======
+    tieneEncabezado: false,
+>>>>>>> avanceAlejandro/rama_post_certamen_1
     modo: 'aleatoria',
     cantidadGrupos: 4,
     tamanoGrupo: '',
@@ -56,6 +63,7 @@ const CrearJuegoView = () => {
     }
   };
 
+<<<<<<< HEAD
   const crearRepartirGrupos = async () => {
   if (!formData.archivoCSV) {
     alert('Por favor, selecciona un archivo primero.');
@@ -91,6 +99,15 @@ const CrearJuegoView = () => {
   }
 };
 
+=======
+  const crearRepartirGrupos = () => {
+    // Funcionalidad futura - por ahora solo simular
+    setGruposCreados(true);
+    setTimeout(() => {
+      alert('Funcionalidad en desarrollo. Los grupos se crearán en una versión futura.');
+    }, 500);
+  };
+>>>>>>> avanceAlejandro/rama_post_certamen_1
 
   const reiniciarFormulario = () => {
     setFormData({

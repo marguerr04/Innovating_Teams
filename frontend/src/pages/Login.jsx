@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+<<<<<<< HEAD
 export default function Login() {
+=======
+export default function Login({ redirectToAdmin = false }) {
+>>>>>>> avanceAlejandro/rama_post_certamen_1
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,6 +16,19 @@ export default function Login() {
     setError("");
 
     try {
+<<<<<<< HEAD
+=======
+      // Modo profesor (dummy): acepta cualquier credencial y redirige a Admin
+      if (redirectToAdmin) {
+        if (!email || !password) throw new Error("Completa los campos");
+        localStorage.setItem("token", "dummy-prof-token");
+        localStorage.setItem("username", email.split("@")[0] || "profesor");
+        localStorage.setItem("role", "profesor");
+        navigate("/admin");
+        return;
+      }
+
+>>>>>>> avanceAlejandro/rama_post_certamen_1
       const res = await fetch("http://localhost:8000/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
