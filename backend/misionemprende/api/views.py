@@ -1,5 +1,4 @@
 from django.shortcuts import render
-<<<<<<< HEAD
 from django.utils import timezone
 from django.db import transaction
 from django.http import JsonResponse
@@ -25,19 +24,6 @@ from django.contrib.auth import authenticate, get_user_model
 import csv
 import io
 import random
-=======
-
-# Create your views here.
-# api/views.py
-from rest_framework import viewsets
-from .models import Estudiante, Curso, Usuario, PartidaUsuario
-from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer
-from django.contrib.auth import authenticate, get_user_model
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-
->>>>>>> avanceAlejandro/rama_post_certamen_1
 
 User = get_user_model()
 
@@ -105,7 +91,6 @@ def get_estudiantes_por_equipo(request, equipo_id):
         return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-<<<<<<< HEAD
 # Hay que cambiar en servics para no encasuplartoda logica
 @csrf_exempt
 def assign_groups(request):
@@ -243,5 +228,3 @@ def assign_groups(request):
         print("ERROR EN assign_groups:", str(e))
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
-=======
->>>>>>> avanceAlejandro/rama_post_certamen_1

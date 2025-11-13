@@ -105,11 +105,7 @@ export default function TokensOverlay({ show, phase, onContinue }) {
         <h1 className="tk-title">¡Felicitaciones, equipo!</h1>
         <p className="tk-subtitle">{subtitle}</p>
         <img 
-<<<<<<< HEAD
-          src="/tokens.jpg" 
-=======
           src="/assets/tokens-me.png" 
->>>>>>> avanceAlejandro/rama_post_certamen_1
           alt="Tokens" 
           className="tk-token-img" 
         />

@@ -4,18 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { beep } from '../utils/helpers.js'; 
 
 /**
-<<<<<<< HEAD
- * Un componente de temporizador reutilizable.
- * @param {number} initialSeconds - El total de segundos para el temporizador.
- * @param {boolean} isProf - Si el usuario es profesor (para mostrar botones).
- * @param {boolean} autoStart - Si el timer debe empezar automáticamente.
- */
-export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false }) {
-  
-  // --- Lógica del Timer ---
-  const [seconds, setSeconds] = useState(initialSeconds);
-  // CAMBIO: El estado 'running' se inicializa con la prop 'autoStart'
-=======
  * Un componente de temporizador reutilizable en cuenta regresiva.
  */
 export default function Timer({ 
@@ -28,21 +16,10 @@ export default function Timer({
   
   // --- Lógica del Timer (Cuenta Regresiva Corregida) ---
   const [seconds, setSeconds] = useState(initialSeconds);
->>>>>>> avanceAlejandro/rama_post_certamen_1
   const [running, setRunning] = useState(autoStart);
   const tickRef = useRef(null);
   const lastBeepRef = useRef(null);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    if (!running) {
-      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-      return;
-    }
-    tickRef.current = setInterval(() => {
-      setSeconds(s => {
-        const next = Math.max(0, s - 1);
-=======
   // Efecto para manejar el intervalo
   useEffect(() => {
     if (!running) {
@@ -58,18 +35,10 @@ export default function Timer({
         const next = s - 1; // Cuenta regresiva
         
         // Beep para los últimos 5 segundos
->>>>>>> avanceAlejandro/rama_post_certamen_1
         if (next > 0 && next <= 5 && lastBeepRef.current !== next) { 
           beep(); 
           lastBeepRef.current = next; 
         }
-<<<<<<< HEAD
-        if (next === 0) {
-          if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-          setRunning(false); 
-          lastBeepRef.current = null;
-          setTimeout(() => alert('⏱️ ¡Tiempo terminado!'));
-=======
         
         // Cuando llega a 0
         if (next <= 0) {
@@ -81,26 +50,10 @@ export default function Timer({
             onComplete();
           }, 100);
           return 0;
->>>>>>> avanceAlejandro/rama_post_certamen_1
         }
         return next;
       });
     }, 1000);
-<<<<<<< HEAD
-    return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
-  }, [running]); // Se ejecuta solo cuando 'running' cambia
-
-  // Función de reseteo
-  const reset = () => {
-    // CAMBIO: Al reiniciar, vuelve al estado 'autoStart'
-    setRunning(autoStart); 
-    setSeconds(initialSeconds);
-    lastBeepRef.current = null;
-    if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-    // Si autoStart es true, el useEffect de [running] lo reiniciará
-  };
-  // --- Fin Lógica del Timer ---
-=======
 
     return () => { 
       if (tickRef.current) { 
@@ -146,7 +99,6 @@ export default function Timer({
     if (seconds <= 120) return 'text-amber-500 dark:text-amber-400';
     return 'text-slate-900 dark:text-emerald-400';
   };
->>>>>>> avanceAlejandro/rama_post_certamen_1
 
   // Formato del tiempo
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -154,19 +106,6 @@ export default function Timer({
 
   return (
     <div className="flex flex-col items-center">
-<<<<<<< HEAD
-      {/* Display del Timer */}
-      <div className="text-6xl font-extrabold tracking-widest text-slate-900">
-        {mm}:{ss}
-      </div>
-
-      {/* 4. Controles del Profesor (Actualizados) */}
-      <div className="mt-5 flex gap-2">
-        {isProf && (
-          <>
-            {/* CAMBIO: Muestra Iniciar o Pausar según el estado 'running' */}
-            {!running ? (
-=======
       {/* Display del Timer con color dinámico */}
       <div className={`text-6xl font-extrabold tracking-widest ${getTimerColor()}`}>
         {mm}:{ss}
@@ -190,7 +129,6 @@ export default function Timer({
         {isProf && (
           <>
             {!running && seconds > 0 ? (
->>>>>>> avanceAlejandro/rama_post_certamen_1
               <button 
                 className="btn bg-mint-500 text-white" 
                 onClick={() => setRunning(true)}
@@ -198,14 +136,6 @@ export default function Timer({
                 Iniciar
               </button>
             ) : (
-<<<<<<< HEAD
-              <button 
-                className="btn bg-slate-100" 
-                onClick={() => setRunning(false)}
-              >
-                Pausar
-              </button>
-=======
               running && (
                 <button 
                   className="btn bg-slate-100" 
@@ -214,7 +144,6 @@ export default function Timer({
                   Pausar
                 </button>
               )
->>>>>>> avanceAlejandro/rama_post_certamen_1
             )}
             <button 
               className="btn bg-accent-500 text-white" 
@@ -225,11 +154,6 @@ export default function Timer({
           </>
         )}
       </div>
-<<<<<<< HEAD
-      
-      
-=======
->>>>>>> avanceAlejandro/rama_post_certamen_1
     </div>
   );
 }

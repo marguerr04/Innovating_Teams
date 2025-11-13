@@ -5,14 +5,6 @@ import ListaEquiposCard from '../components/ListaEquiposCard';
 import MetadatosJuegoCard from '../components/MetadatosJuegoCard';
 import InformacionBasicaCard from '../components/InformacionBasicaCard';
 
-<<<<<<< HEAD
-
-
-
-
-
-=======
->>>>>>> avanceAlejandro/rama_post_certamen_1
 const CrearJuegoView = () => {
   const navigate = useNavigate();
   const { addJuego } = useProfesor();
@@ -27,11 +19,7 @@ const CrearJuegoView = () => {
     
     // Configuración CSV
     archivoCSV: null,
-<<<<<<< HEAD
-    tieneEncabezado: true,
-=======
     tieneEncabezado: false,
->>>>>>> avanceAlejandro/rama_post_certamen_1
     modo: 'aleatoria',
     cantidadGrupos: 4,
     tamanoGrupo: '',
@@ -63,43 +51,6 @@ const CrearJuegoView = () => {
     }
   };
 
-<<<<<<< HEAD
-  const crearRepartirGrupos = async () => {
-  if (!formData.archivoCSV) {
-    alert('Por favor, selecciona un archivo primero.');
-    return;
-  }
-
-  // Prepara el FormData
-  const dataToSend = new FormData();
-  dataToSend.append('archivo_lista', formData.archivoCSV);
-  dataToSend.append('cantidad_grupos', formData.cantidadGrupos);
-  dataToSend.append('tiene_encabezado', formData.tieneEncabezado);
-  dataToSend.append('modo', formData.modo);
-
-  try {
-    const response = await fetch('http://localhost:8000/api/groups/assign', {
-      method: 'POST',
-      body: dataToSend,
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      console.log(' Grupos creados:', result);
-      alert(`Grupos creados exitosamente (${result.grupos.length} equipos)`);
-      setGruposCreados(result.grupos);
-    } else {
-      alert(` Error: ${result.error || 'Error desconocido'}`);
-      console.error('Detalles del error:', result);
-    }
-  } catch (error) {
-    console.error('Error al conectar con el servidor:', error);
-    alert(' Error al conectar con el backend. Revisa consola.');
-  }
-};
-
-=======
   const crearRepartirGrupos = () => {
     // Funcionalidad futura - por ahora solo simular
     setGruposCreados(true);
@@ -107,7 +58,6 @@ const CrearJuegoView = () => {
       alert('Funcionalidad en desarrollo. Los grupos se crearán en una versión futura.');
     }, 500);
   };
->>>>>>> avanceAlejandro/rama_post_certamen_1
 
   const reiniciarFormulario = () => {
     setFormData({
