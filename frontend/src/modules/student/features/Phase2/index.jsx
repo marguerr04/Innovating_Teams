@@ -91,6 +91,13 @@ export default function Phase2({ onNext, isProf }) {
         </div>
       </div>
 
+      {/* === 1. AÑADIR BLOQUE DE INSTRUCCIÓN === */}
+      <p className="text-lg text-white/80 mb-6 max-w-3xl">
+        Ahora, vamos a empatizar. Selecciona un área y un desafío para conocer a la persona que ayudarás.
+        Luego, <strong>agrega atributos</strong> (necesidades, dolores, etc.) para construir su mapa de empatía.
+      </p>
+      {/* === FIN DE LA INSTRUCCIÓN === */}
+
       <div className="grid md:grid-cols-3 gap-6">
         <AreaSelector
           area={state.area}

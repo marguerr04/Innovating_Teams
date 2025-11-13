@@ -116,6 +116,13 @@ function Phase1({ role, onNext, isProf }) {
         </div>
       </div>
 
+      {/* === 1. AÑADIR BLOQUE DE INSTRUCCIÓN === */}
+      <p className="text-lg text-white/80 mb-6 max-w-3xl">
+        ¡Comencemos! La primera habilidad a trabajar es el <strong>Trabajo en Equipo</strong>. 
+        Para romper el hielo, vota por la actividad que prefieras que realice todo el grupo.
+      </p>
+      {/* === FIN DE LA INSTRUCCIÓN === */}
+
       <div className="grid md:grid-cols-2 gap-6 items-start">
         <div className="card p-6">
           <b>Votación de actividades</b>

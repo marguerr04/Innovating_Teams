@@ -1,3 +1,4 @@
+// src/modules/student/features/Phase2/components/EmpathyEditor.jsx
 import React, { useState } from "react";
 
 export default function EmpathyEditor({ persona, bubbles, categories, onAdd, onRemove, onViewMap, onConfirm }) {
@@ -15,27 +16,31 @@ export default function EmpathyEditor({ persona, bubbles, categories, onAdd, onR
 
   return (
     <div>
-      <div className="flex items-end gap-2">
+      {/* === INICIO DEL CAMBIO: <input> A <textarea> === */}
+      <div className="flex items-start gap-2"> {/* items-start para alinear con el textarea */}
         <div className="flex-1">
           <label className="block text-sm font-medium">Nuevo atributo</label>
-          <input
+          <textarea
             value={txt}
             onChange={e => setTxt(e.target.value)}
             placeholder="Ej: No confía en pagos online"
-            className="w-full rounded-xl border border-slate-300 px-3 py-2"
+            className="w-full rounded-xl border border-slate-300 px-3 py-2 h-20 resize-none" // <-- h-20 para más altura
           />
         </div>
+      {/* === FIN DEL CAMBIO === */}
+        
         <div>
           <label className="block text-sm font-medium">Categoría</label>
           <select
             value={cat}
             onChange={e => setCat(e.target.value)}
-            className="rounded-xl border border-slate-300 px-3 py-2"
+            className="rounded-xl border border-slate-300 px-3 py-2" // py-2 para alinear
           >
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
-        <button onClick={add} className="btn bg-mint-500 text-white">Añadir</button>
+        {/* py-2 para alinear con el select */}
+        <button onClick={add} className="btn bg-mint-500 text-white py-2 self-end">Añadir</button>
       </div>
 
       <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">

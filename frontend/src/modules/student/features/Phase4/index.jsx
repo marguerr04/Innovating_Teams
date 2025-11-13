@@ -1,4 +1,8 @@
+// src/modules/student/features/Phase4/index.jsx
+
+// 1. IMPORTA 'useEffect' JUNTO CON 'useState'
 import React, { useState, useEffect } from 'react';
+// 2. IMPORTA 'load' Y 'save'
 import { load, save } from '../../../../utils/helpers.js';
 import Timer from '../../../../components/Timer.jsx';
 import RouletteModal from './components/RouletteModal';
@@ -6,7 +10,16 @@ import RouletteModal from './components/RouletteModal';
 const PHASE_4_DURATION = 360; // 6 minutos
 
 export default function Phase4({ role, isProf, onNext, onBack }) {
-  // ... (La lógica de estado 'members', 'selected', 'remaining', 'mode', etc. no cambia)
+  
+  const p2 = load('it_phase2_store', null) || {};
+
+  // 3. ESTADO PARA EL TEXTAREA (con persistencia en localStorage)
+  const [pitchText, setPitchText] = useState(() => load('it_pitch_text', ''));
+  useEffect(() => {
+    save('it_pitch_text', pitchText);
+  }, [pitchText]);
+
+  // --- Estados (sin cambios) ---
   const [members, setMembers] = useState(() => load('it_members', ['Ana', 'Bruno', 'Carla', 'Diego']));
   const [selected, setSelected] = useState(() => load('it_selected', []));
   
@@ -16,12 +29,26 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
   }, [members, selected]);
   
   const remaining = members.filter(m => !selected.includes(m));
-  const [mode, setMode] = useState('ruleta');
-  const [showRoulette, setShowRoulette] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  // ... (Las funciones 'handleAddMember' y 'handleSelectWinner' no cambian)
-  const handleAddMember = (e) => { /* ... */ };
-  const handleSelectWinner = (name) => { /* ... */ };
+  // --- Lógica de Handlers (sin cambios) ---
+  const handleAddMember = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      const name = e.target.value.trim();
+      if (!members.includes(name)) {
+        setMembers(prev => [...prev, name]);
+      }
+      e.target.value = '';
+    }
+  };
+  
+  const handleSelectWinner = (name) => {
+    if (name && !selected.includes(name)) {
+      setSelected(prev => [...prev, name]);
+    }
+    setShowModal(false); 
+  };
+  // --- Fin de la lógica ---
 
   return (
     <>
@@ -31,23 +58,43 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-3xl font-extrabold mb-1">Fase 4 · Pitch del equipo</h1>
-            <p className="opacity-80">El profesor elige o sortea quién presenta.</p>
           </div>
           <div className="card p-4">
             <Timer 
               initialSeconds={PHASE_4_DURATION} 
-              isProf={isProf}
-              autoStart={true} 
+              isProf={isProf} 
+              autoStart={true}
             />
           </div>
         </div>
         
+        {/* Bloque de Instrucción (sin cambios) */}
+        <p className="text-lg text-white/80 mb-6 max-w-3xl">
+          ¡Es hora de comunicar su idea! Preparen un pitch de 90 segundos.
+          Expliquen la solución que prototiparon para <strong>{p2?.persona?.name || 'la persona'}</strong>, 
+          basándose en lo que aprendieron en el mapa de empatía.
+        </p>
+        
+        {/* === 4. NUEVO BLOQUE DE TEXTAREA === */}
+        <div className="card p-6 mb-6">
+          <h2 className="text-xl font-bold mb-3 text-slate-800">Borrador del Pitch</h2>
+          <p className="text-slate-600 text-sm mb-3">
+            Usen este espacio para escribir y ordenar las ideas de su pitch. (Se guarda automáticamente).
+          </p>
+          <textarea
+            className="w-full h-40 rounded-xl border border-slate-200 p-3 bg-white text-slate-900 focus:ring-2 focus:ring-mint-500"
+            value={pitchText}
+            onChange={(e) => setPitchText(e.target.value)}
+            placeholder="Estructura sugerida: 1. Problema (Ej: Humberto...), 2. Solución (Nuestro prototipo...), 3. Valor (Ayuda a...), 4. Próximos pasos..."
+          />
+        </div>
+        {/* === FIN DEL BLOQUE TEXTAREA === */}
+
         <div className="grid md:grid-cols-2 gap-6">
           
           {/* Card 1: Miembros (sin cambios) */}
           <div className="card p-6">
             <b>Miembros del grupo</b>
-            {/* ... (JSX de miembros y input de 'isProf') ... */}
             <div className="mt-3 flex flex-wrap gap-2">
               {members.map(m => (
                 <span 
@@ -75,35 +122,19 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
             )}
           </div>
           
-          {/* Card 2: Seleccionar */}
+          {/* Card 2: Seleccionar (sin cambios) */}
           <div className="card p-6">
             <b>Seleccionar aleatoriamente</b>
-            {/* ... (Botones de modo) ... */}
-            <div className="mt-3 flex gap-2">
-              {['ruleta', 'palito', 'vasos'].map(k => (
-                <button 
-                  key={k} 
-                  className={`btn ${mode === k ? 'bg-mint-500 text-white' : 'bg-slate-100'}`} 
-                  onClick={() => setMode(k)}
-                >
-                  {k === 'ruleta' ? 'Ruleta' : k === 'palito' ? 'Palito más corto' : 'Juego de vasos'}
-                </button>
-              ))}
+            <div className="mt-4 text-sm text-slate-600">
+              Usa la ruleta para elegir quién presenta. No se repiten presentadores.
             </div>
-            
-            <div className="mt-4 text-sm text-slate-600">Método visual cambia, pero la selección es justa. No se repiten presentadores.</div>
-            
-            {/* --- 1. BLOQUE 'isProf' ELIMINADO --- */}
-            {/* Ahora el botón se muestra para todos los roles */}
             <button 
               className="mt-4 btn bg-accent-500 text-white" 
-              onClick={() => setShowRoulette(true)}
+              onClick={() => setShowModal(true)}
               disabled={remaining.length === 0}
             >
-              {remaining.length === 0 ? 'Todos han presentado' : 'Elegir al azar'}
+              {remaining.length === 0 ? 'Todos han presentado' : 'Girar la Ruleta'}
             </button>
-            
-            {/* (Botones de navegación de fase) */}
             <div className="mt-6 flex gap-2">
               <button className="btn bg-slate-100" onClick={onBack}>← Volver</button>
               <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 5</button>
@@ -112,10 +143,10 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
         </div>
       </div>
       
-      {/* Modal de la Ruleta (sin cambios) */}
+      {/* Modal de Ruleta (sin cambios) */}
       <RouletteModal
-        isOpen={showRoulette}
-        onClose={() => setShowRoulette(false)}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
         names={remaining}
         onSpinEnd={handleSelectWinner}
       />

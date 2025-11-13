@@ -1,18 +1,18 @@
 // Archivo: src/components/Timer.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+// 1. Importa la función 'beep' desde tu archivo de helpers
+// (Ajusta la ruta '..' según dónde guardes este Timer.jsx)
 import { beep } from '../utils/helpers.js'; 
 
 /**
- * Un componente de temporizador reutilizable en cuenta regresiva.
+ * Un componente de temporizador reutilizable.
+ * @param {number} initialSeconds - El total de segundos para el temporizador.
+ * @param {boolean} isProf - Si el usuario es profesor (para mostrar botones).
+ * @param {boolean} autoStart - Si el timer debe empezar automáticamente.
+ * @param {function} onComplete - (NUEVO) Callback que se ejecuta cuando el timer llega a 0.
  */
-export default function Timer({ 
-  initialSeconds = 300, 
-  isProf = false, 
-  autoStart = false,
-  onComplete = () => {},
-  colorMode = 'default' // Puede ser 'default' o 'red'
-}) {
+export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false, onComplete }) {
   
   // --- Lógica del Timer (Cuenta Regresiva Corregida) ---
   const [seconds, setSeconds] = useState(initialSeconds);
@@ -45,60 +45,26 @@ export default function Timer({
           clearInterval(tickRef.current);
           setRunning(false);
           lastBeepRef.current = null;
-          setTimeout(() => {
-            alert('⏱️ ¡Tiempo terminado!');
-            onComplete();
-          }, 100);
-          return 0;
+          
+          // --- CAMBIO ---
+          // Llama al callback onComplete si existe, en lugar de la alerta
+          if (onComplete) onComplete();
+          // setTimeout(() => alert('⏱️ ¡Tiempo terminado!')); // Eliminado
         }
         return next;
       });
     }, 1000);
-
-    return () => { 
-      if (tickRef.current) { 
-        clearInterval(tickRef.current); 
-        tickRef.current = null; 
-      } 
-    };
-  }, [running, onComplete]);
-
-  // Efecto para auto-start
-  useEffect(() => {
-    if (autoStart && !running && seconds === initialSeconds) {
-      setRunning(true);
-    }
-  }, [autoStart, running, seconds, initialSeconds]);
+    return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
+  }, [running, onComplete]); // Añadido onComplete a las dependencias
 
   // Función de reseteo
   const reset = () => {
-    setRunning(false);
+    setRunning(autoStart);
     setSeconds(initialSeconds);
     lastBeepRef.current = null;
-    if (tickRef.current) { 
-      clearInterval(tickRef.current); 
-      tickRef.current = null; 
-    }
-    
-    // Si autoStart es true, iniciar después del reset
-    if (autoStart) {
-      setTimeout(() => setRunning(true), 100);
-    }
+    if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
   };
-
-  // --- Estilos dinámicos según tiempo restante ---
-  const getTimerColor = () => {
-    // Si colorMode es 'red', siempre mostramos en rojo
-    if (colorMode === 'red') return 'text-rose-600 dark:text-rose-400';
-    
-    // Si colorMode es 'green', siempre mostramos en verde emerald
-    if (colorMode === 'green') return 'text-emerald-400';
-
-    // Colores normales para otros casos
-    if (seconds <= 60) return 'text-rose-600 dark:text-rose-400';
-    if (seconds <= 120) return 'text-amber-500 dark:text-amber-400';
-    return 'text-slate-900 dark:text-emerald-400';
-  };
+  // --- Fin Lógica del Timer ---
 
   // Formato del tiempo
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -111,24 +77,11 @@ export default function Timer({
         {mm}:{ss}
       </div>
 
-      {/* Indicador visual para últimos segundos */}
-      {seconds <= 60 && seconds > 0 && (
-        <div className="text-xs text-rose-500 dark:text-rose-400 font-semibold mt-1">
-          ¡Último minuto!
-        </div>
-      )}
-
-      {seconds === 0 && (
-        <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-1">
-          ¡Tiempo completado!
-        </div>
-      )}
-
-      {/* Controles del Profesor */}
+      {/* Controles del Profesor (Actualizados) */}
       <div className="mt-5 flex gap-2">
         {isProf && (
           <>
-            {!running && seconds > 0 ? (
+            {!running ? (
               <button 
                 className="btn bg-mint-500 text-white" 
                 onClick={() => setRunning(true)}
@@ -154,6 +107,8 @@ export default function Timer({
           </>
         )}
       </div>
+      
+      {/* Texto de ayuda eliminado */}
     </div>
   );
 }

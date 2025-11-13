@@ -1,22 +1,26 @@
 // src/modules/student/features/Phase5/index.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-
-// 1. IMPORTA tus helpers (load, save)
-// (Ruta: Phase5 -> features -> student -> modules -> src -> utils)
 import { load, save } from '../../../../utils/helpers.js';
-
-// 2. IMPORTA el Timer global
-// (Ruta: Phase5 -> features -> student -> modules -> src -> components)
 import Timer from '../../../../components/Timer.jsx';
-
-// 3. IMPORTA el SkillRater local
 import SkillRater from './components/SkillRater.jsx';
 
-// 4. DEFINE LA DURACIÓN DE LA FASE (5 minutos)
-const PHASE_5_DURATION = 300; 
+// --- Constantes de la Fase 5 ---
+const PITCH_DURATION = 90; // 90 segundos para presentar
+const EVAL_DURATION = 120; // 2 minutos para evaluar
 
-// --- Constantes de Phase 5 (de index.html) ---
+// (Asumimos 4 equipos. Esto debe venir del profesor en el futuro)
+const TEAMS = [
+  { id: 1, name: "Equipo 1" },
+  { id: 2, name: "Equipo 2" },
+  { id: 3, name: "Equipo 3" },
+  { id: 4, name: "Equipo 4" },
+];
+
+// (Asumimos que el usuario actual es el Equipo 1. Esto también debe ser dinámico)
+const MY_TEAM_ID = 1;
+
+// Rúbrica de Habilidades
 const skills = [
   { key: "equipo", label: "Equipo", desc: "Evalúa si trabajaron coordinados, con participación y colaboración." },
   { key: "empatia", label: "Empatía", desc: "Evalúa si entendieron bien a la persona del desafío y su contexto." },
@@ -26,104 +30,170 @@ const skills = [
 const emptyEval = { equipo: null, empatia: null, creatividad: null, solucion: null, comment: "" };
 // --- Fin Constantes ---
 
+
 export default function Phase5({ role, isProf, onNext, onBack }) {
   
-  // --- Lógica de estado (de index.html) ---
-  const [currentTeam, setCurrentTeam] = useState(1);
-  const [allScores, setAllScores] = useState(() => {
-    const saved = load("it_scores_v2_multi", null); //
-    return saved || { 1: { ...emptyEval }, 2: { ...emptyEval }, 3: { ...emptyEval }, 4: { ...emptyEval } };
-  });
+  // --- Estados de la Máquina de Flujo ---
+  const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
+  const [view, setView] = useState('presenting'); 
   
+  const [allScores, setAllScores] = useState(() => {
+    return load("it_scores_v2_multi", null) || { 1: { ...emptyEval }, 2: { ...emptyEval }, 3: { ...emptyEval }, 4: { ...emptyEval } };
+  });
   useEffect(() => save("it_scores_v2_multi", allScores), [allScores]);
   
   const soundRef = useRef(null);
-  const active = allScores[currentTeam]; // El objeto de score para el equipo actual
+  
+  // --- Handlers del Flujo Automático ---
 
-  // Función setVal (de index.html)
-  function setVal(field, value) {
+  const handlePitchComplete = () => {
+    setView('evaluating'); 
+  };
+
+  const handleEvaluationComplete = () => {
+    if (currentTeamIndex < TEAMS.length - 1) {
+      setCurrentTeamIndex(prevIndex => prevIndex + 1); 
+      setView('presenting'); 
+    } else {
+      onNext(); 
+    }
+  };
+
+  // --- Lógica de la Rúbrica ---
+  function setVal(field, value, teamId) {
     setAllScores((prev) => {
       const copy = { ...prev };
-      copy[currentTeam] = { ...copy[currentTeam], [field]: value };
+      copy[teamId] = { ...copy[teamId], [field]: value };
       return copy;
     });
-    // Toca el sonido (de index.html)
     if (soundRef.current) {
       soundRef.current.currentTime = 0;
       soundRef.current.play().catch(() => {});
     }
   }
 
-  return (
-    // Contenedor principal (de index.html)
-    <div className="w-full flex flex-col items-center">
-      
-      {/* --- Selector de Equipo (de index.html) --- */}
-      <div className="flex gap-3 mb-5 mt-1">
-        <span className="text-white/80 text-sm self-center">Evaluando equipo:</span>
-        {[1, 2, 3, 4].map((n) => (
-          <button
-            key={n}
-            onClick={() => setCurrentTeam(n)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${
-              n === currentTeam ? "bg-emerald-400 text-white shadow" : "bg-white/15 text-white hover:bg-white/25"
-            }`}
+  // --- Renderizado Dinámico ---
+  
+  const currentTeam = TEAMS[currentTeamIndex];
+  const isMyTeamPresenting = currentTeam.id === MY_TEAM_ID;
+
+  // --- VISTA DE PRESENTACIÓN ---
+  if (view === 'presenting') {
+    return (
+      <div className="max-w-3xl mx-auto card p-8 text-center">
+        <h2 className="text-3xl font-bold mb-2">Presentando (Turno {currentTeamIndex + 1}/{TEAMS.length}):</h2>
+        <p className="text-5xl font-extrabold text-mint-500 mb-6">{currentTeam.name}</p>
+        
+        <Timer
+          key={`pitch-${currentTeam.id}`} 
+          initialSeconds={PITCH_DURATION}
+          isProf={isProf}
+          autoStart={true}
+          onComplete={handlePitchComplete} 
+        />
+        
+        {/* === 1. BOTÓN PARA SALTAR (SOLO PROFESOR) === */}
+        {isProf && (
+          <button 
+            className="btn bg-orange-500 text-white mt-4 text-sm"
+            onClick={handlePitchComplete}
           >
-            Equipo {n}
+            (Test) Saltar Presentación
           </button>
-        ))}
+        )}
+        {/* === FIN DEL BOTÓN === */}
+        
+        {isMyTeamPresenting ? (
+          <p className="text-slate-600 mt-4 font-semibold">¡Es su turno de presentar! Tienen 90 segundos.</p>
+        ) : (
+          <p className="text-slate-600 mt-4">Escuchen atentamente. Después de los 90 segundos, podrán evaluar a este equipo.</p>
+        )}
+        
+        {currentTeamIndex === 0 && (
+          <button className="btn bg-slate-100 mt-6" onClick={onBack}>
+            ← Volver a Fase 4 (Preparación)
+          </button>
+        )}
       </div>
+    );
+  }
 
-      {/* --- Card Principal (de index.html) --- */}
-      <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-4xl">
-        <h2 className="text-3xl font-bold text-slate-900 mb-6">Fase 5 · Evaluación a otros grupos</h2>
+  // --- VISTA DE EVALUACIÓN ---
+  if (view === 'evaluating') {
+    const activeScores = allScores[currentTeam.id] || emptyEval;
 
-        {/* --- Componente Timer --- */}
-        <div className="mb-6 border-b border-slate-200 pb-6">
-          <Timer 
-            initialSeconds={PHASE_5_DURATION} 
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl p-8">
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">
+            Evaluando a: {currentTeam.name}
+          </h2>
+          
+          <Timer
+            key={`eval-${currentTeam.id}`}
+            initialSeconds={EVAL_DURATION}
             isProf={isProf}
-            autoStart={true} 
+            autoStart={true}
+            onComplete={handleEvaluationComplete} 
           />
+
+          {/* === 2. BOTÓN PARA SALTAR EVALUACIÓN (SOLO PROFESOR) === */}
+          {isProf && (
+            <button 
+              className="btn bg-orange-500 text-white mt-4 text-sm"
+              onClick={handleEvaluationComplete}
+            >
+              (Test) Saltar Evaluación
+            </button>
+          )}
+          {/* === FIN DEL BOTÓN === */}
+
+          {isMyTeamPresenting ? (
+            <div className="text-center p-8 bg-slate-100 rounded-lg mt-6">
+              <p className="font-semibold text-slate-700">¡Buen trabajo en su pitch!</p>
+              <p className="text-slate-600">Su equipo está siendo evaluado por los demás. Esperen a la siguiente ronda.</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-slate-600 my-6 text-center">
+                Tienen 2 minutos para otorgar un puntaje de 1 a 10 para cada habilidad.
+              </p>
+              
+              <div className="space-y-5">
+                {skills.map((skill) => (
+                  <SkillRater
+                    key={skill.key}
+                    skill={skill}
+                    value={activeScores[skill.key]}
+                    onRate={(key, val) => setVal(key, val, currentTeam.id)}
+                  />
+                ))}
+                
+                <div>
+                  <div className="font-bold mb-2 text-slate-900">Comentarios para {currentTeam.name}</div>
+                  <textarea
+                    className="w-full rounded-xl border border-slate-200 p-3 min-h-[90px] bg-white text-slate-900"
+                    value={activeScores.comment}
+                    onChange={(e) => setVal("comment", e.target.value, currentTeam.id)}
+                    placeholder="Comentarios constructivos..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-8">
+                <button 
+                  className="btn bg-mint-500 text-white px-6 py-2 rounded-xl font-semibold" 
+                  onClick={handleEvaluationComplete}
+                >
+                  Guardar y Siguiente Equipo
+                </button>
+              </div>
+            </>
+          )}
         </div>
         
-        <div className="space-y-5">
-          {/* --- Mapeo de Componentes SkillRater --- */}
-          {skills.map((skill) => (
-            <SkillRater
-              key={skill.key}
-              skill={skill}
-              value={active[skill.key]} // Pasa el score actual
-              onRate={setVal} // Pasa la función para actualizar
-            />
-          ))}
-
-          {/* --- Comentarios (de index.html) --- */}
-          <div>
-            <div className="font-bold mb-2 text-slate-900">Comentarios para equipo {currentTeam}</div>
-            <textarea
-              className="w-full rounded-xl border border-slate-200 p-3 min-h-[90px] bg-white text-slate-900"
-              value={active.comment}
-              onChange={(e) => setVal("comment", e.target.value)}
-              placeholder="Comentarios constructivos..."
-            ></textarea>
-          </div>
-        </div>
-
-        {/* --- Navegación (de index.html) --- */}
-        <div className="flex justify-between mt-8">
-          <button className="bg-slate-100 text-slate-700 px-6 py-2 rounded-xl font-medium hover:bg-slate-200" onClick={onBack}>
-            ← Volver
-          </button>
-          <button className="bg-orange-500 text-white px-6 py-2 rounded-xl font-semibold hover:bg-orange-600" onClick={onNext}>
-            Continuar a Fase 6 →
-          </button>
-        </div>
+        <audio ref={soundRef} src="/MA_BBRealSound_Push_Button_1_MP3.mp3" preload="auto" className="hidden"></audio>
       </div>
-      
-      {/* --- Elemento de Audio --- */}
-      {/* (Asegúrate de poner 'MA_BBRealSound_Push_Button_1_MP3.mp3' en tu carpeta /public) */}
-      <audio ref={soundRef} src="/MA_BBRealSound_Push_Button_1_MP3.mp3" preload="auto" className="hidden"></audio>
-    </div>
-  );
+    );
+  }
 }
