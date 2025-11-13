@@ -1,13 +1,423 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* --- 1. TAILWIND DIRECTIVES --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- 2. VARIABLES GLOBALES (de styles.css) --- */
+:root {
+  /* Reset */
+  --card: #0f1f36;
+  --card2: #0c1a2e;
+  --text: #dbeaff;
+  --muted: #9bb4d6;
+
+  /* Instrucciones */
+  --udd-bg: #f7f6f2;
+  --udd-blue: #005a8d;
+  --udd-blue-soft: #e6f0f7;
+  --udd-accent: #fbb03b;
+
+  /* Fondo Interactivo */
+  --c-bg: #11182A;
+  --c1: #FDC328; /* Amarillo */
+  --c2: #0A8177; /* Teal */
+  --c3: #E24872; /* Rosa */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* --- 3. FONDO INTERACTIVO (de styles.css) --- */
+.interactive-background-glow {
+  background-color: var(--c-bg);
+  background-image: radial-gradient(1000px 700px at 50% 50%, rgba(253, 195, 40, 0.18), transparent 60%);
+  animation: centerGlow 28s linear infinite;
+  min-height: 100vh;
 }
+
+@keyframes centerGlow {
+  0%   { background-image: radial-gradient(1000px 700px at 50% 50%, rgba(253, 195, 40, 0.18), transparent 60%); }
+  33%  { background-image: radial-gradient(1000px 700px at 50% 50%, rgba(10, 129, 119, 0.18), transparent 60%); }
+  66%  { background-image: radial-gradient(1000px 700px at 50% 50%, rgba(226, 72, 114, 0.18), transparent 60%); }
+  100% { background-image: radial-gradient(1000px 700px at 50% 50%, rgba(253, 195, 40, 0.18), transparent 60%); }
+}
+
+.layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0; /* ¡Importante! Detrás de todo */
+}
+
+.item {
+  position: absolute;
+  will-change: transform;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .18));
+}
+.circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--col, var(--c3));
+}
+.square {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: var(--col, var(--c2));
+}
+.triangle {
+  width: 0;
+  height: 0;
+}
+.word {
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+  white-space: nowrap;
+}
+.tpl {
+  display: none;
+}
+
+
+/* --- 4. CLASES DE COMPONENTES (de index.css y styles.css) --- */
+
+/* NOTA: El 'body' conflictivo de index.css FUE REMOVIDO */
+
+.card{background:#fff;color:#0b1f3a;border-radius:1.25rem;box-shadow:0 16px 44px rgba(0,0,0,.18)}
+.btn{border:0;border-radius:1rem;padding:.6rem 1rem;font-weight:800}
+.btn:disabled {
+  cursor: not-allowed;
+}
+.btn-ghost{background:#ffffff22;color:#fff;border:1px solid #ffffff40}
+.progress{display:grid;grid-auto-flow:column;gap:.5rem}
+.step{background:#ffffff22;border:1px solid #ffffff33;color:#fff;border-radius:999px;padding:.35rem .8rem;font-weight:800;font-size:.85rem;opacity:.7}
+.step.active{background:#00B8A9;opacity:1}
+
+/* ESTILOS DE FASE 2 (Bubble Map) */
+.bubble-map{position:relative;min-height:420px;border-radius:18px;background:#f4f7fb;overflow:hidden}
+.bubble{position:absolute;border-radius:999px;padding:10px 14px;background:#e6f4ff;color:#0b1f3a;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.08);user-select:none;cursor:grab; touch-action:none;}
+.bubble.lock{cursor:default}
+.bubble.center{background:#102a4b;color:#fff;cursor:default}
+
+/* ESTILOS DE FASE 4 (Roulette) */
+.me-roulette-backdrop{
+position: fixed; inset: 0; background: rgba(0,0,0,.5);
+display: none; align-items: center; justify-content: center; z-index: 9999;
+}
+.me-roulette-backdrop.me-open{ display:flex }
+.me-roulette-modal{
+width: min(880px, 92vw); background: #fff; border-radius: 18px;
+box-shadow: 0 20px 60px rgba(0,0,0,.25); padding: 24px;
+color: #0b1f3a; /* Agregado de styles.css */
+}
+.me-roulette-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.me-roulette-title { font-size: 20px; font-weight: 700; }
+.me-roulette-close { border: 1px solid #e5eef7; background: #f4f7fb; border-radius: 999px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+.me-roulette-body { display: grid; place-items: center; padding: 8px 0 0; }
+.me-wheel-wrap { position: relative; width: min(520px, 82vw); height: min(520px, 82vw); background: #0e2b47; border-radius: 20px; display: grid; place-items: center; padding: 18px; }
+.me-wheel { width: 100%; height: 100%; border-radius: 50%; background: #0e2b47; position: relative; overflow: hidden; box-shadow: inset 0 0 0 10px #0e2b47, 0 8px 24px rgba(0, 0, 0, .2); transform: rotate(0deg); }
+.me-pointer { position: absolute; top: 8px; width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 18px solid #fff; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .25)); z-index: 10; left: calc(50% - 12px); }
+.me-roulette-controls { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+.me-roulette-btn { background: #ff7a3c; color: #fff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.me-roulette-btn:disabled { background: #ccc; }
+.me-roulette-sub { text-align: center; color: #667; font-size: 14px; margin-top: 8px; }
+.me-winner{ text-align:center; font-weight:800; margin-top:12px; font-size:18px }
+.me-hide{display:none!important}
+
+code {
+font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+monospace;
+}
+
+/* Fase 6 (Podio) */
+.podio-glow {
+  box-shadow: 0 12px 35px rgba(255,215,0,0.6) !important;
+}
+
+/* --- 5. ESTILOS DE INTROS Y MODALES (de styles.css) --- */
+
+/* Instrucciones del juego */
+.step-pill { transition: all .25s ease; }
+.step-pill-active {
+  background: #ffffff;
+  box-shadow: 0 18px 30px rgba(0,0,0,0.03);
+  border-radius: 9999px;
+}
+.hidden-modal {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+.show-modal {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Intros de Fase (de style.css) */
+.bg {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(1000px 600px at 50% 30%, rgba(16, 50, 105, .4), transparent 60%), radial-gradient(800px 800px at 60% 10%, rgba(28, 78, 161, .25), transparent 55%), linear-gradient(120deg, #0b1d36, #0a1630);
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity .6s, transform .6s;
+  z-index: 100;
+}
+.bg.bg-in {
+  opacity: 1;
+  transform: scale(1);
+}
+.wrap {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 101;
+}
+.wrap .card {
+  width: min(980px, 92vw);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+  padding: 28px 32px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .5s .24s, transform .5s .24s;
+  position: relative;
+  overflow: hidden;
+  color: var(--text);
+}
+.wrap .card.card-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.wrap .top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 700;
+  color: #a3c5ff;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+#bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 16px;
+  height: 6px;
+  background: linear-gradient(90deg, #66b2ff, #5eead4);
+  width: 0;
+  border-radius: 999px;
+  opacity: .85;
+}
+.skip {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  border: none;
+  background: #1a2c48;
+  color: #dfeaff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.wrap h1 {
+  font-size: clamp(26px, 3.2vw, 40px);
+  line-height: 1.2;
+  margin: 10px 0 14px 0;
+  color: #fff;
+}
+.wrap .lead {
+  color: #cfe2ff;
+  font-style: italic;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .5s .36s, transform .5s .36s;
+}
+.wrap .text {
+  color: var(--muted);
+  max-width: 80ch;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .6s .46s, transform .6s .46s;
+}
+.title-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.text-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.wrap .note {
+  margin-top: 10px;
+  opacity: .7;
+  font-size: 12px;
+  text-align: center;
+}
+.wrap .badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wrap .badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #5eead4;
+  box-shadow: 0 0 12px #5eead4;
+}
+
+
+/* --- INICIO: ESTILOS DEL OVERLAY DE TOKENS --- */
+
+/* Variables: Las renombro para evitar conflictos 
+  con las variables :root que ya tienes. 
+*/
+:root {
+  --token-bg: #0b1220;
+  --token-card: #101a31;
+  --token-txt: #e9f0ff;
+  --token-muted: #9fb2d9;
+  --token-accent: #3ee0ff;
+  --token-accent2: #2ad3a6;
+}
+
+/* Usamos clases con prefijo 'tk-' para 
+  asegurar que no haya conflictos con tu .card o .btn 
+*/
+.tk-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(5, 10, 18, .55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+.tk-overlay.tk-show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tk-card {
+  width: min(720px, 92vw);
+  text-align: center;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(62, 224, 255, .12), rgba(0, 0, 0, .35) 60%), var(--token-card);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  padding: 24px 22px 34px;
+  box-shadow: 0 24px 100px rgba(0, 0, 0, .55);
+  position: relative;
+  overflow: hidden;
+  color: var(--token-txt);
+  /* Animación de entrada */
+  transform: scale(0.95);
+  transition: transform .3s ease;
+}
+.tk-overlay.tk-show .tk-card {
+  transform: scale(1);
+}
+
+.tk-title {
+  margin: .2rem 0 .2rem;
+  font-size: 2.2rem;
+  font-weight: 700; /* Agregado para Tailwind */
+}
+.tk-subtitle {
+  margin: .2rem 0 1rem;
+  color: var(--token-muted);
+}
+.tk-token-img {
+  width: min(240px, 60vw);
+  display: block;
+  margin: 0 auto 16px;
+  border-radius: 8px;
+  background: #0b1220;
+}
+.tk-btn {
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--token-accent), var(--token-accent2));
+  color: #06202a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.tk-btn:active {
+  transform: translateY(1px);
+}
+
+/* Lateral confetti */
+.tk-lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  pointer-events: none;
+  overflow: visible;
+}
+.tk-lane.tk-left {
+  left: -6%;
+}
+.tk-lane.tk-right {
+  right: -6%;
+}
+.tk-confetti {
+  position: absolute;
+  top: var(--yStart);
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  border-radius: var(--radius);
+  opacity: .0;
+  transform: translate3d(var(--x), 0, 0) rotate(0deg);
+  animation:
+    tk-slideIn var(--inDur) ease-out forwards,
+    tk-driftDown var(--downDur) linear forwards var(--inDur),
+    tk-spin var(--spinDur) linear infinite;
+  box-shadow: 0 0 10px rgba(170, 230, 255, .18);
+  will-change: transform, opacity;
+}
+
+@keyframes tk-slideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fromX), 0, 0) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--x), calc(var(--lift)), 0) rotate(90deg);
+  }
+}
+@keyframes tk-driftDown {
+  from {
+    transform: translate3d(var(--x), calc(var(--lift)), 0) rotate(90deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(calc(var(--x) + var(--driftX)), 110vh, 0) rotate(720deg);
+    opacity: .9;
+  }
+}
+@keyframes tk-spin {
+  from {
+    rotate: 0deg
+  }
+  to {
+    rotate: 720deg
+  }
+}
+
+/* --- FIN: ESTILOS DEL OVERLAY DE TOKENS --- */

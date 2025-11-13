@@ -1,0 +1,89 @@
+/* src/modules/student/features/Phase1/Phase1.css */
+
+/* Estilos específicos para el juego WordSearch */
+.grid-letters {
+  display: grid;
+  /* Hacemos la sopa de letras responsive */
+  grid-template-columns: repeat(12, 24px); /* Más pequeño en móvil */
+  gap: 4px;
+  justify-content: center;
+}
+
+.cell {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef3fb;
+  border-radius: .5rem;
+  font-weight: 800;
+  border: 1px solid #d7e2f1;
+  cursor: pointer;
+  font-size: 14px; /* Letra más pequeña */
+}
+
+.cell.sel {
+  background: #ffdbaa;
+  border-color: #ffc067;
+}
+
+/* En pantallas medianas (md) y superiores, usamos tus tamaños originales */
+@media (min-width: 768px) {
+  .grid-letters {
+    grid-template-columns: repeat(12, 32px);
+    gap: 6px;
+  }
+  .cell {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem; /* Tamaño original */
+  }
+}
+
+
+
+
+
+
+
+// phase 1 sopa de letras
+
+
+
+
+
+
+
+
+.cell-selected { 
+  background: rgba(0, 204, 153, 0.25) !important; 
+}
+
+.cell-found { 
+  background: rgba(16,185,129,1) !important; 
+  color: white !important; 
+  font-weight: 700 !important; 
+}
+
+.word-found { 
+  text-decoration: line-through; 
+  color: #10b981 !important; 
+  font-weight: 600 !important; 
+}
+
+.noselect { 
+  -webkit-user-select: none; 
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+/* Responsive grid para el tablero */
+.grid-cols-16 {
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+}
+
+/* Asegurar que las celdas sean cuadradas */
+.board-cell {
+  aspect-ratio: 1 / 1;
+}
