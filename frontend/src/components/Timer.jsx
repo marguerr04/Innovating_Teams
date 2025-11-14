@@ -14,27 +14,36 @@ import { beep } from '../utils/helpers.js';
  */
 export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false, onComplete }) {
   
-  // --- Lógica del Timer ---
+  // --- Lógica del Timer (Cuenta Regresiva Corregida) ---
   const [seconds, setSeconds] = useState(initialSeconds);
   const [running, setRunning] = useState(autoStart);
   const tickRef = useRef(null);
   const lastBeepRef = useRef(null);
 
+  // Efecto para manejar el intervalo
   useEffect(() => {
     if (!running) {
-      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+      if (tickRef.current) { 
+        clearInterval(tickRef.current); 
+        tickRef.current = null; 
+      }
       return;
     }
+
     tickRef.current = setInterval(() => {
       setSeconds(s => {
-        const next = Math.max(0, s - 1);
+        const next = s - 1; // Cuenta regresiva
+        
+        // Beep para los últimos 5 segundos
         if (next > 0 && next <= 5 && lastBeepRef.current !== next) { 
           beep(); 
           lastBeepRef.current = next; 
         }
-        if (next === 0) {
-          if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-          setRunning(false); 
+        
+        // Cuando llega a 0
+        if (next <= 0) {
+          clearInterval(tickRef.current);
+          setRunning(false);
           lastBeepRef.current = null;
           
           // --- CAMBIO ---
@@ -60,11 +69,16 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
   // Formato del tiempo
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
+  const getTimerColor = (remainingSeconds, totalSeconds) => {
+  if (remainingSeconds <= totalSeconds * 0.1) return 'text-red-600';
+  if (remainingSeconds <= totalSeconds * 0.25) return 'text-yellow-500';
+  return 'text-sea-900';
+};
 
   return (
     <div className="flex flex-col items-center">
-      {/* Display del Timer */}
-      <div className="text-6xl font-extrabold tracking-widest text-slate-900">
+      {/* Display del Timer con color dinámico */}
+      <div className={`text-6xl font-extrabold tracking-widest ${getTimerColor()}`}>
         {mm}:{ss}
       </div>
 
@@ -80,12 +94,14 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
                 Iniciar
               </button>
             ) : (
-              <button 
-                className="btn bg-slate-100" 
-                onClick={() => setRunning(false)}
-              >
-                Pausar
-              </button>
+              running && (
+                <button 
+                  className="btn bg-slate-100" 
+                  onClick={() => setRunning(false)}
+                >
+                  Pausar
+                </button>
+              )
             )}
             <button 
               className="btn bg-accent-500 text-white" 

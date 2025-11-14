@@ -6,7 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.utils import timezone
 
 """
 Se borro el managed = False para que Django pueda manejar las tablas
@@ -19,6 +19,7 @@ class Administrador(models.Model):
     usuario = models.OneToOneField('Usuario', models.CASCADE) # El Cascade esta basado en el diagrama de clases, implica que si se elimina un usuario, se elimina el administrador asociado
 
     class Meta:
+        app_label = 'api'
         db_table = 'administrador'
         db_table_comment = 'Información específica de administradores'
 
@@ -29,6 +30,7 @@ class Atributo(models.Model):
     equipo_desafio = models.ForeignKey('EquipoDesafio', models.CASCADE)
 
     class Meta:
+        app_label = 'api'
         db_table = 'atributo'
 
 
@@ -40,6 +42,7 @@ class Carrera(models.Model):
     estado = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'carrera'
 
 
@@ -47,6 +50,7 @@ class CategoriaAtributo(models.Model):
     nombrecategoria = models.CharField(max_length=100)
 
     class Meta:
+        app_label = 'api'
         db_table = 'categoria_atributo'
 
 
@@ -55,6 +59,7 @@ class Configuracion(models.Model):
     tipodato = models.CharField(max_length=50)
 
     class Meta:
+        app_label = 'api'
         db_table = 'configuracion'
 
 
@@ -64,6 +69,7 @@ class ConfiguracionValor(models.Model):
     usuario = models.ForeignKey('Usuario', models.CASCADE)
 
     class Meta:
+        app_label = 'api'
         db_table = 'configuracion_valor'
 
 
@@ -75,6 +81,7 @@ class Curso(models.Model):
     descripcion = models.TextField(blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'curso'
 
 
@@ -83,6 +90,7 @@ class CursoEstudiante(models.Model):
     estudiante = models.ForeignKey('Estudiante', models.CASCADE)
 
     class Meta:
+        app_label = 'api'
         db_table = 'curso_estudiante'
 
 
@@ -99,6 +107,7 @@ class Desafio(models.Model):
     persona = models.ForeignKey('Persona', models.PROTECT)
 
     class Meta:
+        app_label = 'api'
         db_table = 'desafio'
 
 
@@ -108,6 +117,7 @@ class Equipo(models.Model):
     tamanoequipo = models.IntegerField(blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'equipo'
         db_table_comment = 'Equipos de estudiantes por juego'
 
@@ -118,6 +128,7 @@ class EquipoDesafio(models.Model):
     desafio_persona_id = models.IntegerField()
 
     class Meta:
+        app_label = 'api'
         db_table = 'equipo_desafio'
 
 
@@ -126,6 +137,7 @@ class Estudiante(models.Model):
     lista_participante = models.ForeignKey('ListaParticipante', models.PROTECT)
 
     class Meta:
+        app_label = 'api'
         db_table = 'estudiante'
         db_table_comment = 'Información específica de estudiantes'
 
@@ -139,6 +151,7 @@ class Etapa(models.Model):
     textohabilidad = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'etapa'
 
 
@@ -149,6 +162,7 @@ class EvaluacionAutoencuesta(models.Model):
     comentarios = models.TextField(blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'evaluacion_autoencuesta'
 
 
@@ -161,6 +175,7 @@ class EvaluacionPitch(models.Model):
     puntajecomunicacion = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'evaluacion_pitch'
         unique_together = (('equipo_evaluador', 'equipo_evaluado'),)
 
@@ -169,6 +184,7 @@ class Facultad(models.Model):
     nombre = models.CharField(max_length=100)
 
     class Meta:
+        app_label = 'api'
         db_table = 'facultad'
 
 
@@ -176,6 +192,7 @@ class GanasEmprender(models.Model):
     descripcion = models.CharField(max_length=500)
 
     class Meta:
+        app_label = 'api'
         db_table = 'ganas_emprender'
 
 
@@ -184,6 +201,7 @@ class InstruccionEtapa(models.Model):
     contenido = models.TextField()
 
     class Meta:
+        app_label = 'api'
         db_table = 'instruccion_etapa'
 
 
@@ -192,7 +210,12 @@ class ListaParticipante(models.Model):
     nombreestudiante = models.CharField(max_length=150)
 
     class Meta:
+        app_label = 'api'
         db_table = 'lista_participante'
+    
+    
+
+        
 
 
 class Partida(models.Model):
@@ -206,6 +229,7 @@ class Partida(models.Model):
     maxparticipantes = models.IntegerField(blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'partida'
         db_table_comment = 'Sesiones de juego del sistema de emprendimiento'
 
@@ -216,6 +240,7 @@ class PartidaUsuario(models.Model):
     equipo = models.ForeignKey(Equipo, models.CASCADE)
 
     class Meta:
+        app_label = 'api'
         db_table = 'partida_usuario'
 
 
@@ -233,6 +258,7 @@ class Profesor(models.Model):
     usuario = models.OneToOneField('Usuario', models.CASCADE) # El Cascade esta basado en el diagrama de clases, implica que si se elimina un usuario, se elimina el profesor asociado
 
     class Meta:
+        app_label = 'api'
         db_table = 'profesor'
         db_table_comment = 'Información específica de profesores'
 
@@ -243,6 +269,7 @@ class Ranking(models.Model):
     posicionfinal = models.IntegerField()
 
     class Meta:
+        app_label = 'api'
         db_table = 'ranking'
 
 
@@ -253,6 +280,7 @@ class SolucionLego(models.Model):
     fotoprototipurl = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'solucion_lego'
 
 
@@ -262,6 +290,7 @@ class TemaDesafio(models.Model):
     estado = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
+        app_label = 'api'
         db_table = 'tema_desafio'
 
 
@@ -269,6 +298,7 @@ class TipoCurso(models.Model):
     nombre = models.CharField(max_length=100)
 
     class Meta:
+        app_label = 'api'
         db_table = 'tipo_curso'
 
 
@@ -280,6 +310,7 @@ class Token(models.Model):
     fechaotorgada = models.DateTimeField()
 
     class Meta:
+        app_label = 'api'
         db_table = 'token'
         db_table_comment = 'Sistema de tokens y recompensas'
 
@@ -295,7 +326,7 @@ class Usuario(models.Model):
     contrasena = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-
+        app_label = 'api'
         db_table = 'usuario'
         db_table_comment = 'Tabla base de usuarios del sistema'
 
@@ -305,4 +336,43 @@ class Video(models.Model):
     url = models.CharField(max_length=500)
 
     class Meta:
+        app_label = 'api'
         db_table = 'video'
+
+
+
+
+
+
+
+
+
+class ProgresoEtapa(models.Model):
+    """
+    Trackeo estado equipo y cumplpoir RT02
+    """
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE)
+    
+    # Campos pedidos por RT-02 (Estado actual)
+    start_at = models.DateTimeField(default=timezone.now)
+    end_at = models.DateTimeField(null=True, blank=True)
+    
+    # --- CORRECCIÓN CLAVE ---
+    # Distingue evento de sistema vs. usuario (como pide el feedback)
+    
+    finished_by_system = models.BooleanField(default=False) # True si el timer lo terminó
+    
+    # 'finished_by_user' ahora apunta a tu tabla genérica 'Usuario'.
+    # Esto te permite registrar si fue un estudiante O un profesor quien
+    # marcó la etapa como finalizada.
+    finished_by_user = models.ForeignKey(
+        Usuario, 
+        null=True, 
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+
+    class Meta:
+        app_label = 'api'
+        unique_together = ('equipo', 'etapa') # Un equipo solo pasa una vez por etapa

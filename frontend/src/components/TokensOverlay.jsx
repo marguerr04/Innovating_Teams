@@ -111,7 +111,7 @@ export default function TokensOverlay({ show, phase, onContinue }) {
         
         {/* === IMAGEN (AHORA SIEMPRE VISIBLE) === */}
         <img 
-          src="./tokens.png" 
+          src="/assets/tokens-me.png" 
           alt="Tokens" 
           className="tk-token-img" 
         />

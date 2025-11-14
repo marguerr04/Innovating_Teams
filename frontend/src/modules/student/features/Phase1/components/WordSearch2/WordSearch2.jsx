@@ -20,7 +20,8 @@ const WordSearch2 = ({ onComplete }) => {
     GRID_SIZE
   } = useWordSearch(onComplete);
 
-  const { time, start, reset } = useTimer();
+  // Timer: cuenta regresiva de 5 minutos (300s). Cuando se acaba, llamamos al onComplete recibido desde el padre.
+  const { time, start, reset } = useTimer({ initialSeconds: 300, onComplete });
 
   const [teamName, setTeamName] = React.useState("Equipo 1 - Naranja");
   const [allWordsFound, setAllWordsFound] = React.useState(false);
