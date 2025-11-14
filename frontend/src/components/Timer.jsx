@@ -69,6 +69,11 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
   // Formato del tiempo
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
+  const getTimerColor = (remainingSeconds, totalSeconds) => {
+  if (remainingSeconds <= totalSeconds * 0.1) return 'text-red-600';
+  if (remainingSeconds <= totalSeconds * 0.25) return 'text-yellow-500';
+  return 'text-sea-900';
+};
 
   return (
     <div className="flex flex-col items-center">
