@@ -1,0 +1,20 @@
+# Dependencias (se instalan dentro del contenedor)
+node_modules/
+
+# Archivos de build locales (se generan dentro del contenedor)
+build/
+dist/
+
+# Git
+.git/
+.gitignore
+
+# Archivos locales y de entorno
+.env
+.env.local
+npm-debug.log
+
+# Archivos de la charla que no son de la app
+*.mp3
+*.docx
+*.pdf
