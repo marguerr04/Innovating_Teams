@@ -102,7 +102,6 @@ export default function AdminLogin() {
 
         <div className="mt-6 text-center text-xs text-white/60">
           <p>Uso exclusivo de administradores autorizados.</p>
-          <p> (Temporal) Credenciales para acceder </p>
           <p>Correo: usuario5@innovate.com</p>
           <p>Contraseña: contraseña123</p>
           <a href="/prelogin" className="underline hover:text-white/90">Volver</a>

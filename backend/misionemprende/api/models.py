@@ -220,7 +220,7 @@ class ListaParticipante(models.Model):
 
 
 class Partida(models.Model):
-    video = models.ForeignKey('Video', models.PROTECT)
+    video = models.ForeignKey('Video', models.PROTECT, blank=True, null=True)  # Permitir valores nulos
     fechacreacion = models.DateTimeField()
     estado = models.CharField(max_length=20)
     codigoacceso = models.CharField(unique=True, max_length=10, blank=True, null=True)
