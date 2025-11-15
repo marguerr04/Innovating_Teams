@@ -6,12 +6,16 @@ import math
 from django.views.decorators.csrf import csrf_exempt # desactivacion temporal de la verificacion CSRF para probar post de csv
 
 
+
+
+from api.models import Usuario
 # Django REST Framework imports
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-
+from django.contrib.auth.hashers import check_password # para verificar contraseñas
 # Modelos y serializers
 from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida,  ListaParticipante
 
@@ -47,6 +51,60 @@ def login_view(request):
         "token": token.key,
         "username": user.username,
         "role": "admin",  # como esta demo es solo para admin
+    })
+
+# endpoint para profesor
+
+@api_view(["POST"])
+def login_profesor(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+
+    try:
+        user = Usuario.objects.get(email=email, estado="ACTIVO")
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=400)
+
+    if not check_password(password, user.password):
+        return Response({"error": "Credenciales inválidas"}, status=400)
+
+    if user.tipousuario != "PROFESOR":
+        return Response({"error": "No tiene permisos para acceder como profesor"}, status=403)
+
+    # Genera el token
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({
+        "token": token.key,
+        "username": user.nombre,
+        "role": user.tipousuario
+    })
+
+
+@api_view(["POST"])
+def login_admin(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+
+    try:
+        # Busca al usuario por email y estado ACTIVO
+        user = Usuario.objects.get(email=email, estado="ACTIVO")
+    except Usuario.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=400)
+
+    # Verifica la contraseña
+    if not check_password(password, user.password):
+        return Response({"error": "Credenciales inválidas"}, status=400)
+
+    # Verifica el rol del usuario
+    if user.tipousuario != "ADMINISTRADOR":
+        return Response({"error": "No tiene permisos para acceder como administrador"}, status=403)
+
+    # Genera el token
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({
+        "token": token.key,
+        "username": user.nombre,
+        "role": user.tipousuario
     })
 
 
@@ -228,3 +286,79 @@ def assign_groups(request):
         print("ERROR EN assign_groups:", str(e))
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+def bulk_create_estudiantes(request):
+    """
+    Endpoint: /api/estudiantes/bulk_create/
+    Recibe JSON: { "estudiantes": [ {"correo":"","rut":"","nombre":"","apellido_paterno":"","apellido_materno":""}, ... ] }
+    Crea (o reutiliza) Usuario y Estudiante. Devuelve lista creada/reutilizada.
+    """
+    try:
+        data = request.data.get('estudiantes')
+        if data is None:
+            return Response({'error': 'Campo "estudiantes" requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(data, list):
+            return Response({'error': '"estudiantes" debe ser una lista'}, status=status.HTTP_400_BAD_REQUEST)
+
+        resultado = []
+        with transaction.atomic():
+            for idx, est in enumerate(data, start=1):
+                correo = (est.get('correo') or est.get('email') or '').strip()
+                rut = (est.get('rut') or '').strip()
+                nombre = (est.get('nombre') or '').strip()
+                ap_pat = (est.get('apellido_paterno') or '').strip()
+                ap_mat = (est.get('apellido_materno') or '').strip()
+
+                # Validación mínima
+                if not correo or not nombre:
+                    # Saltar fila inválida sin abortar todo
+                    continue
+
+                apellido_final = f"{ap_pat} {ap_mat}".strip()
+
+                usuario, _ = Usuario.objects.get_or_create(
+                    email=correo,
+                    defaults={
+                        'nombre': nombre,
+                        'apellido': apellido_final,
+                        'tipousuario': 'ESTUDIANTE',
+                        'fechacreacion': timezone.now(),
+                        'estado': 'ACTIVO',
+                    }
+                )
+
+                # Actualizar nombre/apellido si llegaron distintos
+                actual_nombre = usuario.nombre or ''
+                actual_apellido = usuario.apellido or ''
+                if actual_nombre != nombre or actual_apellido != apellido_final:
+                    usuario.nombre = nombre
+                    usuario.apellido = apellido_final
+                    usuario.save()
+
+                lista_participante, _ = ListaParticipante.objects.get_or_create(
+                    emailestudiante=usuario.email,
+                    defaults={'nombreestudiante': usuario.nombre}
+                )
+
+                estudiante_obj, creado_est = Estudiante.objects.get_or_create(
+                    usuario=usuario,
+                    defaults={'lista_participante': lista_participante}
+                )
+                if not creado_est and estudiante_obj.lista_participante_id != lista_participante.id:
+                    estudiante_obj.lista_participante = lista_participante
+                    estudiante_obj.save()
+
+                resultado.append({
+                    'id': estudiante_obj.id,
+                    'correo': usuario.email,
+                    'nombre': usuario.nombre,
+                    'apellido': usuario.apellido,
+                    'rut': rut,
+                    'nuevo': creado_est
+                })
+
+        return Response({'estudiantes': resultado, 'total': len(resultado)}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -108,7 +108,7 @@ puedes usar la siguiente configuración comentada:
 
 """
 
-
+AUTH_USER_MODEL = 'api.Usuario'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -170,3 +170,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+
+
+# AUTENTICACION DE UNA VEZ POR TODAS
+
+
+AUTH_USER_MODEL = 'api.Usuario'

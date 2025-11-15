@@ -7,6 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 """
 Se borro el managed = False para que Django pueda manejar las tablas
@@ -314,21 +315,43 @@ class Token(models.Model):
         db_table = 'token'
         db_table_comment = 'Sistema de tokens y recompensas'
 
+# para que funcione en bd 
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El correo electrónico es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-class Usuario(models.Model):
-    email = models.CharField(unique=True, max_length=100)
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class Usuario(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     tipousuario = models.CharField(max_length=20)
-    fechacreacion = models.DateTimeField()
-    ultimologin = models.DateTimeField(blank=True, null=True)
+    fechacreacion = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, blank=True, null=True)
-    contrasena = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['nombre', 'apellido']
+    
+
+    def __str__(self):
+        return self.email
     class Meta:
-        app_label = 'api'
-        db_table = 'usuario'
-        db_table_comment = 'Tabla base de usuarios del sistema'
+        db_table = 'api_usuario'
+    
 
 
 class Video(models.Model):
@@ -338,6 +361,29 @@ class Video(models.Model):
     class Meta:
         app_label = 'api'
         db_table = 'video'
+
+
+# vita del detalle del equipo
+class VistaDetalleEquipo(models.Model):
+    equipo_id = models.IntegerField()
+    nombreequipo = models.CharField(max_length=100)
+    profesor_id = models.IntegerField(blank=True, null=True)
+    nombre_profesor = models.CharField(max_length=50, blank=True, null=True)
+    apellido_profesor = models.CharField(max_length=50, blank=True, null=True)
+    email_profesor = models.CharField(max_length=100, blank=True, null=True)
+    estudiante_id = models.IntegerField(blank=True, null=True)
+    nombre_estudiante = models.CharField(max_length=50, blank=True, null=True)
+    apellido_estudiante = models.CharField(max_length=50, blank=True, null=True)
+    email_estudiante = models.CharField(max_length=100, blank=True, null=True)
+    nombre_carrera = models.CharField(max_length=100, blank=True, null=True)
+    nombre_facultad = models.CharField(max_length=100, blank=True, null=True)
+    partida_id = models.IntegerField()
+    codigoacceso = models.CharField(max_length=10)
+
+    class Meta:
+        managed = False  # Esto indica que Django no gestionará la vista
+        db_table = 'vista_detalle_equipo'
+
 
 
 

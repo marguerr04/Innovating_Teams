@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfesor } from '../components/ProfessorContext';
 import ListaEquiposCard from '../components/ListaEquiposCard';
 import MetadatosJuegoCard from '../components/MetadatosJuegoCard';
+import InformacionBasicaCard from '../components/InformacionBasicaCard';
 
 const CrearJuegoView = () => {
   const navigate = useNavigate();
