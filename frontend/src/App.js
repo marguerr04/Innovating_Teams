@@ -8,6 +8,7 @@ import AdminApp from "./modules/admin/AdminApp";
 import PreLogin from "./pages/PreLogin";
 import ProfessorApp from "./modules/profesor/ProfessorApp";
 import TestAnimacion from './pages/Tests';
+import DevImageUpload from './utils/dev-tools/DevImageUpload';
 
 export default function App() {
   return (
@@ -31,9 +32,10 @@ export default function App() {
         {/* Alias para botón Administrador en PreLogin */}
         <Route path="/administrador/*" element={<AdminApp />} />
 
-        {/* Rutas de prueba para animaciones */}
+        {/* Rutas de desarrollo/prueba */}
         <Route path="/test-animacion" element={<TestAnimacion />} />
         <Route path="/tests" element={<TestAnimacion />} />
+        <Route path="/test-upload" element={<DevImageUpload />} />
       </Routes>
     </BrowserRouter>
   );

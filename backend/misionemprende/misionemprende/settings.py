@@ -59,12 +59,36 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')  # debe estar antes del CommonMiddleware
 
+# --- Configuración de CORS ---
+CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
-# Al parecer esto permite que cualquiera pueda conectarse sin problemas, en el futuro se deberia testear que no genere problemas de seguridad
-CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'misionemprende.urls'
 
@@ -155,25 +179,29 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 """
 Configuración para unirse a react
-
+Ya está configurado arriba en CORS_ALLOWED_ORIGINS
 """
-
-# --- Configuración de CORS ---
-# Asume que tu React corre en el puerto 3000
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CORS_ALLOW_CREDENTIALS = True
-
-
 
 # AUTENTICACION DE UNA VEZ POR TODAS
 
 
 AUTH_USER_MODEL = 'api.Usuario'
+
+
+# Google Cloud Storage Configuration
+import os
+from pathlib import Path
+
+# Ruta al archivo de credenciales de Google Cloud
+# Puedes colocar tu archivo JSON de credenciales en el directorio backend/
+GCS_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'gcs-credentials.json')
+
+# Configuraciones de Google Cloud Storage
+# Lee el nombre del bucket y el project id desde variables de entorno cuando sea posible
+GCS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME', 'mision-emprende-prototiposs')  # Tu bucket real
+GCS_PROJECT_ID = os.getenv('GCS_PROJECT_ID', 'misionemprende')  # Project ID desde JSON de credenciales
+GCS_REGION = os.getenv('GCS_REGION', 'us-central1')  # Región por defecto
+
+# Configuración opcional para URLs firmadas
+GCS_SIGNED_URL_EXPIRATION = 3600  # 1 hora en segundos
+GCS_PUBLIC_URL_EXPIRATION = 86400  # 24 horas en segundos

@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import check_password # para verificar contraseñas
 # Modelos y serializers
-from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida,  ListaParticipante
+from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida,  ListaParticipante, SolucionLego
 
 from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer
 
@@ -558,3 +558,61 @@ def obtener_grupos(request, partida_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def guardar_imagen_solucion(request):
+    """
+    Guarda la URL de imagen de una solución LEGO en la base de datos.
+    Recibe: equipo_id, image_url, descripcion (opcional)
+    """
+    try:
+        data = JSONParser().parse(request)
+        equipo_id = data.get('equipo_id')
+        image_url = data.get('image_url')
+        descripcion = data.get('descripcion', '')
+
+        if not equipo_id or not image_url:
+            return JsonResponse({
+                'error': 'equipo_id y image_url son requeridos'
+            }, status=400)
+
+        try:
+            equipo = Equipo.objects.get(id=equipo_id)
+        except Equipo.DoesNotExist:
+            return JsonResponse({
+                'error': 'Equipo no encontrado'
+            }, status=404)
+
+        # Buscar la solución más reciente del equipo o crear nueva si no existe
+        solucion = SolucionLego.objects.filter(equipo=equipo).order_by('-fechacreacion').first()
+        
+        if solucion:
+            # Actualizar la solución existente más reciente
+            solucion.fotoprototipurl = image_url
+            solucion.descripsoluc = descripcion
+            solucion.save()
+            created = False
+        else:
+            # Crear nueva si no existe ninguna para este equipo
+            solucion = SolucionLego.objects.create(
+                equipo=equipo,
+                fechacreacion=timezone.now(),
+                descripsoluc=descripcion,
+                fotoprototipurl=image_url
+            )
+            created = True
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Imagen guardada exitosamente',
+            'solucion_id': solucion.id,
+            'image_url': solucion.fotoprototipurl,
+            'created': created
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Error interno del servidor: {str(e)}'
+        }, status=500)

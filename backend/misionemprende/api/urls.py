@@ -3,7 +3,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from .views import login_view, assign_groups, login_profesor, login_admin, crear_partida
-from .views import asignar_grupos, obtener_grupos
+from .views import asignar_grupos, obtener_grupos, guardar_imagen_solucion
+from .storage_service import generate_signed_url
+from .database_test import test_database_connection
 
 # Router principal para los viewsets
 router = DefaultRouter()
@@ -25,5 +27,16 @@ urlpatterns = [
 # Endpoint para la asignacion de grupos
     path("partida/<int:partida_id>/asignar-grupos/", asignar_grupos, name="asignar_grupos"),
     path('partida/<int:partida_id>/obtener-grupos/', views.obtener_grupos, name='obtener_grupos'),
+
+# Endpoint para el servicio de almacenamiento
+    path('storage/signed-url/', generate_signed_url, name='generate_signed_url'),
+    # Ruta corta para compatibilidad con la guía de uso (/api/signed-url/)
+    path('signed-url/', generate_signed_url, name='signed-url'),
+    
+# Endpoint para guardar imágenes en BD
+    path('guardar-imagen/', guardar_imagen_solucion, name='guardar_imagen_solucion'),
+    
+    # Endpoint de diagnóstico de base de datos
+    path('test-db/', test_database_connection, name='test_database_connection'),
 
 ]
