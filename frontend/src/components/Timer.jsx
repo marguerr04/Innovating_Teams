@@ -1,26 +1,26 @@
 // Archivo: src/components/Timer.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-// 1. Importa la función 'beep' desde tu archivo de helpers
-// (Ajusta la ruta '..' según dónde guardes este Timer.jsx)
-import { beep } from '../utils/helpers.js'; 
+import { beep } from '../utils/helpers.js';
 
 /**
- * Un componente de temporizador reutilizable.
- * @param {number} initialSeconds - El total de segundos para el temporizador.
- * @param {boolean} isProf - Si el usuario es profesor (para mostrar botones).
- * @param {boolean} autoStart - Si el timer debe empezar automáticamente.
- * @param {function} onComplete - (NUEVO) Callback que se ejecuta cuando el timer llega a 0.
+ * ... (descripción) ...
+ * @param {string} size - (NUEVO) 'large' (default) o 'small'.
  */
-export default function Timer({ initialSeconds = 300, isProf = false, autoStart = false, onComplete }) {
+export default function Timer({ 
+  initialSeconds = 300, 
+  isProf = false, 
+  autoStart = false, 
+  onComplete, 
+  size = 'large' // 1. Añadimos la prop 'size'
+}) {
   
-  // --- Lógica del Timer (Cuenta Regresiva Corregida) ---
+  // --- Lógica del Timer (sin cambios) ---
   const [seconds, setSeconds] = useState(initialSeconds);
   const [running, setRunning] = useState(autoStart);
   const tickRef = useRef(null);
   const lastBeepRef = useRef(null);
 
-  // Efecto para manejar el intervalo
   useEffect(() => {
     if (!running) {
       if (tickRef.current) { 
@@ -32,32 +32,23 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
 
     tickRef.current = setInterval(() => {
       setSeconds(s => {
-        const next = s - 1; // Cuenta regresiva
-        
-        // Beep para los últimos 5 segundos
+        const next = s - 1;
         if (next > 0 && next <= 5 && lastBeepRef.current !== next) { 
           beep(); 
           lastBeepRef.current = next; 
         }
-        
-        // Cuando llega a 0
         if (next <= 0) {
           clearInterval(tickRef.current);
           setRunning(false);
           lastBeepRef.current = null;
-          
-          // --- CAMBIO ---
-          // Llama al callback onComplete si existe, en lugar de la alerta
           if (onComplete) onComplete();
-          // setTimeout(() => alert('⏱️ ¡Tiempo terminado!')); // Eliminado
         }
         return next;
       });
     }, 1000);
     return () => { if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; } };
-  }, [running, onComplete]); // Añadido onComplete a las dependencias
+  }, [running, onComplete]);
 
-  // Función de reseteo
   const reset = () => {
     setRunning(autoStart);
     setSeconds(initialSeconds);
@@ -66,23 +57,25 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
   };
   // --- Fin Lógica del Timer ---
 
-  // Formato del tiempo
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
   const getTimerColor = (remainingSeconds, totalSeconds) => {
-  if (remainingSeconds <= totalSeconds * 0.1) return 'text-red-600';
-  if (remainingSeconds <= totalSeconds * 0.25) return 'text-yellow-500';
-  return 'text-sea-900';
-};
+    if (remainingSeconds <= totalSeconds * 0.1) return 'text-red-600';
+    if (remainingSeconds <= totalSeconds * 0.25) return 'text-yellow-500';
+    return 'text-slate-900';
+  };
+  
+  // 2. Definimos el tamaño de la fuente basado en 'size'
+  const textSizeClass = size === 'large' ? 'text-6xl' : 'text-4xl';
 
   return (
     <div className="flex flex-col items-center">
-      {/* Display del Timer con color dinámico */}
-      <div className={`text-6xl font-extrabold tracking-widest ${getTimerColor()}`}>
+      {/* 3. Aplicamos la clase de tamaño */}
+      <div className={`font-extrabold tracking-widest ${getTimerColor(seconds, initialSeconds)} ${textSizeClass}`}>
         {mm}:{ss}
       </div>
 
-      {/* Controles del Profesor (Actualizados) */}
+      {/* Controles del Profesor (sin cambios) */}
       <div className="mt-5 flex gap-2">
         {isProf && (
           <>
@@ -112,8 +105,6 @@ export default function Timer({ initialSeconds = 300, isProf = false, autoStart 
           </>
         )}
       </div>
-      
-      {/* Texto de ayuda eliminado */}
     </div>
   );
 }
