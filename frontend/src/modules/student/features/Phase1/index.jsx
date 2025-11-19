@@ -82,8 +82,7 @@ const KnowledgeSelector = ({ onSelect }) => {
 
 // --- COMPONENTE PRINCIPAL DE LA FASE 1 ---
 function Phase1({ role, onNext, isProf }) {
-  // Mostrar intro de video antes de comenzar (fase 1)
-  const [showVideoIntro, setShowVideoIntro] = useState(() => true);
+  // NOTE: Phase-specific video intro is shown via the global interstitial (StudentApp).
   
   // 1. Estado para controlar el modo ("conocen" vs "no conocen")
   const [knowledgeMode, setKnowledgeMode] = useState(() => load('it_p1_knowledge', null));
@@ -181,15 +180,6 @@ function Phase1({ role, onNext, isProf }) {
   if (!knowledgeMode) {
     return (
       <>
-        {/* Video intro para la fase 1 (id 14) - tamaño medio */}
-        {showVideoIntro && (
-          <div className="mb-6">
-            <VideoIntroCard videoId={14} size="medium" />
-            <div className="text-right mt-2">
-              <button onClick={() => setShowVideoIntro(false)} className="btn px-4 py-2 text-sm">Saltar introducción</button>
-            </div>
-          </div>
-        )}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Fase 1 · Configuración inicial</h1>
           {/* Timer decorativo o de espera */}

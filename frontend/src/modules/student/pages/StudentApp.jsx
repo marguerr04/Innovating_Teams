@@ -6,6 +6,7 @@ import { useRole } from '../../../utils/helpers.js';
 import InstructionsModal from '../../../components/InstructionsModal';
 import PhaseBackground from '../../../components/PhaseBackground.jsx';
 import PhaseIntro from '../../../components/PhaseIntro.jsx';
+import PhaseVideoInterstitial from '../../../components/PhaseVideoInterstitial.jsx';
 import TokensOverlay from '../../../components/TokensOverlay.jsx';
 import PhaseProgressBar from '../../../components/PhaseProgressBar.jsx'; 
 import PhaseSalaCodigo from "../features/Phase-2";
@@ -24,6 +25,8 @@ export default function StudentApp() {
   const [phase, setPhase] = useState(-2); 
   const [showInstructions, setShowInstructions] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [showPhaseVideo, setShowPhaseVideo] = useState(false);
+  const [phaseVideoShown, setPhaseVideoShown] = useState({});
   const [imgError, setImgError] = useState(false);
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
@@ -84,6 +87,20 @@ export default function StudentApp() {
   };
   
   const handleIntroDone = () => {
+    // If this phase has a specific video intro, show it after the generic PhaseIntro
+    const VIDEO_BY_PHASE = {
+      0: 15, // general intro
+      1: 14, // Fase 1 specific video id
+      2: 16  // Fase 2 specific video id
+    };
+
+    const vid = VIDEO_BY_PHASE[phase];
+    if (vid && !phaseVideoShown[phase]) {
+      setPhaseVideoShown(prev => ({ ...prev, [phase]: true }));
+      setShowPhaseVideo(true);
+      return;
+    }
+
     setShowIntro(false);
   };
 
@@ -181,6 +198,15 @@ export default function StudentApp() {
               <PhaseIntro phase={phase} onDone={handleIntroDone} />
             ) : (
               <>
+                {/* Phase-specific video interstitial (overlays the UI). */}
+                {showPhaseVideo && (
+                  <PhaseVideoInterstitial
+                    videoId={{0:15,1:14,2:16}[phase] || 15}
+                    size={phase === 0 ? 'large' : 'medium'}
+                    onClose={() => { setShowPhaseVideo(false); setShowIntro(false); }}
+                  />
+                )}
+
                 {phase === 1 && <Phase1 role={role} isProf={isProf} onNext={() => handlePhaseComplete(1)} />}
                 {phase === 2 && <Phase2 role={role} isProf={isProf} onNext={() => handlePhaseComplete(2)} />}
                 {phase === 3 && <Phase3 role={role} isProf={isProf} onBack={() => go(2)} onNext={() => handlePhaseComplete(3)} />}
