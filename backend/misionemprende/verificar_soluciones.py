@@ -7,7 +7,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'misionemprende.settings')
 django.setup()
 
-from api.models import Equipo, SolucionLego
+from .api.models import Equipo, SolucionLego
 
 equipo = Equipo.objects.get(id=1)
 soluciones = SolucionLego.objects.filter(equipo=equipo).order_by('-fechacreacion')

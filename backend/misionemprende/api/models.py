@@ -220,7 +220,8 @@ class ListaParticipante(models.Model):
 
 
 class Partida(models.Model):
-    video = models.ForeignKey('Video', models.PROTECT, blank=True, null=True)  # Permitir valores nulos
+    # Nota: se elimina la FK a Video para permitir una relación one-to-many
+    # Los videos ahora referenciarán a la partida mediante Video.partida
     fechacreacion = models.DateTimeField()
     estado = models.CharField(max_length=20)
     codigoacceso = models.CharField(unique=True, max_length=10, blank=True, null=True)
@@ -357,6 +358,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 class Video(models.Model):
     nombrevideo = models.CharField(max_length=150)
     url = models.CharField(max_length=500)
+    # Nueva FK hacia Partida para soportar múltiples videos por partida
+    partida = models.ForeignKey(Partida, related_name='videos', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         app_label = 'api'

@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.db import connection
-from api.models import Equipo, SolucionLego
+from .models import Equipo, SolucionLego
 import traceback
 
 def test_database_connection(request):

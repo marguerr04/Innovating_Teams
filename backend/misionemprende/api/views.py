@@ -8,7 +8,7 @@ from rest_framework.parsers import JSONParser
 
 
 
-from api.models import Usuario
+from .models import Usuario
 # Django REST Framework imports
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action, parser_classes
@@ -17,9 +17,9 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import check_password # para verificar contraseñas
 # Modelos y serializers
-from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida,  ListaParticipante, SolucionLego
+from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida, ListaParticipante, SolucionLego, Video
 
-from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer, EquipoSerializer
+from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer, EquipoSerializer, VideoSerializer
 
 # Autenticación
 from django.contrib.auth import authenticate, get_user_model
@@ -131,6 +131,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     """
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint para crear/listar/editar videos.
+    """
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
 
 
 

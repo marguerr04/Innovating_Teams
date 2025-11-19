@@ -9,6 +9,7 @@ import PreLogin from "./pages/PreLogin";
 import ProfessorApp from "./modules/profesor/ProfessorApp";
 import TestAnimacion from './pages/Tests';
 import DevImageUpload from './utils/dev-tools/DevImageUpload';
+import VideoTest from './pages/VideoTest';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/test-animacion" element={<TestAnimacion />} />
         <Route path="/tests" element={<TestAnimacion />} />
         <Route path="/test-upload" element={<DevImageUpload />} />
+        <Route path="/test-videos" element={<VideoTest />} />
       </Routes>
     </BrowserRouter>
   );

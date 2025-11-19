@@ -12,6 +12,7 @@ router = DefaultRouter()
 router.register(r'estudiantes', views.EstudianteViewSet, basename='estudiante')
 router.register(r'cursos', views.CursoViewSet, basename='curso')
 router.register(r'usuarios', views.UsuarioViewSet, basename='usuario')
+router.register(r'videos', views.VideoViewSet, basename='video')
 
 # Rutas adicionales
 urlpatterns = [

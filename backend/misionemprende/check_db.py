@@ -9,7 +9,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'misionemprende.settings')
 django.setup()
 
-from api.models import Equipo, SolucionLego
+from .api.models import Equipo, SolucionLego
 from django.db import connection
 
 print("=== VERIFICACIÓN DE BASE DE DATOS ===")
