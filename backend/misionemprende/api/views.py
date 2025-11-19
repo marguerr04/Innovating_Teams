@@ -616,3 +616,65 @@ def guardar_imagen_solucion(request):
         return JsonResponse({
             'error': f'Error interno del servidor: {str(e)}'
         }, status=500)
+
+@csrf_exempt
+def obtener_imagen_equipo(request):
+    """
+    Obtiene la imagen de prototipo de un equipo específico de la fase actual.
+    
+    Parámetros:
+    - GET: team_id (número del equipo)
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    team_id = request.GET.get('team_id')
+    
+    if not team_id:
+        return JsonResponse({'error': 'team_id es requerido'}, status=400)
+    
+    try:
+        # Convertir team_id a entero
+        team_id = int(team_id)
+        
+        # Buscar la solución que tenga una imagen válida para este equipo
+        # Priorizar URLs de Google Cloud Storage sobre URLs dummy
+        solucion = SolucionLego.objects.filter(
+            equipo__id=team_id,
+            fotoprototipurl__isnull=False
+        ).exclude(
+            fotoprototipurl__exact=''
+        ).exclude(
+            fotoprototipurl__startswith='http://example.com/'
+        ).order_by('-id').first()
+        
+        # Si no hay imagen de Google Cloud, buscar cualquier imagen
+        if not solucion:
+            solucion = SolucionLego.objects.filter(
+                equipo__id=team_id,
+                fotoprototipurl__isnull=False
+            ).exclude(
+                fotoprototipurl__exact=''
+            ).order_by('-id').first()
+        
+        if not solucion:
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró imagen para este equipo',
+                'has_image': False
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'has_image': bool(solucion.fotoprototipurl),
+            'image_url': solucion.fotoprototipurl,
+            'solucion_id': solucion.id,
+            'team_id': team_id
+        })
+        
+    except ValueError:
+        return JsonResponse({'error': 'team_id debe ser un número válido'}, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Error interno del servidor: {str(e)}'
+        }, status=500)

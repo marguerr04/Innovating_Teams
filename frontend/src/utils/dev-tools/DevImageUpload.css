@@ -31,6 +31,158 @@
     margin-bottom: 40px;
 }
 
+/* Estilos para la sección de imagen existente */
+.existing-image-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.existing-image-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.existing-image-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.image-display {
+    flex: 1;
+    max-width: 400px;
+}
+
+.existing-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.existing-image:hover {
+    transform: scale(1.02);
+}
+
+.image-error {
+    padding: 20px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.existing-image-info {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.existing-image-info p {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.existing-image-info strong {
+    color: #495057;
+}
+
+.existing-image-info a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.existing-image-info a:hover {
+    text-decoration: underline;
+}
+
+.refresh-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: #218838;
+}
+
+.no-existing-image {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.no-existing-image p {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.no-existing-image small {
+    color: #adb5bd;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+.error-message p {
+    margin-bottom: 10px;
+}
+
+.clear-error-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.clear-error-btn:hover {
+    background: #c82333;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 768px) {
+    .existing-image-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .existing-image-info {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
 .results-section {
     background: white;
     border-radius: 12px;
