@@ -79,7 +79,7 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
       {/* Cabecera con Timer mejorado */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold mb-1">Fase 3 · Creatividad (Construcción)</h1>
+          <h1 className="text-3xl font-extrabold mb-1">Creatividad </h1>
           <p className="text-lg opacity-80 max-w-3xl">
             ¡Tiempo de crear! Usando la <strong>caja de Legos en tu mesa</strong>, 
             construye un prototipo de tu solución para <strong>{p2?.persona?.name || 'la persona'}</strong>. 

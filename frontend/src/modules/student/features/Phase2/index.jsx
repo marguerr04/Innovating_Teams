@@ -76,7 +76,7 @@ export default function Phase2({ onNext, isProf }) {
         {/* --- Cabecera y Timer (Compartido) --- */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-extrabold">
-            Fase 2 · {view === 'selection' ? 'Selección de Desafío' : 'Mapa de Empatía'}
+            Empatía · {view === 'selection' ? 'Selección de Desafío' : 'Mapa de Empatía'}
           </h1>
           <div className="card p-4">
             <Timer 
