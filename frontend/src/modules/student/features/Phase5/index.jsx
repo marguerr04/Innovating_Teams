@@ -41,25 +41,9 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
   
   const soundRef = useRef(null);
   
-  // --- 1. AÑADIR LÓGICA DE FOTOS (MODIFICADA PARA TESTING) ---
-  // ... (código existente) ...
-  const [myLegoPhoto] = useState(() => load('it_lego_photo', null)); // <--- ¡ESTA LÍNEA FALTA!
+  // --- LÓGICA DE FOTOS CON GOOGLE CLOUD STORAGE ---
+  // Estado local para la imagen del equipo actual
   const [currentTeamPhoto, setCurrentTeamPhoto] = useState(null);
-
-  useEffect(() => {
-    // Esta función se actualiza cada vez que cambia el equipo
-    const teamId = TEAMS[currentTeamIndex].id;
-    
-    if (teamId === MY_TEAM_ID) {
-      // Para TU equipo (Equipo 1), carga la foto real que tomaste en Fase 3.
-      setCurrentTeamPhoto(myLegoPhoto);
-    } else {
-      // PARA TESTEAR: Carga una foto de prueba para los otros equipos.
-      //
-      setCurrentTeamPhoto('/lego.gif'); 
-    }
-  }, [currentTeamIndex, myLegoPhoto]); // Se ejecuta cuando cambia el equipo
-  // --- FIN LÓGICA DE FOTOS ---
 
 
   const handlePitchComplete = () => {
@@ -102,10 +86,9 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
     clearError
   } = useImageManager(currentTeam.id);
 
-  // Estado local para la imagen del equipo actual (igual que Phase3)
-  const [currentTeamPhoto, setCurrentTeamPhoto] = useState(null);
+  // Estado local para la imagen del equipo actual (ya declarado arriba)
 
-  // Sincronizar con imagen existente cuando se carga (igual que Phase3)
+  // Sincronizar con imagen existente cuando se carga y cuando cambia el equipo
   useEffect(() => {
     console.log(`🔍 Debug Equipo ${currentTeam.id}:`, {
       hasExistingImage,
@@ -117,7 +100,12 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
       setCurrentTeamPhoto(existingImageUrl);
       console.log(`✅ Imagen asignada para ${currentTeam.name}:`, existingImageUrl);
     } else {
-      setCurrentTeamPhoto(null);
+      // Para equipos sin imagen en la BD, mostrar imagen de prueba
+      if (currentTeam.id === MY_TEAM_ID) {
+        setCurrentTeamPhoto(null); // Mi equipo sin imagen
+      } else {
+        setCurrentTeamPhoto('/lego.gif'); // Otros equipos - imagen de prueba
+      }
       console.log(`❌ Sin imagen para ${currentTeam.name}`);
     }
   }, [hasExistingImage, existingImageUrl, currentTeam.id]);
