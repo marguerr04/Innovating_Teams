@@ -3,13 +3,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; 
 
-import { useRole } from '../../../utils/helpers.js'; 
+import { useRole } from '../../../utils/helpers.js';
 
-// 1. RE-IMPORTA EL MODAL DE INSTRUCCIONES
-import InstructionsModal from '../../../components/InstructionsModal'; 
-import InteractiveBackground from '../../../components/InteractiveBackground.jsx'; 
+import InstructionsModal from '../../../components/InstructionsModal';
+
+// 1. ELIMINAMOS 'InteractiveBackground' DE AQUÍ
+// import InteractiveBackground from '../../../components/InteractiveBackground.jsx'; // <--- ELIMINADO
+import PhaseBackground from '../../../components/PhaseBackground.jsx'; // <--- AÑADIDO
+
 import PhaseIntro from '../../../components/PhaseIntro.jsx';
-import TokensOverlay from '../../../components/TokensOverlay.jsx'; 
+import TokensOverlay from '../../../components/TokensOverlay.jsx';
 
 import Phase0 from "../features/Phase0";
 import Phase1 from "../features/Phase1";
@@ -25,14 +28,12 @@ import BouncingCircle from '../../../components/BouncingCircle';
 
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
-  const [phase, setPhase] = useState(0); // comenzamos en Fase 0 (introducción)
+  const [phase, setPhase] = useState(0); 
   const [showInstructions, setShowInstructions] = useState(false);
   
   const [showIntro, setShowIntro] = useState(true);
-  // estado para fallback si la imagen no carga o es muy pequeña
   const [imgError, setImgError] = useState(false);
   
-  // 2. AÑADE ESTOS NUEVOS ESTADOS
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
 
@@ -61,11 +62,14 @@ export default function StudentApp() {
   };
 
   return (
-    <div className="interactive-background-glow min-h-screen text-white"> 
+    // 2. ELIMINAMOS la clase 'interactive-background-glow'
+    <div className="min-h-screen text-white relative"> 
       
-      <InteractiveBackground />
-
-      {/* 3. RE-AGREGA EL BOTÓN DE INSTRUCCIONES */}
+      {/* 3. REEMPLAZAMOS el componente de fondo */}
+      {/* <InteractiveBackground /> */ } {/* <--- ELIMINADO */}
+      <PhaseBackground phase={phase} /> {/* <--- CORRECTO */}
+      
+      {/* Botón de Instrucciones */}
       <button 
         id="openModal"
         className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
@@ -74,19 +78,19 @@ export default function StudentApp() {
         📘 Ver instrucciones
       </button>
 
-      {/* 4. RE-AGREGA EL COMPONENTE MODAL */}
+      {/* Modal de Instrucciones */}
       <InstructionsModal 
         isOpen={showInstructions} 
         onClose={() => setShowInstructions(false)}
         initialPhase={phase} 
       />
       
-      {/* ... (Navbar sin cambios) ... */}
+      {/* Navbar (con z-index) */}
       <div className="sticky top-0 z-20 backdrop-blur border-b border-white/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            {/* ... (contenido del navbar sin cambios) ... */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
-                {/* Logo a la izquierda, cargado desde public/assets/mission_logo.png */}
                 <Link to="/" className="flex items-center gap-3 no-underline">
                   {!imgError ? (
                     <img
@@ -96,7 +100,6 @@ export default function StudentApp() {
                       onError={() => setImgError(true)}
                     />
                   ) : (
-                    // Fallback textual ancho y espaciado horizontal
                     <div className="text-left">
                       <div className="font-extrabold text-2xl tracking-wider text-white">Mision</div>
                       <div className="font-extrabold text-2xl tracking-wider text-[#FFD700]">Emprende</div>
@@ -105,7 +108,6 @@ export default function StudentApp() {
                 </Link>
               </div>
               <div className="progress ml-3">
-                {/* Incluye Fase 0 + Fases 1-7 */}
                 {[0,1,2,3,4,5,6,7].map((n) => (
                   <span key={n} className={`step ${phase === n ? "active" : ""}`}>
                     Fase {n}
@@ -125,20 +127,20 @@ export default function StudentApp() {
                 {isProf ? "Cambiar a Alumno" : "Cambiar a Profesor"}
               </button>
             </div>
-          </div>
+        </div>
       </div>
       
+      {/* TokensOverlay (sin cambios) */}
       <TokensOverlay 
         show={showTokens}
         phase={phaseToShowTokensFor}
         onContinue={handleTokenContinue}
       />
 
-      {/* Contenido de la Fase (sin cambios) */}
+      {/* Contenido de la Fase (con z-index) */}
       <div className="max-w-6xl mx-auto p-6 relative z-10">
       
-        {/* 6. MODIFICA EL RENDERIZADO CONDICIONAL */}
-        {/* Ahora, solo muestra la intro O la fase si el overlay de tokens NO está visible */ }
+        {/* ... (Lógica de fases sin cambios) ... */}
         {!showTokens && (
           phase === 0 ? (
             <Phase0 onStart={() => go(1)} />

@@ -10,18 +10,14 @@ import SkillRater from './components/SkillRater.jsx';
 const PITCH_DURATION = 90; // 90 segundos para presentar
 const EVAL_DURATION = 120; // 2 minutos para evaluar
 
-// (Asumimos 4 equipos. Esto debe venir del profesor en el futuro)
 const TEAMS = [
   { id: 1, name: "Equipo 1" },
   { id: 2, name: "Equipo 2" },
   { id: 3, name: "Equipo 3" },
   { id: 4, name: "Equipo 4" },
 ];
-
-// (Asumimos que el usuario actual es el Equipo 1. Esto también debe ser dinámico)
 const MY_TEAM_ID = 1;
 
-// Rúbrica de Habilidades
 const skills = [
   { key: "equipo", label: "Equipo", desc: "Evalúa si trabajaron coordinados, con participación y colaboración." },
   { key: "empatia", label: "Empatía", desc: "Evalúa si entendieron bien a la persona del desafío y su contexto." },
@@ -45,7 +41,26 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
   
   const soundRef = useRef(null);
   
-  // --- Handlers del Flujo Automático ---
+  // --- 1. AÑADIR LÓGICA DE FOTOS (MODIFICADA PARA TESTING) ---
+  // ... (código existente) ...
+  const [myLegoPhoto] = useState(() => load('it_lego_photo', null)); // <--- ¡ESTA LÍNEA FALTA!
+  const [currentTeamPhoto, setCurrentTeamPhoto] = useState(null);
+
+  useEffect(() => {
+    // Esta función se actualiza cada vez que cambia el equipo
+    const teamId = TEAMS[currentTeamIndex].id;
+    
+    if (teamId === MY_TEAM_ID) {
+      // Para TU equipo (Equipo 1), carga la foto real que tomaste en Fase 3.
+      setCurrentTeamPhoto(myLegoPhoto);
+    } else {
+      // PARA TESTEAR: Carga una foto de prueba para los otros equipos.
+      //
+      setCurrentTeamPhoto('/lego.gif'); 
+    }
+  }, [currentTeamIndex, myLegoPhoto]); // Se ejecuta cuando cambia el equipo
+  // --- FIN LÓGICA DE FOTOS ---
+
 
   const handlePitchComplete = () => {
     setView('evaluating'); 
@@ -60,8 +75,8 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
     }
   };
 
-  // --- Lógica de la Rúbrica ---
   function setVal(field, value, teamId) {
+    // ... (Tu función setVal existente)
     setAllScores((prev) => {
       const copy = { ...prev };
       copy[teamId] = { ...copy[teamId], [field]: value };
@@ -73,8 +88,6 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
     }
   }
 
-  // --- Renderizado Dinámico ---
-  
   const currentTeam = TEAMS[currentTeamIndex];
   const isMyTeamPresenting = currentTeam.id === MY_TEAM_ID;
   
@@ -192,7 +205,6 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
           onComplete={handlePitchComplete} 
         />
         
-        {/* === 1. BOTÓN PARA SALTAR (SOLO PROFESOR) === */}
         {isProf && (
           <button 
             className="btn bg-orange-500 text-white mt-4 text-sm"
@@ -201,7 +213,24 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
             (Test) Saltar Presentación
           </button>
         )}
-        {/* === FIN DEL BOTÓN === */}
+        
+        {/* --- 2. MOSTRAR FOTO GRANDE --- */}
+        <div className="mt-6">
+          {currentTeamPhoto ? (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">Prototipo del {currentTeam.name}:</h3>
+              {/* Se muestra grande (max-w-lg) */}
+              <img src={currentTeamPhoto} alt={`Prototipo ${currentTeam.name}`} className="w-full max-w-lg mx-auto rounded-lg shadow-md mt-2 border" />
+            </div>
+          ) : (
+            <div className="mt-6 p-4 bg-slate-50 rounded-lg text-slate-500 text-sm">
+              {isMyTeamPresenting ? 
+                "Tu equipo no subió una foto en la Fase 3." :
+                `(No se puede mostrar la foto del ${currentTeam.name} - (lógica de backend pendiente))`
+              }
+            </div>
+          )}
+        </div>
         
         {isMyTeamPresenting ? (
           <p className="text-slate-600 mt-4 font-semibold">¡Es su turno de presentar! Tienen 90 segundos.</p>
@@ -237,7 +266,6 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
             onComplete={handleEvaluationComplete} 
           />
 
-          {/* === 2. BOTÓN PARA SALTAR EVALUACIÓN (SOLO PROFESOR) === */}
           {isProf && (
             <button 
               className="btn bg-orange-500 text-white mt-4 text-sm"
@@ -246,39 +274,61 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
               (Test) Saltar Evaluación
             </button>
           )}
-          {/* === FIN DEL BOTÓN === */}
 
           {isMyTeamPresenting ? (
+            // Vista si es mi equipo el que está siendo evaluado
             <div className="text-center p-8 bg-slate-100 rounded-lg mt-6">
               <p className="font-semibold text-slate-700">¡Buen trabajo en su pitch!</p>
               <p className="text-slate-600">Su equipo está siendo evaluado por los demás. Esperen a la siguiente ronda.</p>
             </div>
           ) : (
+            // Vista para evaluar a OTRO equipo
             <>
               <p className="text-slate-600 my-6 text-center">
-                Tienen 2 minutos para otorgar un puntaje de 1 a 10 para cada habilidad.
+                Tienen 2 minutos para otorgar un puntaje de 1 a 10 para cada habilidad, observando su prototipo.
               </p>
               
-              <div className="space-y-5">
-                {skills.map((skill) => (
-                  <SkillRater
-                    key={skill.key}
-                    skill={skill}
-                    value={activeScores[skill.key]}
-                    onRate={(key, val) => setVal(key, val, currentTeam.id)}
-                  />
-                ))}
+              {/* --- 3. LAYOUT RESPONSIVO (FOTO + RÚBRICA) --- */}
+              <div className="grid grid-cols-1 gap-6 lg:gap-8 items-start">
                 
-                <div>
-                  <div className="font-bold mb-2 text-slate-900">Comentarios para {currentTeam.name}</div>
-                  <textarea
-                    className="w-full rounded-xl border border-slate-200 p-3 min-h-[90px] bg-white text-slate-900"
-                    value={activeScores.comment}
-                    onChange={(e) => setVal("comment", e.target.value, currentTeam.id)}
-                    placeholder="Comentarios constructivos..."
-                  ></textarea>
+                {/* Columna 1: Foto (Ahora arriba) */}
+                {/* CAMBIO: Centramos la foto y quitamos el 'sticky' */}
+                <div className="w-full max-w-lg mx-auto"> 
+                  {currentTeamPhoto ? (
+                    <div> 
+                      <h3 className="font-bold text-slate-800 mb-2">Prototipo del {currentTeam.name}</h3>
+                      <img src={currentTeamPhoto} alt={`Prototipo ${currentTeam.name}`} className="w-full rounded-lg shadow-md border" />
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-slate-50 rounded-lg text-center text-slate-500 text-sm">
+                      (No se pudo cargar la foto del prototipo del Equipo {currentTeam.name}.)
+                    </div>
+                  )}
+                </div>
+                
+                {/* Columna 2: Rúbrica */}
+                <div className="space-y-5">
+                  {skills.map((skill) => (
+                    <SkillRater
+                      key={skill.key}
+                      skill={skill}
+                      value={activeScores[skill.key]}
+                      onRate={(key, val) => setVal(key, val, currentTeam.id)}
+                    />
+                  ))}
+                  
+                  <div>
+                    <div className="font-bold mb-2 text-slate-900">Comentarios para {currentTeam.name}</div>
+                    <textarea
+                      className="w-full rounded-xl border border-slate-200 p-3 min-h-[90px] bg-white text-slate-900"
+                      value={activeScores.comment}
+                      onChange={(e) => setVal("comment", e.target.value, currentTeam.id)}
+                      placeholder="Comentarios constructivos..."
+                    ></textarea>
+                  </div>
                 </div>
               </div>
+              {/* --- FIN LAYOUT RESPONSIVO --- */}
 
               <div className="flex justify-end mt-8">
                 <button 
