@@ -105,7 +105,7 @@ function Phase1({ role, onNext, isProf }) {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Fase 1 · Votación de actividades</h1>
+        <h1 className="text-2xl font-bold">Trabajo en equipo</h1>
         <div className="card p-4">
           <Timer
             initialSeconds={PHASE_1_DURATION}
