@@ -1,6 +1,6 @@
-// Archivo: src/modules/student/pages/StudentApp.jsx
+// src/modules/student/pages/StudentApp.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
 import { useRole } from '../../../utils/helpers.js';
 import InstructionsModal from '../../../components/InstructionsModal';
@@ -27,6 +27,37 @@ export default function StudentApp() {
   const [imgError, setImgError] = useState(false);
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
+
+  // --- 1. EFECTO PARA CARGAR EL CHATBOT (CORREGIDO) ---
+  useEffect(() => {
+    (function(){
+      if(!window.chatbase || window.chatbase("getState") !== "initialized"){
+        // CORRECCIÓN AQUÍ: Cambiado '...arguments' por '...args'
+        window.chatbase = (...args) => {
+          if (!window.chatbase.q) { window.chatbase.q = [] }
+          window.chatbase.q.push(args)
+        };
+        window.chatbase = new Proxy(window.chatbase, {
+          get(target, prop) {
+            if (prop === "q") { return target.q }
+            return (...args) => target(prop, ...args)
+          }
+        })
+      }
+      const onLoad = function() {
+        const script = document.createElement("script");
+        script.src = "https://www.chatbase.co/embed.min.js";
+        script.id = "NDIGyY6LjlULvnmM9GEOX";
+        script.domain = "www.chatbase.co";
+        document.body.appendChild(script);
+      };
+      if (document.readyState === "complete") {
+        onLoad();
+      } else {
+        window.addEventListener("load", onLoad);
+      }
+    })();
+  }, []);
 
   const handlePhaseComplete = (phaseJustFinished) => {
     if (phaseJustFinished >= 6) {
@@ -61,10 +92,9 @@ export default function StudentApp() {
       
       <PhaseBackground phase={phase} /> 
       
-      {/* --- BOTONES FLOTANTES PARA FASES INICIALES (-2 y -1) --- */}
+      {/* Botones flotantes (Fases iniciales) */}
       {phase < 0 && (
         <>
-          {/* 1. NUEVO: Botón Cambiar Rol (Izquierda) */}
           <button
             className="fixed top-4 left-4 z-40 bg-slate-800/50 hover:bg-slate-700/80 text-white px-4 py-2 rounded-full shadow-lg text-xs sm:text-sm flex items-center gap-2 backdrop-blur-sm border border-white/10 transition-all"
             onClick={() => setRole(isProf ? "alumno" : "profesor")}
@@ -73,7 +103,6 @@ export default function StudentApp() {
             <span className="opacity-60 text-[10px] hidden sm:inline">(Cambiar)</span>
           </button>
 
-          {/* 2. Botón Instrucciones (Derecha) - Ya existía, lo mantenemos agrupado aquí */}
           <button 
             id="openModal"
             className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
@@ -90,7 +119,7 @@ export default function StudentApp() {
         initialPhase={phase} 
       />
       
-      {/* Navbar (Solo visible desde Fase 0 en adelante) */}
+      {/* Navbar (Fases >= 0) */}
       {phase >= 0 && (
         <div className="sticky top-0 z-20 backdrop-blur border-b border-white/20 bg-slate-900/30">
           <div className="w-full max-w-7xl mx-auto px-4 lg:px-12 py-3 flex items-center justify-between gap-4">
@@ -167,5 +196,3 @@ export default function StudentApp() {
     </div>
   );
 }
-
-//testeo commit lol

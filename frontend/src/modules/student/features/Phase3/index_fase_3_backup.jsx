@@ -1,3 +1,6 @@
+// Backup de index.jsx antes de merge manual
+// Copia completa del archivo en conflicto para recuperación rápida
+export const BACKUP = `
 // src/modules/student/features/Phase3/index.jsx
 import JuicyButton from '../../../../components/JuicyButton';
 import React, { useState, useEffect } from 'react';
@@ -189,7 +192,7 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
             {legoPhoto ? 'Subir Nueva Foto' : 'Subir Foto (Google Cloud)'}
           </button>
 
-          {/* Cámara local (opción secundaria) */}
+          {/* Cámara local (ya tenemos JuicyButton arriba, repetir como opción) */}
           <JuicyButton color="blue" onClick={() => setShowCameraModal(true)} className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2H5a2 2 0 01-2-2V9z" />
@@ -264,4 +267,4 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
     </div>
   );
 }
- 
+`;

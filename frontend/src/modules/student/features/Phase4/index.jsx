@@ -1,5 +1,5 @@
 // src/modules/student/features/Phase4/index.jsx
-
+import JuicyButton from '../../../../components/JuicyButton';
 // 1. IMPORTA 'useEffect' JUNTO CON 'useState'
 import React, { useState, useEffect } from 'react';
 // 2. IMPORTA 'load' Y 'save'
@@ -128,16 +128,17 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
             <div className="mt-4 text-sm text-slate-600">
               Usa la ruleta para elegir quién presenta. No se repiten presentadores.
             </div>
-            <button 
-              className="mt-4 btn bg-accent-500 text-white" 
-              onClick={() => setShowModal(true)}
-              disabled={remaining.length === 0}
-            >
-              {remaining.length === 0 ? 'Todos han presentado' : 'Girar la Ruleta'}
-            </button>
+            <JuicyButton 
+        color="yellow" 
+        onClick={() => setShowModal(true)}
+        disabled={remaining.length === 0}
+        className="w-full"
+      >
+        {remaining.length === 0 ? 'Todos han presentado' : '🎰 Girar la Ruleta'}
+      </JuicyButton>
             <div className="mt-6 flex gap-2">
-              <button className="btn bg-slate-100" onClick={onBack}>← Volver</button>
-              <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 5</button>
+              <JuicyButton color="gray" onClick={onBack}>← Volver</JuicyButton>
+    <JuicyButton color="blue" onClick={onNext}>Continuar a Fase 5 →</JuicyButton>
             </div>
           </div>
         </div>
