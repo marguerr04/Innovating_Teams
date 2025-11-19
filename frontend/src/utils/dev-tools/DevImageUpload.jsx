@@ -1,11 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PrototypeUpload from '../../modules/student/components/PrototypeUpload';
 import useImageManager from '../useImageManager';
 import './DevImageUpload.css';
 
 const DevImageUpload = () => {
     const [uploadedImages, setUploadedImages] = useState([]);
-    const teamId = 1; // Equipo de prueba
+    const [equipos, setEquipos] = useState([]);
+    const [selectedEquipoId, setSelectedEquipoId] = useState(null);
+    const [loadingEquipos, setLoadingEquipos] = useState(false);
+    
+    // Cargar equipos al montar el componente
+    useEffect(() => {
+        fetchEquipos();
+    }, []);
+    
+    const fetchEquipos = async () => {
+        try {
+            setLoadingEquipos(true);
+            const response = await fetch('/api/equipos/');
+            if (response.ok) {
+                const data = await response.json();
+                setEquipos(data);
+                // Seleccionar el primer equipo por defecto si hay equipos disponibles
+                if (data.length > 0) {
+                    setSelectedEquipoId(data[0].id);
+                }
+            } else {
+                console.error('Error al cargar equipos');
+            }
+        } catch (error) {
+            console.error('Error al conectar con la API:', error);
+        } finally {
+            setLoadingEquipos(false);
+        }
+    };
     
     // Usar el hook para gestionar imágenes existentes
     const {
@@ -17,7 +45,7 @@ const DevImageUpload = () => {
         updateImageData,
         refreshImage,
         clearError
-    } = useImageManager(teamId);
+    } = useImageManager(selectedEquipoId);
 
     const handleImageUploaded = (result) => {
         console.log('Imagen subida:', result);
@@ -39,9 +67,71 @@ const DevImageUpload = () => {
                 <p>Prueba el sistema: Frontend → Backend → Google Cloud → PostgreSQL</p>
             </div>
 
+            {/* Sección de selección de equipo */}
+            <div className="team-selection-section" style={{
+                padding: '20px',
+                backgroundColor: '#f0f8ff',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                border: '2px solid #4CAF50'
+            }}>
+                <h2>👥 Seleccionar Equipo</h2>
+                {loadingEquipos ? (
+                    <p>🔄 Cargando equipos...</p>
+                ) : equipos.length > 0 ? (
+                    <>
+                        <select 
+                            value={selectedEquipoId || ''} 
+                            onChange={(e) => {
+                                const newTeamId = parseInt(e.target.value);
+                                console.log('Equipo seleccionado:', newTeamId);
+                                setSelectedEquipoId(newTeamId);
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                fontSize: '16px',
+                                border: '2px solid #ddd',
+                                borderRadius: '6px',
+                                marginBottom: '10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {equipos.map(equipo => (
+                                <option key={equipo.id} value={equipo.id}>
+                                    {equipo.nombre} (ID: {equipo.id}) - Tamaño: {equipo.tamanoequipo || 'N/A'}
+                                </option>
+                            ))}
+                        </select>
+                        <p style={{ 
+                            color: '#2c5f2d', 
+                            fontWeight: 'bold',
+                            marginTop: '10px'
+                        }}>
+                            ✅ Equipo actual: {equipos.find(eq => eq.id === selectedEquipoId)?.nombre} (ID: {selectedEquipoId})
+                        </p>
+                    </>
+                ) : (
+                    <div style={{
+                        padding: '15px',
+                        backgroundColor: '#fff3cd',
+                        borderRadius: '6px',
+                        border: '1px solid #ffc107'
+                    }}>
+                        <p style={{ color: '#856404', margin: 0 }}>
+                            ⚠️ No hay equipos disponibles en la base de datos
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                            Ejecuta el script SQL: <code>basedatos/Scripts/VerificarEquipos.sql</code>
+                        </p>
+                    </div>
+                )}
+            </div>
+
             {/* Sección de imagen existente */}
-            <div className="existing-image-section">
-                <h2>📷 Imagen Existente - Equipo {teamId}</h2>
+            {selectedEquipoId && (
+                <div className="existing-image-section">
+                    <h2>📷 Imagen Existente - {equipos.find(eq => eq.id === selectedEquipoId)?.nombre}</h2>
                 
                 {loadingError && (
                     <div className="error-message">
@@ -59,7 +149,7 @@ const DevImageUpload = () => {
                         <div className="image-display">
                             <img 
                                 src={existingImageUrl} 
-                                alt={`Imagen del equipo ${teamId}`}
+                                alt={`Imagen del equipo ${selectedEquipoId}`}
                                 className="existing-image"
                                 onError={(e) => {
                                     e.target.style.display = 'none';
@@ -88,14 +178,30 @@ const DevImageUpload = () => {
                         <p><small>Sube una imagen usando el formulario de abajo para verla aquí</small></p>
                     </div>
                 )}
-            </div>
+                </div>
+            )}
 
-            <div className="upload-section">
-                <PrototypeUpload 
-                    equipoId={teamId} 
-                    onImageUploaded={handleImageUploaded}
-                />
-            </div>
+            {/* Sección de upload */}
+            {selectedEquipoId ? (
+                <div className="upload-section">
+                    <h2>📤 Subir Nueva Imagen</h2>
+                    <PrototypeUpload 
+                        equipoId={selectedEquipoId} 
+                        onImageUploaded={handleImageUploaded}
+                    />
+                </div>
+            ) : (
+                <div className="upload-section" style={{
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    color: '#666'
+                }}>
+                    <h3>⬆️ Selecciona un equipo primero</h3>
+                    <p>Debes seleccionar un equipo antes de poder subir imágenes</p>
+                </div>
+            )}
 
             {uploadedImages.length > 0 && (
                 <div className="results-section">

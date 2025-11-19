@@ -19,7 +19,7 @@ from django.contrib.auth.hashers import check_password # para verificar contrase
 # Modelos y serializers
 from .models import Estudiante, Curso, Usuario, PartidaUsuario, Equipo, Partida,  ListaParticipante, SolucionLego
 
-from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer
+from .serializers import EstudianteSerializer, CursoSerializer, UsuarioSerializer, EquipoSerializer
 
 # Autenticación
 from django.contrib.auth import authenticate, get_user_model
@@ -678,3 +678,37 @@ def obtener_imagen_equipo(request):
         return JsonResponse({
             'error': f'Error interno del servidor: {str(e)}'
         }, status=500)
+
+
+@api_view(['GET'])
+def listar_equipos(request):
+    """
+    Endpoint para obtener la lista de todos los equipos disponibles.
+    
+    GET /api/equipos/
+    
+    Retorna:
+    - Lista de equipos con id, nombre y tamaño
+    
+    Ejemplo de respuesta:
+    [
+        {
+            "id": 1,
+            "nombre": "Equipo Alpha",
+            "tamanoequipo": 5
+        },
+        {
+            "id": 2,
+            "nombre": "Equipo Beta",
+            "tamanoequipo": 4
+        }
+    ]
+    """
+    try:
+        equipos = Equipo.objects.all().order_by('id')
+        serializer = EquipoSerializer(equipos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'error': f'Error al obtener equipos: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

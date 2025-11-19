@@ -43,11 +43,19 @@ def generate_signed_url(request):
 
         expiration_seconds = getattr(settings, 'GCS_SIGNED_URL_EXPIRATION', 3600)
 
+        # Unificar Content-Type para jpg y jpeg
+        if ext.lower() in ["jpg", "jpeg"]:
+            content_type = "image/jpeg"
+        elif ext.lower() == "png":
+            content_type = "image/png"
+        else:
+            content_type = f"image/{ext}"
+
         upload_url = blob.generate_signed_url(
             version="v4",
             expiration=timedelta(seconds=expiration_seconds),
             method="PUT",
-            content_type=f"image/{ext}"
+            content_type=content_type
         )
 
         public_url = f"https://storage.googleapis.com/{bucket_name}/{object_name}"

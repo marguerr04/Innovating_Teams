@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from .views import login_view, assign_groups, login_profesor, login_admin, crear_partida
-from .views import asignar_grupos, obtener_grupos, guardar_imagen_solucion, obtener_imagen_equipo
+from .views import asignar_grupos, obtener_grupos, guardar_imagen_solucion, obtener_imagen_equipo, listar_equipos
 from .storage_service import generate_signed_url
 from .database_test import test_database_connection
 
@@ -38,6 +38,9 @@ urlpatterns = [
     
 # Endpoint para obtener imagen de equipo
     path('obtener-imagen/', obtener_imagen_equipo, name='obtener_imagen_equipo'),
+    
+# Endpoint para listar todos los equipos
+    path('equipos/', listar_equipos, name='listar_equipos'),
     
     # Endpoint de diagnóstico de base de datos
     path('test-db/', test_database_connection, name='test_database_connection'),
