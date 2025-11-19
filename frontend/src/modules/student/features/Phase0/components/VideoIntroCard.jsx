@@ -2,14 +2,14 @@
 // Componente responsive para alojar el video introductorio (placeholder por ahora)
 import React, { useEffect, useState } from 'react';
 
-export default function VideoIntroCard() {
+// General VideoIntroCard: acepta `videoId` (por defecto 15) y `size` ('large'|'medium')
+export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Cargar el video con id 15 (intro) desde la API
-    const id = 15;
+    const id = videoId;
     const url = `/api/videos/${id}/`;
 
     let cancelled = false;
@@ -33,10 +33,13 @@ export default function VideoIntroCard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [videoId]);
+
+  // Ajustes de tamaño
+  const maxWidthClass = size === 'medium' ? 'max-w-4xl' : 'max-w-5xl';
 
   return (
-    <div className="w-full mx-auto max-w-5xl">
+    <div className={`w-full mx-auto ${maxWidthClass}`}>
       <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white/5 backdrop-blur-md p-4 sm:p-6">
         {/* Área de video con relación 16:9 usando aspect-video */}
         <div className="aspect-video w-full grid place-items-center bg-gradient-to-br from-[#1E5AA8] to-[#3AB6B5] text-white/80">
