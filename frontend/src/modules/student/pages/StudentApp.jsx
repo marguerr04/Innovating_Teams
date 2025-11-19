@@ -61,15 +61,27 @@ export default function StudentApp() {
       
       <PhaseBackground phase={phase} /> 
       
-      {/* Botón flotante de instrucciones (solo visible si el navbar no está, o como backup) */}
+      {/* --- BOTONES FLOTANTES PARA FASES INICIALES (-2 y -1) --- */}
       {phase < 0 && (
-        <button 
-          id="openModal"
-          className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
-          onClick={() => setShowInstructions(true)}
-        >
-          📘 Ver instrucciones
-        </button>
+        <>
+          {/* 1. NUEVO: Botón Cambiar Rol (Izquierda) */}
+          <button
+            className="fixed top-4 left-4 z-40 bg-slate-800/50 hover:bg-slate-700/80 text-white px-4 py-2 rounded-full shadow-lg text-xs sm:text-sm flex items-center gap-2 backdrop-blur-sm border border-white/10 transition-all"
+            onClick={() => setRole(isProf ? "alumno" : "profesor")}
+          >
+            <span>Rol: <b>{isProf ? "Profesor" : "Alumno"}</b></span>
+            <span className="opacity-60 text-[10px] hidden sm:inline">(Cambiar)</span>
+          </button>
+
+          {/* 2. Botón Instrucciones (Derecha) - Ya existía, lo mantenemos agrupado aquí */}
+          <button 
+            id="openModal"
+            className="fixed top-4 right-4 z-40 bg-[#005a8d] hover:bg-sky-700 text-white px-4 py-2 rounded-full shadow-lg text-sm flex items-center gap-2"
+            onClick={() => setShowInstructions(true)}
+          >
+            📘 Ver instrucciones
+          </button>
+        </>
       )}
 
       <InstructionsModal 
@@ -78,19 +90,12 @@ export default function StudentApp() {
         initialPhase={phase} 
       />
       
-      {/* Navbar REESTRUCTURADO */}
+      {/* Navbar (Solo visible desde Fase 0 en adelante) */}
       {phase >= 0 && (
         <div className="sticky top-0 z-20 backdrop-blur border-b border-white/20 bg-slate-900/30">
-          
-          {/* CAMBIO CLAVE: 
-              1. 'max-w-7xl' -> Limita el ancho total en pantallas gigantes.
-              2. 'mx-auto' -> Centra todo el navbar si la pantalla es más ancha que 7xl.
-              3. 'px-4 lg:px-8' -> Padding responsivo. En PC (lg) añade más margen a los lados para "empujar" el logo y botones hacia el centro.
-          */}
           <div className="w-full max-w-7xl mx-auto px-4 lg:px-12 py-3 flex items-center justify-between gap-4">
               
-              {/* 1. LOGO (Izquierda) */}
-              <div className="flex-shrink-0 w-32 lg:w-40 flex items-center"> {/* Ancho fijo para equilibrar */}
+              <div className="flex-shrink-0 w-32 lg:w-40 flex items-center"> 
                 <Link to="/" className="flex items-center gap-3 no-underline">
                   {!imgError ? (
                     <img
@@ -108,13 +113,10 @@ export default function StudentApp() {
                 </Link>
               </div>
               
-              {/* 2. BARRA DE PROGRESO (Centro) */}
               <div className="flex-1 flex justify-center min-w-0"> 
                   <PhaseProgressBar currentPhase={phase} />
               </div>
 
-              {/* 3. BOTONES (Derecha) */}
-              {/* Mismo ancho fijo que el logo para mantener el centro perfecto */}
               <div className="flex-shrink-0 w-32 lg:w-40 flex justify-end items-center gap-2">
                 <div className="hidden md:flex items-center gap-2">
                    <button className="btn bg-sea-500 text-white text-sm px-3 py-2 whitespace-nowrap" onClick={() => setShowInstructions(true)}>Instrucciones</button>
