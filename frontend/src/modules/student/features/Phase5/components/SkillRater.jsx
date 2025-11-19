@@ -40,18 +40,18 @@ export default function SkillRater({ skill, value, onRate }) {
             const isActive = n === val;
             return (
               <button
-                key={n}
-                type="button"
-                onClick={() => onRate(skill.key, n)} // Llama a la función del padre
-                className={
-                  "w-full aspect-square min-h-[38px] rounded-full flex items-center justify-center font-semibold transition " +
-                  (isActive
-                    ? "bg-[#00B8A9] text-white shadow-md" // bg-mint-500
-                    : "bg-white text-slate-600 hover:bg-slate-100")
-                }
-              >
-                {n}
-              </button>
+  key={n}
+  type="button"
+  onClick={() => onRate(skill.key, n)}
+  className={
+    "w-full aspect-square rounded-xl font-bold text-lg transition-all border-b-4 active:border-b-0 active:translate-y-1 " +
+    (isActive
+      ? "bg-[#3AB6B5] border-[#2E8F8E] text-white" // Mint activo
+      : "bg-slate-100 border-slate-300 text-slate-500 hover:bg-slate-200")
+  }
+>
+  {n}
+</button>
             );
           })}
         </div>

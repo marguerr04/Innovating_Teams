@@ -1,5 +1,6 @@
 // src/modules/student/features/Phase5/index.jsx
 
+import JuicyButton from '../../../../components/JuicyButton';
 import React, { useState, useEffect, useRef } from 'react';
 import { load, save } from '../../../../utils/helpers.js';
 import Timer from '../../../../components/Timer.jsx';
@@ -167,12 +168,9 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
           />
 
           {isProf && (
-            <button 
-              className="btn bg-orange-500 text-white mt-4 text-sm"
-              onClick={handleEvaluationComplete}
-            >
-              (Test) Saltar Evaluación
-            </button>
+            <JuicyButton color="mint" onClick={handleEvaluationComplete}>
+    Guardar y Siguiente →
+  </JuicyButton>
           )}
 
           {isMyTeamPresenting ? (

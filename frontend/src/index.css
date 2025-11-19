@@ -462,3 +462,47 @@ monospace;
 }
 
 /* --- FIN: ESTILOS PARA EL CONTADOR DE TOKENS --- */
+
+
+/* --- 1. IMPORTAR FUENTE "NUNITO" --- */
+/* Agrega esto en la PRIMERA línea del archivo */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+/* --- 2. TAILWIND DIRECTIVES --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- 3. APLICAR FUENTE GLOBALMENTE --- */
+body, #root {
+  background-color: transparent !important;
+  /* Agrega esta línea para cambiar la fuente de toda la app: */
+  font-family: 'Nunito', sans-serif; 
+}
+
+/* ... (El resto de tus estilos y variables siguen igual abajo) ... */
+:root {
+  /* Reset */
+  --card: #0f1f36;
+  /* ... */
+}
+
+/* --- NUEVO ESTILO "TARJETA FLOTANTE" --- */
+.card {
+  /* 1. Fondo y Color */
+  background-color: #ffffff;
+  color: #1e293b; /* slate-800 (Texto oscuro para contraste) */
+
+  /* 2. Bordes Redondos y Gruesos */
+  border-radius: 1.5rem; /* Equivalente a rounded-3xl */
+  border: 4px solid #e2e8f0; /* slate-200 (Borde grueso gris claro) */
+
+  /* 3. Sombra Sólida (El secreto del estilo "Juicy") */
+  /* 0px en X, 8px en Y, 0px de difuminado (blur) -> Sombra dura */
+  box-shadow: 0 8px 0 #cbd5e1; /* slate-300 */
+
+  /* 4. Ajustes de espaciado (opcional, para asegurar que se vea bien) */
+  margin-bottom: 8px; /* Espacio para que la sombra no choque */
+  position: relative; /* Para el contexto de apilamiento */
+}
+

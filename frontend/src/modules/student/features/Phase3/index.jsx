@@ -1,5 +1,5 @@
 // src/modules/student/features/Phase3/index.jsx
-
+import JuicyButton from '../../../../components/JuicyButton';
 import React, { useState, useEffect } from 'react';
 import CameraCapture from './components/CameraCapture.jsx';
 import { load, save } from '../../../../utils/helpers.js';
@@ -85,16 +85,17 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
         <h2 className="text-2xl font-bold mb-4 text-slate-800">Captura tu Prototipo</h2>
         
         {/* Botón para abrir el modal de la cámara */}
-        <button 
-          onClick={() => setShowCameraModal(true)} 
-          className="btn bg-mint-500 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-md hover:bg-mint-600 transition-colors flex items-center gap-2 mx-auto"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          {legoPhoto ? 'Tomar Otra Foto' : 'Tomar Foto del Prototipo'}
-        </button>
+        <JuicyButton 
+    color="mint" 
+    onClick={() => setShowCameraModal(true)} 
+    className="flex items-center gap-2 mx-auto"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+    {legoPhoto ? '📸 Tomar Otra Foto' : '📸 Tomar Foto'}
+  </JuicyButton>
         {legoPhoto && (
           <p className="text-sm text-slate-600 mt-3">¡Prototipo guardado! Puedes tomar otra foto si lo necesitas.</p>
         )}
@@ -102,8 +103,8 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
 
       {/* --- BOTONES DE NAVEGACIÓN --- */}
       <div className="flex gap-3 justify-end mb-10"> {/* Añadimos mb-10 para espacio inferior */}
-        <button className="btn bg-slate-100" onClick={onBack}>← Volver</button>
-        <button className="btn bg-accent-500 text-white" onClick={onNext}>Continuar a Fase 4</button>
+        <JuicyButton color="gray" onClick={onBack}>← Volver</JuicyButton>
+  <JuicyButton color="blue" onClick={onNext}>Continuar a Fase 4 →</JuicyButton>
       </div>
       
       {/* Ya no usamos MapModal en este archivo, su contenido ahora está directamente en la página. */}

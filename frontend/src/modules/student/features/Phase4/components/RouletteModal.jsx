@@ -1,12 +1,13 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import JuicyButton from '../../../../../components/JuicyButton'; // Importamos el botón jugoso
 
 export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
   const canvasRef = useRef(null);
   const [winner, setWinner] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  // Lógica para dibujar la rueda (de index.html)
-  const drawWheel = (rotation = 0) => {
+  // 1. SOLUCIÓN: Envolvemos la función en useCallback
+  const drawWheel = useCallback((rotation = 0) => {
     const canvas = canvasRef.current;
     if (!canvas || names.length === 0) return;
     
@@ -44,19 +45,17 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
     ctx.arc(cx, cy, 28, 0, Math.PI * 2);
     ctx.fillStyle = '#fff';
     ctx.fill();
-  };
+  }, [names]); // Dependencia: Solo se recrea si cambian los nombres
 
-  // Dibuja la rueda cuando se abre el modal o cambian los nombres
+  // 2. Actualizamos el useEffect con la dependencia correcta
   useEffect(() => {
     if (isOpen) {
       setWinner(null);
       setIsSpinning(false);
-      // Dibuja la rueda en el siguiente frame
       requestAnimationFrame(() => drawWheel(0));
     }
-  }, [isOpen, names]); // Depende de 'names' para redibujar
+  }, [isOpen, drawWheel]); // Ahora drawWheel es una dependencia segura
 
-  // Lógica para girar (de index.html)
   const handleSpin = () => {
     if (names.length === 0 || isSpinning) return;
     
@@ -66,7 +65,7 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
     const idx = Math.floor(Math.random() * names.length);
     const n = names.length;
     const step = 360 / n;
-    const targetAngle = 360 - (idx * step + step / 2); // Puntero a 0deg
+    const targetAngle = 360 - (idx * step + step / 2); 
     const spins = 5 * 360;
     const finalDeg = spins + targetAngle;
 
@@ -76,11 +75,10 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
     const onEnd = () => {
       canvas.removeEventListener('transitionend', onEnd);
       canvas.style.transition = 'none';
-      canvas.style.transform = `rotate(${finalDeg % 360}deg)`; // Normaliza
+      canvas.style.transform = `rotate(${finalDeg % 360}deg)`; 
       setWinner(names[idx]);
       setIsSpinning(false);
       
-      // Llama al padre después de un momento
       setTimeout(() => onSpinEnd(names[idx]), 1200);
     };
     canvas.addEventListener('transitionend', onEnd);
@@ -88,17 +86,18 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
   
   if (!isOpen) return null;
 
-  // JSX del Modal (copiado de index.html)
-  // Estas clases 'me-roulette-*' deben estar en tu CSS global
   return (
     <div 
       className="me-roulette-backdrop me-open" 
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget && !isSpinning) onClose(); }}
     >
       <div className="me-roulette-modal">
         <div className="me-roulette-header">
           <div className="me-roulette-title">Seleccionar aleatoriamente</div>
-          <button className="me-roulette-close" onClick={onClose}> Cerrar </button>
+          {/* Actualizamos a JuicyButton */}
+          <JuicyButton color="gray" onClick={onClose} disabled={isSpinning} className="py-1 px-3 text-sm">
+             Cerrar 
+          </JuicyButton>
         </div>
         <div className="me-roulette-body">
           <div className="me-wheel-wrap">
@@ -106,16 +105,17 @@ export default function RouletteModal({ isOpen, onClose, names, onSpinEnd }) {
             <canvas ref={canvasRef} width="480" height="480" className="me-wheel"></canvas>
           </div>
           <div className="me-roulette-controls">
-            <button 
-              className="me-roulette-btn" 
+            {/* Actualizamos a JuicyButton */}
+            <JuicyButton 
+              color="yellow" // Amarillo para acción principal
               onClick={handleSpin} 
               disabled={isSpinning || names.length === 0}
             >
-              {isSpinning ? 'Girando...' : (names.length === 0 ? 'No hay nombres' : 'Girar ruleta')}
-            </button>
+              {isSpinning ? 'Girando...' : (names.length === 0 ? 'No hay nombres' : '🎰 Girar ruleta')}
+            </JuicyButton>
           </div>
           <div className="me-roulette-sub">Tip: se toman los nombres desde la lista de integrantes.</div>
-          <div className="me-winner">{winner ? `Presenta: ${winner}` : ''}</div>
+          <div className="me-winner text-2xl text-mint-600">{winner ? `Presenta: ${winner}` : ''}</div>
         </div>
       </div>
     </div>

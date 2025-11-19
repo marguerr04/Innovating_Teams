@@ -1,150 +1,107 @@
 // src/components/TokensOverlay.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import confetti from 'canvas-confetti';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
-// --- Lógica de Texto y Tokens (Modificada) ---
 function getRewardForPhase(n) {
-  if (n === 1) {
-    return { amount: 4, reason: "¡Fueron el primer equipo en terminar!" };
-  }
-  if (n >= 2 && n <= 4) {
-    return { amount: 1, reason: "¡Por completar la fase!" };
-  }
-  if (n === 5) {
-    return { amount: 0, reason: "¡Fase 5 completa! Los tokens de feedback se sumarán en el podio." };
-  }
-  return { amount: 0, reason: "¡Fase completada!" };
+  if (n === 1) return { amount: 4, reason: "¡Primeros en terminar!" };
+  if (n >= 2 && n <= 4) return { amount: 1, reason: "¡Excelente trabajo!" };
+  if (n === 5) return { amount: 0, reason: "¡Evaluación completada!" };
+  return { amount: 0, reason: "¡Fase superada!" };
 }
-
-// --- Lógica de Confeti (Sin cambios) ---
-const COLORS = ["#ffffff", "#f7d778", "#f79ac0", "#96d6ff", "#8df0d2", "#b39cff"];
-const SHAPES = [
-  { w: 8, h: 12, r: "2px" }, { w: 10, h: 10, r: "50%" }, { w: 12, h: 5, r: "2px" }
-];
-function gradientBg() {
-  const a = COLORS[(Math.random() * COLORS.length) | 0];
-  const b = COLORS[(Math.random() * COLORS.length) | 0];
-  return `linear-gradient(${(Math.random() * 360) | 0}deg, ${a}, ${b})`;
-}
-function makeConfetti(side) {
-  const el = document.createElement("div");
-  el.className = "tk-confetti"; 
-  const s = SHAPES[(Math.random() * SHAPES.length) | 0];
-  el.style.setProperty("--w", s.w + "px");
-  el.style.setProperty("--h", s.h + "px");
-  el.style.setProperty("--radius", s.r);
-  el.style.setProperty("--bg", gradientBg());
-  const yStart = (10 + Math.random() * 70) + "vh";
-  el.style.setProperty("--yStart", yStart);
-  if (side === "left") {
-    el.style.setProperty("--fromX", "-14vw");
-    const x = (5 + Math.random() * 25) + "vw";
-    el.style.setProperty("--x", x);
-    el.style.setProperty("--driftX", (15 + Math.random() * 10) + "vw");
-  } else {
-    el.style.setProperty("--fromX", "14vw");
-    const x = (-5 - Math.random() * 25) + "vw";
-    el.style.setProperty("--x", x);
-    el.style.setProperty("--driftX", (-15 - Math.random() * 10) + "vw");
-  }
-  el.style.setProperty("--lift", (-6 - Math.random() * 10) + "vh");
-  el.style.setProperty("--inDur", (0.35 + Math.random() * 0.35).toFixed(2) + "s");
-  el.style.setProperty("--downDur", (2.4 + Math.random() * 2.2).toFixed(2) + "s");
-  el.style.setProperty("--spinDur", (1 + Math.random() * 1.4).toFixed(2) + "s");
-  el.style.animationDelay = (Math.random() * 0.3).toFixed(2) + "s";
-  return el;
-}
-// --- Fin Lógica de Confeti ---
-
 
 export default function TokensOverlay({ show, phase, onContinue }) {
   const [reward, setReward] = useState({ amount: 0, reason: "" });
-  
   const audioRef = useRef(null);
-  const laneLeftRef = useRef(null);
-  const laneRightRef = useRef(null);
-
-  const launchConfettiLateral = useCallback(() => {
-    const left = laneLeftRef.current;
-    const right = laneRightRef.current;
-    if (!left || !right) return;
-
-    left.innerHTML = "";
-    right.innerHTML = "";
-    const count = 120;
-    for (let i = 0; i < count; i++) {
-      left.appendChild(makeConfetti("left"));
-      right.appendChild(makeConfetti("right"));
-    }
-    setTimeout(() => {
-      left.innerHTML = "";
-      right.innerHTML = "";
-    }, 5000);
-  }, []);
-
-  const playSound = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    try {
-      audio.currentTime = 0;
-      audio.play().catch(e => console.log("Audio play failed:", e));
-    } catch (e) {}
-  }, []);
 
   useEffect(() => {
     if (show) {
       setReward(getRewardForPhase(phase));
-      if (getRewardForPhase(phase).amount > 0) {
-        playSound();
-        launchConfettiLateral();
+      
+      // 1. Sonido
+      if(audioRef.current) {
+         audioRef.current.currentTime = 0;
+         audioRef.current.volume = 0.6;
+         audioRef.current.play().catch(()=>{});
       }
+
+      // 2. Confeti (Colores actualizados para combinar con morado)
+      const duration = 2500;
+      const end = Date.now() + duration;
+      const colors = ['#ffffff', '#e9d5ff', '#fcd34d']; // Blanco, Lila, Amarillo
+
+      const frame = () => {
+        confetti({
+          particleCount: 4,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors
+        });
+        confetti({
+          particleCount: 4,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
     }
-  }, [show, phase, playSound, launchConfettiLateral]);
+  }, [show, phase]);
+
+  if (!show) return null;
 
   return (
-    <div 
-      className={`tk-overlay ${show ? 'tk-show' : ''}`} 
-      aria-hidden={!show}
-    >
-      <div className="tk-card">
-        <h1 className="tk-title">¡Felicitaciones, equipo!</h1>
+    // --- FONDO: MORADO VIBRANTE (bg-violet-600) ---
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-violet-600 animate-in fade-in zoom-in duration-300 origin-center">
+      
+      <div className="text-center flex flex-col items-center p-6">
         
-        {/* === IMAGEN (AHORA SIEMPRE VISIBLE) === */}
-        <img 
-          src="/assets/tokens-me.png" 
-          alt="Tokens" 
-          className="tk-token-img" 
-        />
-        
-        {/* === TEXTO DE RECOMPENSA (CONDICIONAL) === */}
+        {/* TÍTULO */}
+        <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.15)] mb-8 uppercase tracking-tight animate-bounce">
+          ¡Fase Completada!
+        </h1>
+
+        {/* TARJETA DE PUNTOS */}
         {reward.amount > 0 && (
-          <div className="tk-reward-display">
-            <span className="tk-reward-plus">+</span>
-            <span className="tk-reward-amount">{reward.amount}</span>
-            <span className="tk-reward-label">TOKEN{reward.amount > 1 ? 'S' : ''}</span>
-          </div>
+            <div className="bg-white rounded-[2rem] p-8 md:p-10 mb-8 border-b-[8px] border-violet-200 shadow-2xl transform transition hover:scale-105 hover:-rotate-2">
+                {/* Texto de puntos en morado para combinar */}
+                <div className="text-8xl font-black text-violet-600 mb-2 leading-none">
+                    +{reward.amount}
+                </div>
+                <div className="text-xl font-bold text-slate-400 uppercase tracking-widest">
+                    Tokens
+                </div>
+            </div>
         )}
-        
-        <p className="tk-subtitle">{reward.reason}</p>
-        {/* === FIN DEL BLOQUE === */}
-        
+
+        {/* MENSAJE (Texto claro sobre fondo oscuro) */}
+        <p className="text-2xl md:text-3xl text-violet-100 font-bold mb-12 max-w-2xl leading-tight">
+            {reward.reason}
+        </p>
+
+        {/* BOTÓN "JUICY" (Color Menta para contrastar con el morado) */}
         <button 
-          className="tk-btn" 
           onClick={onContinue}
+          className="
+            bg-teal-400 text-teal-900 text-2xl font-extrabold py-5 px-16 rounded-2xl
+            border-b-[8px] border-teal-600 
+            shadow-[0_10px_20px_rgba(0,0,0,0.25)]
+            active:border-b-0 active:translate-y-[8px] active:shadow-none
+            transition-all duration-150 hover:bg-teal-300
+            uppercase tracking-wide
+          "
         >
           Continuar
-        </button> 
+        </button>
 
-        <audio 
-          ref={audioRef} 
-          src="/token-sound.mp3" 
-          preload="auto" 
-          playsInline 
-        />
-
-        <div ref={laneLeftRef} className="tk-lane tk-left"></div>
-        <div ref={laneRightRef} className="tk-lane tk-right"></div>
       </div>
+
+      <audio ref={audioRef} src="/assets/sounds/games/success.mp3" /> 
     </div>
   );
 }

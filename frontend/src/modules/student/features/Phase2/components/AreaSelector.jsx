@@ -1,32 +1,35 @@
 import React from "react";
+import JuicyButton from "../../../../../components/JuicyButton"; // <--- Importar
 
 export default function AreaSelector({ area, challengeId, onSelectArea, onSelectChallenge, areas, challenges }) {
   return (
     <div className="card p-6">
       <h2 className="font-bold mb-2">Área</h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3"> {/* Aumenté gap a 3 para espacio del borde 3D */}
         {areas.map(a => (
-          <button
+          <JuicyButton
             key={a.id}
+            color={area === a.id ? "mint" : "gray"}
             onClick={() => onSelectArea(a.id)}
-            className={`btn text-left ${area === a.id ? "bg-mint-500 text-white" : "bg-slate-100"}`}
+            className="w-full text-left"
           >
             {a.name}
-          </button>
+          </JuicyButton>
         ))}
       </div>
 
       <h2 className="font-bold mt-6 mb-2">Desafío</h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {!area && <div className="text-slate-500 text-sm">Primero elige un área</div>}
         {area && challenges[area].map(c => (
-          <button
+          <JuicyButton
             key={c.id}
+            color={challengeId === c.id ? "blue" : "gray"}
             onClick={() => onSelectChallenge(c.id)}
-            className={`btn text-left ${challengeId === c.id ? "bg-mint-500 text-white" : "bg-slate-100"}`}
+            className="w-full text-left"
           >
             {c.title}
-          </button>
+          </JuicyButton>
         ))}
       </div>
     </div>
