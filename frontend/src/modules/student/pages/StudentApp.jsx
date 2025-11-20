@@ -93,24 +93,26 @@ export default function StudentApp() {
     }
   };
   
+  // Mapeo explícito de videoId por fase, saltando id 16
+  const VIDEO_BY_PHASE = {
+    0: 15, // Intro general
+    1: 14, // Fase 1
+    2: 17, // Fase 2 (Empatía) - saltamos 16
+    3: 18, // Fase 3
+    4: 19, // Fase 4
+    5: 20  // Fase 5
+  };
+
+  const INTERSTITIAL_BY_PHASE = {
+    1: true,
+    2: true,
+    3: true,
+    4: true,
+    5: true
+  };
+
   const handleIntroDone = () => {
     // Show video interstitial if mapped, then phase interstitial if mapped, then continue
-    // Mapeo explícito de videoId por fase, saltando id 16
-    const VIDEO_BY_PHASE = {
-      0: 15, // Intro general
-      1: 14, // Fase 1
-      2: 17, // Fase 2 (Empatía) - saltamos 16
-      3: 18, // Fase 3
-      4: 19, // Fase 4
-      5: 20  // Fase 5
-    };
-    const INTERSTITIAL_BY_PHASE = {
-      1: true,
-      2: true,
-      3: true,
-      4: true,
-      5: true
-    };
     const vid = VIDEO_BY_PHASE[phase];
     if (vid && !phaseVideoShown[phase]) {
       setPhaseVideoShown(prev => ({ ...prev, [phase]: true }));
