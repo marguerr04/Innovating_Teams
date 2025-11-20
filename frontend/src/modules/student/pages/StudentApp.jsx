@@ -22,6 +22,7 @@ import Phase2Interstitial from '../features/Phase2/Phase2Interstitial';
 import Phase3Interstitial from '../features/Phase3/Phase3Interstitial';
 import Phase4Interstitial from '../features/Phase4/Phase4Interstitial';
 import Phase5Interstitial from '../features/Phase5/Phase5Interstitial';
+import Phase7Interstitial from '../features/Phase7/Phase7Interstitial';
 import Phase6 from '../features/Phase6';
 import Phase7 from '../features/Phase7';
 
@@ -42,7 +43,6 @@ export default function StudentApp() {
   useEffect(() => {
     (function(){
       if(!window.chatbase || window.chatbase("getState") !== "initialized"){
-        // CORRECCIÓN AQUÍ: Cambiado '...arguments' por '...args'
         window.chatbase = (...args) => {
           if (!window.chatbase.q) { window.chatbase.q = [] }
           window.chatbase.q.push(args)
@@ -70,7 +70,13 @@ export default function StudentApp() {
   }, []);
 
   const handlePhaseComplete = (phaseJustFinished) => {
-    if (phaseJustFinished >= 6) {
+    // Si termina la fase 6, saltar a la fase 7 y mostrar el video de cierre
+    if (phaseJustFinished === 6) {
+      setShowIntro(true); // Activa intro para disparar el video de cierre
+      setPhase(7);
+      return;
+    }
+    if (phaseJustFinished > 7) {
       go(phaseJustFinished + 1);
       return;
     }
@@ -86,11 +92,12 @@ export default function StudentApp() {
 
   const go = (n) => {
     setPhase(n);
-    if (n < 0) {
-      setShowIntro(false);
-    } else {
-      setShowIntro(true); 
-    }
+    setShowIntro(n >= 0);
+    setPhaseVideoShown(prev => {
+      const updated = { ...prev };
+      delete updated[n];
+      return updated;
+    });
   };
   
   // Mapeo explícito de videoId por fase, saltando id 16
@@ -100,7 +107,7 @@ export default function StudentApp() {
     2: 17, // Fase 2 (Empatía) - saltamos 16
     3: 18, // Fase 3
     4: 19, // Fase 4
-    5: 20  // Fase 5
+    7: 20  // Video de cierre antes de QR (fase 7)
   };
 
   const INTERSTITIAL_BY_PHASE = {
@@ -108,7 +115,7 @@ export default function StudentApp() {
     2: true,
     3: true,
     4: true,
-    5: true
+    7: true
   };
 
   const handleIntroDone = () => {
@@ -217,7 +224,7 @@ export default function StudentApp() {
           phase === -2 ? ( <PhaseSalaCodigo onJoin={() => go(-1)} /> ) :
           phase === -1 ? ( <PhaseSalaEspera onStart={() => go(0)} isProf={isProf} /> ) :
           phase === 0 ? ( <Phase0 onStart={() => go(1)} /> ) : (
-            showIntro && phase <= 5 ? (
+            showIntro && (phase <= 5 || phase === 7) ? (
               <PhaseIntro phase={phase} onDone={handleIntroDone} />
             ) : (
               <>
@@ -228,8 +235,6 @@ export default function StudentApp() {
                     size={phase === 0 ? 'large' : 'medium'}
                     onClose={() => {
                       setShowPhaseVideo(false);
-                      // After video, show phase interstitial if mapped
-                      const INTERSTITIAL_BY_PHASE = {1:true,2:true,3:true,4:true,5:true};
                       if (INTERSTITIAL_BY_PHASE[phase] && !phaseInterstitialShown[phase]) {
                         setPhaseInterstitialShown(prev => ({ ...prev, [phase]: true }));
                         setShowPhaseInterstitial(true);
@@ -239,7 +244,8 @@ export default function StudentApp() {
                     }}
                   />
                 )}
-                {/* Phase-specific empty interstitials */}
+                
+                {/* Phase-specific interstitials */}
                 {showPhaseInterstitial && phase === 1 && (
                   <Phase1Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
                 )}
@@ -252,17 +258,34 @@ export default function StudentApp() {
                 {showPhaseInterstitial && phase === 4 && (
                   <Phase4Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
                 )}
-                {showPhaseInterstitial && phase === 5 && (
-                  <Phase5Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
+                {showPhaseInterstitial && phase === 7 && (
+                  <Phase7Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
                 )}
 
-                {phase === 1 && <Phase1 role={role} isProf={isProf} onNext={() => handlePhaseComplete(1)} />}
-                {phase === 2 && <Phase2 role={role} isProf={isProf} onNext={() => handlePhaseComplete(2)} />}
-                {phase === 3 && <Phase3 role={role} isProf={isProf} onBack={() => go(2)} onNext={() => handlePhaseComplete(3)} />}
-                {phase === 4 && <Phase4 role={role} isProf={isProf} onBack={() => go(3)} onNext={() => handlePhaseComplete(4)} />}
-                {phase === 5 && <Phase5 role={role} isProf={isProf} onBack={() => go(4)} onNext={() => handlePhaseComplete(5)} />}
-                {phase === 6 && <Phase6 role={role} isProf={isProf} onBack={() => go(5)} onNext={() => handlePhaseComplete(6)} />}
-                {phase === 7 && <Phase7 role={role} isProf={isProf} onBack={() => go(6)} />}
+                {/* Renderizado de fases principales */}
+                {phase === 1 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase1 role={role} isProf={isProf} onNext={() => handlePhaseComplete(1)} />
+                )}
+                {phase === 2 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase2 role={role} isProf={isProf} onNext={() => handlePhaseComplete(2)} />
+                )}
+                {phase === 3 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase3 role={role} isProf={isProf} onBack={() => go(2)} onNext={() => handlePhaseComplete(3)} />
+                )}
+                {phase === 4 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase4 role={role} isProf={isProf} onBack={() => go(3)} onNext={() => handlePhaseComplete(4)} />
+                )}
+                {phase === 5 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase5 role={role} isProf={isProf} onBack={() => go(4)} onNext={() => handlePhaseComplete(5)} />
+                )}
+                {phase === 6 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase6 role={role} isProf={isProf} onBack={() => go(5)} onNext={() => handlePhaseComplete(6)} />
+                )}
+                
+                {/* Fase 7 - Solo se muestra cuando no hay intro, video o interstitial activos */}
+                {phase === 7 && !showPhaseVideo && !showPhaseInterstitial && (
+                  <Phase7 role={role} isProf={isProf} onBack={() => go(6)} />
+                )}
               </>
             )
           )

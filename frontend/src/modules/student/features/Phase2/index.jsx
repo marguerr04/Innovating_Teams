@@ -10,7 +10,6 @@ import PersonaCard from "./components/PersonCard";
 import EmpathyEditor from "./components/EmpathyEditor";
 import DraggableMap from "./components/DraggableMap";
 import "./Phase2.css";
-import VideoIntroCard from '../Phase0/components/VideoIntroCard';
 
 const STORAGE_KEY = 'it_phase2_store';
 const PHASE_2_DURATION = 480;
@@ -89,12 +88,8 @@ export default function Phase2({ onNext, isProf }) {
         </div>
 
         {/* --- Párrafo de Instrucción (Dinámico) --- */}
-        {/* Video intro para la fase 2 (id 16) antes de selección */}
-        {view === 'selection' && (
-          <div className="mb-6">
-            <VideoIntroCard videoId={16} size="medium" />
-          </div>
-        )}
+
+
         {view === 'selection' ? (
           <p className="text-lg text-white/80 mb-6 max-w-3xl">
             Vamos a empatizar. Selecciona un área y un desafío para conocer a la persona que ayudarás.

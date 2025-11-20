@@ -4,7 +4,7 @@ import './Phase1.css'; // Asegúrate de que este archivo exista o elimina la lí
 import { load, save } from '../../../../utils/helpers.js';
 import ActivityModal from '../../components/ActivityModal.jsx';
 import Timer from '../../../../components/Timer';
-import VideoIntroCard from '../Phase0/components/VideoIntroCard';
+// ...existing code...
 
 // Importamos los juegos
 import AnagramaGame from './components/AnagramaGame';
