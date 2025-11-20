@@ -95,10 +95,14 @@ export default function StudentApp() {
   
   const handleIntroDone = () => {
     // Show video interstitial if mapped, then phase interstitial if mapped, then continue
+    // Mapeo explícito de videoId por fase, saltando id 16
     const VIDEO_BY_PHASE = {
-      0: 15,
-      1: 14,
-      2: 16
+      0: 15, // Intro general
+      1: 14, // Fase 1
+      2: 17, // Fase 2 (Empatía) - saltamos 16
+      3: 18, // Fase 3
+      4: 19, // Fase 4
+      5: 20  // Fase 5
     };
     const INTERSTITIAL_BY_PHASE = {
       1: true,
@@ -218,7 +222,7 @@ export default function StudentApp() {
                 {/* Phase-specific video interstitial (overlays the UI). */}
                 {showPhaseVideo && (
                   <PhaseVideoInterstitial
-                    videoId={{0:15,1:14,2:16}[phase] || 15}
+                    videoId={VIDEO_BY_PHASE[phase] || 15}
                     size={phase === 0 ? 'large' : 'medium'}
                     onClose={() => {
                       setShowPhaseVideo(false);
