@@ -2,9 +2,13 @@ import React from 'react';
 import VideoIntroCard from '../Phase0/components/VideoIntroCard';
 export default function Phase3Interstitial({ onNext }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <VideoIntroCard videoId={16} size="medium" />
-      <button className="btn px-6 py-2 mt-6" onClick={onNext}>Siguiente</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="w-full max-w-4xl mx-auto">
+        <VideoIntroCard videoId={18} size="medium" />
+        <div className="text-right mt-6">
+          <button className="btn px-6 py-2" onClick={onNext}>Siguiente</button>
+        </div>
+      </div>
     </div>
   );
 }
