@@ -72,9 +72,13 @@ export default function StudentApp() {
   const handlePhaseComplete = (phaseJustFinished) => {
     // Si termina la fase 6, saltar a la fase 7 y mostrar el video de cierre
     if (phaseJustFinished === 6) {
-      setShowIntro(true); // Activa intro para disparar el video de cierre
-      setPhase(7);
-      return;
+    setPhase(7);
+
+    // disparar video manualmente
+    setPhaseVideoShown(prev => ({ ...prev, [7]: false }));
+    setShowPhaseVideo(true);
+
+    return;
     }
     if (phaseJustFinished > 7) {
       go(phaseJustFinished + 1);
@@ -114,8 +118,7 @@ export default function StudentApp() {
     1: true,
     2: true,
     3: true,
-    4: true,
-    7: true
+    4: true
   };
 
   const handleIntroDone = () => {
@@ -224,7 +227,7 @@ export default function StudentApp() {
           phase === -2 ? ( <PhaseSalaCodigo onJoin={() => go(-1)} /> ) :
           phase === -1 ? ( <PhaseSalaEspera onStart={() => go(0)} isProf={isProf} /> ) :
           phase === 0 ? ( <Phase0 onStart={() => go(1)} /> ) : (
-            showIntro && (phase <= 5 || phase === 7) ? (
+            showIntro && phase <= 5 ? (
               <PhaseIntro phase={phase} onDone={handleIntroDone} />
             ) : (
               <>
@@ -235,11 +238,15 @@ export default function StudentApp() {
                     size={phase === 0 ? 'large' : 'medium'}
                     onClose={() => {
                       setShowPhaseVideo(false);
+
+                      // Si la fase tiene interstitial (Fases 1–4)
                       if (INTERSTITIAL_BY_PHASE[phase] && !phaseInterstitialShown[phase]) {
                         setPhaseInterstitialShown(prev => ({ ...prev, [phase]: true }));
                         setShowPhaseInterstitial(true);
                         return;
                       }
+
+                      // Para fase 7 NO hay interstitial → se debe mostrar directo Phase7
                       setShowIntro(false);
                     }}
                   />
@@ -258,9 +265,7 @@ export default function StudentApp() {
                 {showPhaseInterstitial && phase === 4 && (
                   <Phase4Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
                 )}
-                {showPhaseInterstitial && phase === 7 && (
-                  <Phase7Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
-                )}
+               
 
                 {/* Renderizado de fases principales */}
                 {phase === 1 && !showPhaseVideo && !showPhaseInterstitial && (
