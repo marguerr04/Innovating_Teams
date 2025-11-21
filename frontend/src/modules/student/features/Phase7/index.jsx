@@ -13,7 +13,7 @@ export default function Phase7({ onBack }) {
       
       {/* --- Título --- */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-extrabold mb-2">
+        <h1 className="text-4xl font-extrabold mb-2 text-white">
           ¡Muchas gracias por jugar!
         </h1>
         <p className="text-lg text-white/80">
@@ -25,7 +25,7 @@ export default function Phase7({ onBack }) {
       <div className="grid md:grid-cols-2 gap-6 items-start">
 
         {/* --- Card 1: Formulario de Evaluación --- */}
-        <div className="card p-6 flex flex-col items-center">
+        <div className="card p-6 flex flex-col items-center bg-white rounded-xl shadow-lg">
           <h2 className="text-xl font-bold text-slate-800 mb-3">
             Evaluación de la Actividad
           </h2>
@@ -40,12 +40,12 @@ export default function Phase7({ onBack }) {
         </div>
 
         {/* --- Card 2: Instagram --- */}
-        <div className="card p-6 flex flex-col items-center">
+        <div className="card p-6 flex flex-col items-center bg-white rounded-xl shadow-lg">
           <h2 className="text-xl font-bold text-slate-800 mb-3">
             ¡Sigue a Emprendimiento UDD!
           </h2>
           <p className="text-slate-600 text-center mb-4">
-            Entérate de todas las novedades,charlas y fondos concursables.
+            Entérate de todas las novedades, charlas y fondos concursables.
           </p>
           <img 
             src={INSTA_QR_URL} 
@@ -62,7 +62,7 @@ export default function Phase7({ onBack }) {
       {/* --- Navegación --- */}
       <div className="mt-8 flex justify-center">
         <button 
-          className="btn-ghost text-white/80 hover:bg-white/20" 
+          className="btn-ghost text-white/80 hover:bg-white/20 px-6 py-3 rounded-lg border border-white/30 transition-all" 
           onClick={onBack}
         >
           ← Volver al Podio

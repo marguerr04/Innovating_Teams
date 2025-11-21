@@ -3,6 +3,7 @@
 import JuicyButton from '../../../../components/JuicyButton';
 import React, { useState, useEffect, useRef } from 'react';
 import { load, save } from '../../../../utils/helpers.js';
+import useImageManager from '../../../../utils/useImageManager';
 import Timer from '../../../../components/Timer.jsx';
 import SkillRater from './components/SkillRater.jsx';
 
@@ -41,25 +42,9 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
   
   const soundRef = useRef(null);
   
-  // --- 1. AÑADIR LÓGICA DE FOTOS (MODIFICADA PARA TESTING) ---
-  // ... (código existente) ...
-  const [myLegoPhoto] = useState(() => load('it_lego_photo', null)); // <--- ¡ESTA LÍNEA FALTA!
+  // --- LÓGICA DE FOTOS CON GOOGLE CLOUD STORAGE ---
+  // Estado local para la imagen del equipo actual
   const [currentTeamPhoto, setCurrentTeamPhoto] = useState(null);
-
-  useEffect(() => {
-    // Esta función se actualiza cada vez que cambia el equipo
-    const teamId = TEAMS[currentTeamIndex].id;
-    
-    if (teamId === MY_TEAM_ID) {
-      // Para TU equipo (Equipo 1), carga la foto real que tomaste en Fase 3.
-      setCurrentTeamPhoto(myLegoPhoto);
-    } else {
-      // PARA TESTEAR: Carga una foto de prueba para los otros equipos.
-      //
-      setCurrentTeamPhoto('/lego.gif'); 
-    }
-  }, [currentTeamIndex, myLegoPhoto]); // Se ejecuta cuando cambia el equipo
-  // --- FIN LÓGICA DE FOTOS ---
 
 
   const handlePitchComplete = () => {
@@ -90,6 +75,41 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
 
   const currentTeam = TEAMS[currentTeamIndex];
   const isMyTeamPresenting = currentTeam.id === MY_TEAM_ID;
+  
+  // Usar el mismo hook que funciona en Phase3
+  const {
+    imageUrl: existingImageUrl,
+    hasImage: hasExistingImage,
+    loading: loadingExistingImage,
+    error: imageError,
+    updateImageData,
+    refreshImage,
+    clearError
+  } = useImageManager(currentTeam.id);
+
+  // Estado local para la imagen del equipo actual (ya declarado arriba)
+
+  // Sincronizar con imagen existente cuando se carga y cuando cambia el equipo
+  useEffect(() => {
+    console.log(`🔍 Debug Equipo ${currentTeam.id}:`, {
+      hasExistingImage,
+      existingImageUrl,
+      loadingExistingImage
+    });
+    
+    if (hasExistingImage && existingImageUrl) {
+      setCurrentTeamPhoto(existingImageUrl);
+      console.log(`✅ Imagen asignada para ${currentTeam.name}:`, existingImageUrl);
+    } else {
+      // Para equipos sin imagen en la BD, mostrar imagen de prueba
+      if (currentTeam.id === MY_TEAM_ID) {
+        setCurrentTeamPhoto(null); // Mi equipo sin imagen
+      } else {
+        setCurrentTeamPhoto('/lego.gif'); // Otros equipos - imagen de prueba
+      }
+      console.log(`❌ Sin imagen para ${currentTeam.name}`);
+    }
+  }, [hasExistingImage, existingImageUrl, currentTeam.id]);
 
   // --- VISTA DE PRESENTACIÓN ---
   if (view === 'presenting') {
@@ -97,6 +117,74 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
       <div className="max-w-3xl mx-auto card p-8 text-center">
         <h2 className="text-3xl font-bold mb-2">Presentando (Turno {currentTeamIndex + 1}/{TEAMS.length}):</h2>
         <p className="text-5xl font-extrabold text-mint-500 mb-6">{currentTeam.name}</p>
+        
+        {/* Sección de imagen del prototipo - exactamente como Phase3 */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-slate-700 mb-3">Prototipo LEGO</h3>
+          
+          {/* Mensaje de error si existe */}
+          {imageError && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm">
+              ⚠️ {imageError}
+              <button 
+                onClick={clearError}
+                className="ml-2 underline hover:no-underline"
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
+          
+          {/* Indicador de carga */}
+          {loadingExistingImage && (
+            <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-lg text-blue-700 text-sm">
+              🔄 Cargando imagen existente del equipo {currentTeam.id}...
+            </div>
+          )}
+          
+          {/* Mostrar imagen (igual que Phase3) */}
+          {currentTeamPhoto ? (
+            <div className="w-full max-w-lg mx-auto rounded-lg overflow-hidden border-4 border-mint-200 mb-4">
+              <img 
+                src={currentTeamPhoto} 
+                alt={`Prototipo del ${currentTeam.name}`}
+                className="w-full h-auto object-cover"
+                onError={(e) => {
+                  console.error('Error al cargar imagen del equipo:', currentTeam.id, currentTeamPhoto);
+                  // Si hay error cargando imagen, mostrar placeholder
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div style={{display: 'none'}} className="w-full aspect-video bg-orange-100 border border-orange-300 rounded text-orange-600 text-sm flex flex-col items-center justify-center">
+                <div className="text-2xl mb-2">📷</div>
+                <div>URL de imagen no válida</div>
+                <div className="text-xs mt-1 px-2 text-center break-all">{currentTeamPhoto}</div>
+              </div>
+              {/* Información adicional si es imagen existente */}
+              {hasExistingImage && currentTeamPhoto === existingImageUrl && (
+                <div className="bg-white/90 p-2 text-xs text-slate-600">
+                  📷 Imagen cargada desde base de datos - Equipo {currentTeam.id}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-full max-w-lg mx-auto aspect-video bg-slate-700 flex items-center justify-center text-white/50 rounded-lg text-lg mb-4">
+              {loadingExistingImage ? (
+                "🔄 Cargando imagen..."
+              ) : (
+                <div className="text-center">
+                  <div className="text-lg mb-2">{`No hay imagen para ${currentTeam.name}`}</div>
+                  <div className="text-xs">
+                    hasImage: {String(hasExistingImage)} | 
+                    loading: {String(loadingExistingImage)} |
+                    error: {imageError ? 'Sí' : 'No'}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         
         <Timer
           key={`pitch-${currentTeam.id}`} 

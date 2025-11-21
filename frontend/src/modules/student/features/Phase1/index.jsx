@@ -4,6 +4,7 @@ import './Phase1.css'; // Asegúrate de que este archivo exista o elimina la lí
 import { load, save } from '../../../../utils/helpers.js';
 import ActivityModal from '../../components/ActivityModal.jsx';
 import Timer from '../../../../components/Timer';
+// ...existing code...
 
 // Importamos los juegos
 import AnagramaGame from './components/AnagramaGame';
@@ -81,6 +82,7 @@ const KnowledgeSelector = ({ onSelect }) => {
 
 // --- COMPONENTE PRINCIPAL DE LA FASE 1 ---
 function Phase1({ role, onNext, isProf }) {
+  // NOTE: Phase-specific video intro is shown via the global interstitial (StudentApp).
   
   // 1. Estado para controlar el modo ("conocen" vs "no conocen")
   const [knowledgeMode, setKnowledgeMode] = useState(() => load('it_p1_knowledge', null));

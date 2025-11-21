@@ -88,6 +88,8 @@ export default function Phase2({ onNext, isProf }) {
         </div>
 
         {/* --- Párrafo de Instrucción (Dinámico) --- */}
+
+
         {view === 'selection' ? (
           <p className="text-lg text-white/80 mb-6 max-w-3xl">
             Vamos a empatizar. Selecciona un área y un desafío para conocer a la persona que ayudarás.

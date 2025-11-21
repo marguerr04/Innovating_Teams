@@ -15,6 +15,13 @@ const GroupBuilder = () => {
   });
   const [newStudentName, setNewStudentName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  // CSV related state
+  const [csvFile, setCsvFile] = useState(null);
+  const [parsedCsv, setParsedCsv] = useState([]); // raw parsed entries
+  const [csvError, setCsvError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState(null); // resultado del backend
+  const [backendStudentsRaw, setBackendStudentsRaw] = useState([]); // respuesta cruda del backend para verificación
 
   // Datos de ejemplo de estudiantes
   const exampleStudents = [
@@ -31,6 +38,8 @@ const GroupBuilder = () => {
   useEffect(() => {
     setStudents(exampleStudents);
   }, []);
+
+  const API_BASE = 'http://127.0.0.1:8000/api/';
 
   useEffect(() => {
     if (groupSettings.groupSize > 0 && students.length > 0) {
@@ -49,6 +58,111 @@ const GroupBuilder = () => {
       };
       setStudents(prev => [...prev, newStudent]);
       setNewStudentName('');
+    }
+  };
+
+  // CSV Parsing (semicolon delimited to align backend expectation)
+  const handleCsvFileChange = (e) => {
+    const file = e.target.files[0];
+    setCsvError('');
+    setParsedCsv([]);
+    setCsvFile(file || null);
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      setCsvError('Seleccione un archivo .csv');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target.result.replace(/\r/g, '');
+        const lines = text.split(/\n+/).filter(l => l.trim().length > 0);
+        if (lines.length === 0) {
+          setCsvError('Archivo vacío');
+          return;
+        }
+        // Detect header if it contains typical column names
+        const delimiter = ';';
+        const firstCols = lines[0].split(delimiter).map(c => c.trim().toLowerCase());
+        const expected = ['correo','rut','nombre','apellido paterno','apellido materno'];
+        const headerPresent = expected.some(col => firstCols.some(fc => fc.includes(col.split(' ')[0])));
+        let start = 0;
+        let headers = ['correo','rut','nombre','apellido_paterno','apellido_materno'];
+        if (headerPresent) {
+          // Map header variations
+          headers = firstCols.map(h => h
+            .replace('apellido paterno','apellido_paterno')
+            .replace('apellido materno','apellido_materno')
+            .replace(/\s+/g,'_')
+          );
+          start = 1;
+        }
+        const rows = [];
+        for (let i = start; i < lines.length; i++) {
+          const cols = lines[i].split(delimiter).map(c => c.trim());
+          if (cols.length < headers.length) continue; // skip malformed
+          const obj = {};
+          headers.forEach((h, idx) => { obj[h] = cols[idx] || ''; });
+          rows.push(obj);
+        }
+        if (!rows.length) {
+          setCsvError('No se pudieron parsear filas');
+        } else {
+          setParsedCsv(rows);
+        }
+      } catch (err) {
+        setCsvError('Error parseando CSV: ' + err.message);
+      }
+    };
+    reader.onerror = () => setCsvError('No se pudo leer el archivo');
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  const sendCsvToBackend = async () => {
+    if (!parsedCsv.length) return;
+    setUploading(true);
+    setCsvError('');
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        estudiantes: parsedCsv.map(e => ({
+          correo: e.correo || e.email || '',
+          rut: e.rut || '',
+          nombre: e.nombre || '',
+          apellido_paterno: e.apellido_paterno || e.apellido || '',
+          apellido_materno: e.apellido_materno || ''
+        }))
+      };
+      console.log('[CSV->Backend] Enviando payload', payload);
+      const resp = await fetch(API_BASE + 'estudiantes/bulk_create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Token ${token}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || 'Error HTTP ' + resp.status);
+      }
+      const data = await resp.json();
+      console.log('[CSV->Backend] Respuesta', data);
+      // Transform backend estudiantes to internal representation
+      const mapped = data.estudiantes.map(est => ({
+        id: est.id,
+        name: `${est.nombre || ''} ${est.apellido || ''}`.trim(),
+        skills: [],
+        level: 'básico'
+      }));
+      setStudents(mapped);
+      setGroups([]); // reset any existing groups
+      setUploadResult({ total: data.total, nuevos: data.estudiantes.filter(e => e.nuevo).length });
+      setBackendStudentsRaw(data.estudiantes || []);
+    } catch (err) {
+      setCsvError(err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -145,6 +259,7 @@ const GroupBuilder = () => {
   };
 
   return (
+    <>
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="bg-white rounded-lg shadow-lg p-8">
         {/* Header */}
@@ -177,6 +292,28 @@ const GroupBuilder = () => {
           {/* Students Management */}
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Gestión de Estudiantes</h2>
+
+            {/* CSV Upload */}
+            <div className="mb-4 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Importar desde CSV</label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleCsvFileChange}
+                className="w-full text-sm"
+              />
+              {csvError && <p className="text-xs text-red-600">{csvError}</p>}
+              {parsedCsv.length > 0 && (
+                <div className="text-xs text-gray-600 flex items-center justify-between">
+                  <span>{parsedCsv.length} filas parseadas</span>
+                  <button
+                    onClick={sendCsvToBackend}
+                    disabled={uploading}
+                    className="px-2 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700 disabled:bg-gray-400"
+                  >{uploading ? 'Enviando...' : 'Enviar al backend'}</button>
+                </div>
+              )}
+            </div>
             
             {/* Add Student */}
             <div className="mb-4 flex gap-2">
@@ -201,6 +338,14 @@ const GroupBuilder = () => {
               <h3 className="font-medium text-gray-900 mb-3">
                 Estudiantes ({students.length})
               </h3>
+              {uploadResult && (
+                <p className="text-xs mb-2 text-green-700">
+                  Backend recibió {uploadResult.total} registros (nuevos: {uploadResult.nuevos}).
+                </p>
+              )}
+              {parsedCsv.length > 0 && students.length === exampleStudents.length && (
+                <p className="text-xs text-orange-600 mb-2">CSV parseado listo, envíalo al backend para reemplazar la lista.</p>
+              )}
               <div className="space-y-2">
                 {students.map((student) => (
                   <div
@@ -364,6 +509,41 @@ const GroupBuilder = () => {
         )}
       </div>
     </div>
+    {/* Sección de verificación backend */}
+    {backendStudentsRaw.length > 0 && (
+      <div className="max-w-6xl mx-auto mt-4 bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Verificación: Estudiantes recibidos del backend</h2>
+        <p className="text-sm text-gray-600 mb-4">Esta tabla muestra exactamente lo que devolvió el endpoint <code>/api/estudiantes/bulk_create/</code>.</p>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-3 py-2 text-left border">#</th>
+                <th className="px-3 py-2 text-left border">Correo</th>
+                <th className="px-3 py-2 text-left border">Nombre</th>
+                <th className="px-3 py-2 text-left border">Apellido</th>
+                <th className="px-3 py-2 text-left border">RUT</th>
+                <th className="px-3 py-2 text-left border">Nuevo?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {backendStudentsRaw.map((est, idx) => (
+                <tr key={est.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-3 py-2 border">{idx + 1}</td>
+                  <td className="px-3 py-2 border whitespace-nowrap">{est.correo}</td>
+                  <td className="px-3 py-2 border">{est.nombre}</td>
+                  <td className="px-3 py-2 border">{est.apellido}</td>
+                  <td className="px-3 py-2 border">{est.rut || '-'}</td>
+                  <td className="px-3 py-2 border">{est.nuevo ? 'Sí' : 'No'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-xs text-gray-500 mt-3">Total: {backendStudentsRaw.length} registros. Puedes reenviar otro CSV para actualizar esta vista.</p>
+      </div>
+    )}
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 # api/serializers.py
 from rest_framework import serializers
-from .models import Estudiante, Curso, Usuario, ListaParticipante  # Importa los modelos que quieras exponer
+from .models import Estudiante, Curso, Usuario, ListaParticipante, Equipo, Video, Partida  # Importa los modelos que quieras exponer
 
 
 
@@ -39,6 +39,38 @@ class CursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curso
         fields = '__all__'
+
+
+class EquipoSerializer(serializers.ModelSerializer):
+    """
+    Serializer para el modelo Equipo.
+    Permite obtener la lista de equipos con su id y nombre.
+    """
+    class Meta:
+        model = Equipo
+        fields = ['id', 'nombreequipo', 'tamanoequipo']
+        
+    # Renombrar el campo en el JSON de salida para que sea más legible
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['nombre'] = representation.pop('nombreequipo')
+        return representation
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        # incluir 'partida' para poder asignarla al crear/subir un video
+        fields = ['id', 'nombrevideo', 'url', 'partida']
+
+
+class PartidaSerializer(serializers.ModelSerializer):
+    # mostrar la lista de videos asociados usando el related_name 'videos'
+    videos = VideoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Partida
+        fields = ['id', 'fechacreacion', 'estado', 'codigoacceso', 'fechainicio', 'fechafin', 'maxequipos', 'maxparticipantes', 'videos']
 
 
 

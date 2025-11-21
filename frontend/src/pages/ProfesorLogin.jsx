@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-export default function Login({ redirectToAdmin = false }) {
+import { showErrorAlert, showSuccessAlert } from "../utils/sweetAlerts"; // Importa las funciones
+export default function ProfesorLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,32 +12,39 @@ export default function Login({ redirectToAdmin = false }) {
     setError("");
 
     try {
-      // Modo profesor (dummy): acepta cualquier credencial y redirige a Admin
-      if (redirectToAdmin) {
-        if (!email || !password) throw new Error("Completa los campos");
-        localStorage.setItem("token", "dummy-prof-token");
-        localStorage.setItem("username", email.split("@")[0] || "profesor");
-        localStorage.setItem("role", "profesor");
-        navigate("/admin");
-        return;
-      }
+      // Endpoint específico para profesores
+      const url = "http://localhost:8000/api/login/profesor/";
 
-      const res = await fetch("http://localhost:8000/api/login/", {
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) throw new Error("Credenciales inválidas");
+      const errorMessage = "Credenciales inválidas";
+      showErrorAlert(errorMessage); // Mostrar alerta de erro
       const data = await res.json();
 
+      if (data.role !== "PROFESOR") {
+        const errorMessage = "No tiene permisos para acceder como profesor";
+        showErrorAlert(errorMessage); // Mostrar alerta de error
+        throw new Error(errorMessage);
+      }
+
+
+
+
+
+      // Guarda el token y otros datos en localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", data.username);
       localStorage.setItem("role", data.role);
 
-      if (data.role === "profesor") navigate("/profesor");
-      else if (data.role === "admin" || data.role === "administrador") navigate("/admin");
-      else navigate("/estudiante");
+      
+      showSuccessAlert("Inicio de sesión exitoso");
+      // Redirige al módulo de profesores
+      navigate("/profesor");
     } catch (err) {
       setError(err.message);
     }
@@ -47,7 +54,7 @@ export default function Login({ redirectToAdmin = false }) {
     <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(1200px_600px_at_80%_10%,#204b86_0%,#163a6a_40%,#0f2b4d_100%)] text-white relative overflow-hidden">
       {/* ← Volver */}
       <a
-        href="/login"
+        href="/prelogin"
         className="absolute top-6 left-6 text-white opacity-80 hover:opacity-100 transition"
       >
         ← Volver
@@ -60,10 +67,10 @@ export default function Login({ redirectToAdmin = false }) {
             IT
           </div>
           <h2 className="text-3xl font-extrabold text-[#0b1f3a] mb-1">
-            Iniciar sesión
+            Iniciar sesión como Profesor
           </h2>
           <p className="text-gray-500 text-sm">
-            Aprende emprendimiento en equipo
+            Accede a tu cuenta para gestionar tus clases
           </p>
         </div>
 
@@ -105,6 +112,11 @@ export default function Login({ redirectToAdmin = false }) {
           </button>
         </form>
 
+
+
+          <footer className="text-center text-gray-500 text-sm mt-6">
+          Correo: usuario2@innovate.com | Contraseña: contraseña123
+        </footer>
         <footer className="text-center text-gray-500 text-sm mt-6">
           © 2025 Innovating Team
         </footer>

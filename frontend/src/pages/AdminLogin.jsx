@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { showErrorAlert, showSuccessAlert } from "../utils/sweetAlerts"; // Importa las funciones
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,13 +11,35 @@ export default function AdminLogin() {
     e.preventDefault();
     setError("");
 
-    // Dummy auth: cualquier credencial pasa (puedes reemplazar con fetch real)
     try {
-      if (!email || !password) throw new Error("Completa los campos");
-      // Guarda rol para flujo unificado
-      localStorage.setItem("token", "dummy-admin-token");
-      localStorage.setItem("username", email.split("@")[0] || "admin");
-      localStorage.setItem("role", "admin");
+      // Endpoint específico para administradores
+      const url = "http://localhost:8000/api/login/admin/";
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      
+
+      if (!res.ok) throw new Error("Credenciales inválidas");
+      const data = await res.json();
+
+      // Verifica que el rol sea "ADMINISTRADOR"
+     if (data.role !== "ADMINISTRADOR") {
+        const errorMessage = "No tiene permisos para acceder como administrador";
+        showErrorAlert(errorMessage); // Mostrar alerta de error
+        throw new Error(errorMessage);
+      }
+
+      // Guarda el token y otros datos en localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("role", data.role);
+
+      showSuccessAlert("Inicio de sesión exitoso");
+
+      // Redirige al módulo de administradores
       navigate("/admin");
     } catch (err) {
       setError(err.message);
@@ -49,7 +71,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@innovating.com"
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-white/15 border border-white/30 focus:outline-none focus:ring-2 focus:ring-[#3AB6B5] placeholder-white/40 text-white"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-white/15 border border-white/30 focus:outline-none focus:ring-2 focus:ring-[#3AB6B5] placeholder-white/40 text-black"
             />
           </div>
 
@@ -60,7 +82,7 @@ export default function AdminLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-white/15 border border-white/30 focus:outline-none focus:ring-2 focus:ring-[#3AB6B5] placeholder-white/40 text-white"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-white/15 border border-white/30 focus:outline-none focus:ring-2 focus:ring-[#3AB6B5] placeholder-white/40 text-black"
             />
           </div>
 
@@ -80,6 +102,8 @@ export default function AdminLogin() {
 
         <div className="mt-6 text-center text-xs text-white/60">
           <p>Uso exclusivo de administradores autorizados.</p>
+          <p>Correo: usuario5@innovate.com</p>
+          <p>Contraseña: contraseña123</p>
           <a href="/prelogin" className="underline hover:text-white/90">Volver</a>
         </div>
       </section>

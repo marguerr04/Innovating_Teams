@@ -1,0 +1,327 @@
+/* Estilos para DevImageUpload - Herramienta de Desarrollo */
+.dev-image-upload {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.upload-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+/* Estilos para la sección de imagen existente */
+.existing-image-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.existing-image-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.existing-image-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.image-display {
+    flex: 1;
+    max-width: 400px;
+}
+
+.existing-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.existing-image:hover {
+    transform: scale(1.02);
+}
+
+.image-error {
+    padding: 20px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.existing-image-info {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.existing-image-info p {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.existing-image-info strong {
+    color: #495057;
+}
+
+.existing-image-info a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.existing-image-info a:hover {
+    text-decoration: underline;
+}
+
+.refresh-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: #218838;
+}
+
+.no-existing-image {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.no-existing-image p {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.no-existing-image small {
+    color: #adb5bd;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+.error-message p {
+    margin-bottom: 10px;
+}
+
+.clear-error-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.clear-error-btn:hover {
+    background: #c82333;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 768px) {
+    .existing-image-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .existing-image-info {
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+.results-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.results-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.image-result {
+    background: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.image-result:hover {
+    transform: translateY(-5px);
+}
+
+.image-container {
+    height: 200px;
+    overflow: hidden;
+}
+
+.result-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.image-info {
+    padding: 15px;
+}
+
+.image-info p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.image-info strong {
+    color: #333;
+}
+
+.image-info a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.image-info a:hover {
+    text-decoration: underline;
+}
+
+.technical-info {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.technical-info h2 {
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.tech-stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.tech-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #4CAF50;
+}
+
+.tech-item h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.tech-item ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tech-item li {
+    margin: 8px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.tech-item code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    color: #d63384;
+    font-weight: 600;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+    
+    .images-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tech-stack {
+        grid-template-columns: 1fr;
+    }
+}
