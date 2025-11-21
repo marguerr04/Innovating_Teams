@@ -197,7 +197,7 @@ function Phase1({ role, onNext, isProf }) {
         
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Fase 1 · Votación</h1>
+            <h1 className="text-2xl font-bold">Trabajo en Equipo</h1>
             
             {/* BOTÓN DE PROFESOR PARA CAMBIAR MODO */}
             {isProf && (

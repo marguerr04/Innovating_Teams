@@ -63,7 +63,7 @@ export default function TokensOverlay({ show, phase, onContinue }) {
         
         {/* TÍTULO */}
         <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.15)] mb-8 uppercase tracking-tight animate-bounce">
-          ¡Fase Completada!
+          ¡Misión Cumplida!
         </h1>
 
         {/* TARJETA DE PUNTOS */}
