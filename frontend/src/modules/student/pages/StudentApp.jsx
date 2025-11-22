@@ -25,6 +25,7 @@ import Phase5Interstitial from '../features/Phase5/Phase5Interstitial';
 import Phase7Interstitial from '../features/Phase7/Phase7Interstitial';
 import Phase6 from '../features/Phase6';
 import Phase7 from '../features/Phase7';
+import MissyCompanion from '../../../components/MissyCompanion.jsx';
 
 export default function StudentApp() {
   const { role, setRole, isProf } = useRole();
@@ -298,6 +299,11 @@ export default function StudentApp() {
           )
         )}
       </div>
+      {/* Le pasamos la fase actual y si se están mostrando tokens para que reaccione */}
+      <MissyCompanion 
+        phase={phase} 
+        showTokens={showTokens} 
+      />
     </div>
   );
 }
