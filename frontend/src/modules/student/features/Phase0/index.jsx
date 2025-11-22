@@ -27,7 +27,7 @@ export default function Phase0({ onStart }) {
           {/* CAMBIO: Textos mucho más grandes (text-4xl a 6xl en titulo, xl a 3xl en texto) */}
           <div className="w-full text-center max-w-4xl px-6 mb-8">
             <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-md">
-              ¡Bienvenido a tu Misión!
+              ¡Bienvenido Misión Emprende!
             </h2>
             <p className="text-white/90 text-xl md:text-3xl leading-relaxed drop-shadow-sm font-medium">
               Hoy te convertirás en un innovador. Tu objetivo es encontrar una <span className="text-mint-300">solución real</span> para una persona que la necesita.
