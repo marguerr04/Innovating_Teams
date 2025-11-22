@@ -127,11 +127,13 @@ export default function StudentApp() {
     if (vid && !phaseVideoShown[phase]) {
       setPhaseVideoShown(prev => ({ ...prev, [phase]: true }));
       setShowPhaseVideo(true);
+      setShowIntro(false);
       return;
     }
     if (INTERSTITIAL_BY_PHASE[phase] && !phaseInterstitialShown[phase]) {
       setPhaseInterstitialShown(prev => ({ ...prev, [phase]: true }));
       setShowPhaseInterstitial(true);
+      setShowIntro(false);
       return;
     }
     setShowIntro(false);

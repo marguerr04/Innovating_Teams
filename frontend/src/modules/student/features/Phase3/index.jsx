@@ -79,13 +79,19 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
       {/* Cabecera con Timer mejorado */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold mb-1">Creatividad </h1>
-          <p className="text-lg opacity-80 max-w-3xl">
-            ¡Tiempo de crear! Usando la <strong>caja de Legos en tu mesa</strong>, 
-            construye un prototipo de tu solución para <strong>{p2?.persona?.name || 'la persona'}</strong>. 
-            Al terminar, toma una foto de tu creación.
-          </p>
-        </div>
+  <h1 className="text-3xl font-extrabold mb-1">Creatividad: La Solución</h1>
+  {/* CAMBIO: Pregunta explícita y requerimiento de innovación */}
+  {/* CAMBIO: Instrucción destacada y responsiva */}
+          <div className="text-white/95 max-w-4xl mt-4 space-y-4">
+            <p className="text-xl md:text-3xl font-bold leading-tight">
+              Pregunta clave: <span className="text-mint-300">¿Qué solución emprendedora le crearás a {p2?.persona?.name || 'tu usuario'}?</span>
+            </p>
+            <p className="text-lg md:text-2xl opacity-90 leading-relaxed">
+              ¡No basta con una idea simple! Usando los Legos, construye un prototipo de un 
+              <strong> producto o servicio innovador</strong> que resuelva sus dolores.
+            </p>
+          </div>
+</div>
         
         <div className="card p-4 flex-shrink-0 ml-6">
           <Timer 

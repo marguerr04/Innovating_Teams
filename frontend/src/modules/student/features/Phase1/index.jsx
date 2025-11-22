@@ -227,11 +227,12 @@ function Phase1({ role, onNext, isProf }) {
         </div>
       </div>
 
-      <p className="text-lg text-white/80 mb-6 max-w-3xl">
-        ¡Comencemos! La primera habilidad a trabajar es el <strong>Trabajo en Equipo</strong>. 
+      {/* CAMBIO: Texto instructivo más grande (text-xl a 2xl) y con mejor interlineado */}
+      <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl leading-relaxed font-medium">
+        Tu primera <strong>misión</strong> es activar la habilidad de <strong>Trabajo en Equipo</strong>.
         {knowledgeMode === 'known' 
-          ? " Como ya se conocen, voten por un desafío rápido para activar la mente."
-          : " Como es su primera vez, realizaremos una dinámica para romper el hielo."
+          ? " Como ya se conocen, deben elegir un desafío rápido para sincronizar sus mentes antes de empezar a innovar."
+          : " Como es su primera vez juntos, su objetivo es romper el hielo y entrar en confianza para trabajar mejor."
         }
       </p>
 

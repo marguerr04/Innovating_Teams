@@ -38,6 +38,7 @@ export default function PhaseIntro({ phase, onDone }) {
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
   const data = INTRO_DATA[phase];
+  const notifiedRef = useRef(false);
 
   useEffect(() => {
     // Secuencia de entrada
@@ -65,11 +66,15 @@ export default function PhaseIntro({ phase, onDone }) {
   }, []);
 
   const notify = (reason) => {
-    setShowContent(false); // Animar salida del contenido primero
-    setTimeout(() => setVisible(false), 300); // Luego el fondo
+    // Si ya fue notificado, no hacer nada (evita disparos fantasma)
+    if (notifiedRef.current) return;
+    notifiedRef.current = true;
+
+    setVisible(false); 
+    
     setTimeout(() => {
       onDone(phase);
-    }, 600);
+    }, 600); 
   };
 
   if (!data) return null;

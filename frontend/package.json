@@ -754,6 +754,7 @@
     "supports-preserve-symlinks-flag": "^1.0.0",
     "svg-parser": "^2.0.4",
     "svgo": "^4.0.0",
+    "sweetalert": "^2.1.2",
     "sweetalert2": "^11.26.3",
     "symbol-tree": "^3.2.4",
     "tapable": "^2.3.0",

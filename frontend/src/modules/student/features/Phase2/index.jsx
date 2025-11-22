@@ -90,18 +90,29 @@ export default function Phase2({ onNext, isProf }) {
         {/* --- Párrafo de Instrucción (Dinámico) --- */}
 
 
+        {/* CAMBIO: Instrucciones guiadas con preguntas clave */}
+{/* --- Párrafo de Instrucción (Dinámico y Más Grande) --- */}
         {view === 'selection' ? (
-          <p className="text-lg text-white/80 mb-6 max-w-3xl">
-            Vamos a empatizar. Selecciona un área y un desafío para conocer a la persona que ayudarás.
-            Haz clic en "Continuar a Empatía" cuando estés listo.
-          </p>
+          <div className="mb-8 max-w-4xl">
+            <p className="text-xl md:text-3xl text-white/95 font-bold mb-3">
+              Tu misión: Seleccionar a quién ayudarás hoy.
+            </p>
+            <p className="text-lg md:text-2xl text-white/80 leading-snug">
+              Explora las áreas y desafíos abajo. Lee las historias y pregúntate: 
+              <br/><em className="text-mint-200">¿Qué problema nos motiva más resolver como equipo?</em>
+            </p>
+          </div>
         ) : (
-          <p className="text-lg text-white/80 mb-6 max-w-3xl">
-            Ahora, construye el mapa de empatía para <strong>{state.persona?.name}</strong>. 
-            Usa el editor de la derecha para añadir atributos y observa cómo se arma el mapa.
-          </p>
+          <div className="mb-8 max-w-4xl">
+             <p className="text-xl md:text-3xl text-white/95 font-bold mb-3">
+              Misión de Empatía: Entender a profundidad a {state.persona?.name}.
+            </p>
+            <p className="text-lg md:text-2xl text-white/80 leading-snug">
+              Usa el editor para responder: <strong>¿Qué piensa? ¿Qué le duele? ¿Qué necesita?</strong>
+              <span className="block mt-2 text-base md:text-xl opacity-90">Cuanta más información completen en el mapa, mejor será su solución final.</span>
+            </p>
+          </div>
         )}
-
         {/* ============================================= */}
         {/* ---          VISTA 1: SELECCIÓN           --- */}
         {/* ============================================= */}
