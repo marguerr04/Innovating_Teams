@@ -2,6 +2,21 @@
 import React, { useMemo } from 'react'; 
 import { arr, CATS } from '../../../../../utils/helpers.js';
 
+// --- 1. MAPA DE AVATARES (Para mostrar la foto en el centro) ---
+const AVATAR_MAP = {
+  Osvaldo: "/avatars/osvaldo.png",
+  Humberto: "/avatars/humberto.png",
+  Simona: "/avatars/simona.png",
+  Juana: "/avatars/juana.png",
+  Martina: "/avatars/martina.png",
+  Andrés: "/avatars/andres.png",
+  Gabriela: "/avatars/gabriela.png",
+  Camila: "/avatars/camila.png",
+  Francisco: "/avatars/francisco.png",
+  Luis: "/avatars/luis.png",
+};
+const DEFAULT_AVATAR = "/avatars/default.png";
+
 // Lógica de clases
 const categoryClasses = CATS.reduce((acc, cat) => {
   acc[cat.id] = cat.cls;
@@ -9,14 +24,13 @@ const categoryClasses = CATS.reduce((acc, cat) => {
 }, {});
 const defaultClasses = "bg-slate-100 text-slate-900 border-slate-200";
 
-// --- LÓGICA DE POSICIONAMIENTO (CON RADIOS AJUSTADOS) ---
+// --- LÓGICA DE POSICIONAMIENTO ---
 const calculatePositions = (bubbleCount) => {
   const positions = [];
   const isMobile = window.innerWidth < 1024;
 
-  // --- 1. Usamos los radios más pequeños para que quepan ---
-  const RADIUS_X = isMobile ? 160 : 220; // Antes era 300
-  const RADIUS_Y = isMobile ? 120 : 160; // Antes era 180
+  const RADIUS_X = isMobile ? 160 : 220; 
+  const RADIUS_Y = isMobile ? 120 : 160; 
 
   const START_ANGLE = -Math.PI / 2; 
 
@@ -29,14 +43,14 @@ const calculatePositions = (bubbleCount) => {
   }
   return positions;
 };
-// --- FIN DE LA LÓGICA DE POSICIONAMIENTO ---
 
 export default function DraggableMap({ persona, bubbles }) {
   
   const allBubbles = arr(bubbles);
+  // El texto central ahora es secundario, priorizamos la imagen visualmente
   const centerBubble = { 
     id: 'center', 
-    text: `${persona?.name || 'Persona'} · ${persona?.age || ''}`, 
+    text: persona?.name || 'Persona', 
     center: true 
   };
   const otherBubbles = allBubbles.filter(b => !b.center);
@@ -46,24 +60,28 @@ export default function DraggableMap({ persona, bubbles }) {
     [otherBubbles.length]
   );
 
+  const avatarSrc = AVATAR_MAP[persona?.name] || DEFAULT_AVATAR;
+
   return (
     <div 
       className="relative w-full h-full min-h-[420px] p-4 bg-gray-50 rounded-lg overflow-hidden"
     >
-      {/* 2. Capa SVG eliminada */}
-      
-      {/* Burbuja Central */}
+      {/* --- BURBUJA CENTRAL (FOTO) --- */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 
-                   w-32 h-32 rounded-full font-bold text-white shadow-lg bg-red-500 
-                   flex items-center justify-center text-center p-2"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 
+                   w-32 h-32 rounded-full shadow-2xl border-4 border-red-500 bg-white 
+                   overflow-hidden flex items-center justify-center"
       >
-        {centerBubble.text}
+        {/* CAMBIO: Mostrar imagen en vez de texto */}
+        <img 
+          src={avatarSrc} 
+          alt={centerBubble.text} 
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Ancla para burbujas satélite */}
       <div className="absolute top-1/2 left-1/2 w-0 h-0 z-0">
-        
         {otherBubbles.map((b, index) => {
           const colorClasses = categoryClasses[b.cat] || defaultClasses;
           const position = bubblePositions[index];
@@ -71,7 +89,6 @@ export default function DraggableMap({ persona, bubbles }) {
           return (
             <div 
               key={b.id} 
-              // 3. No se necesita 'ref' para las líneas
               className={`absolute z-10 w-28 h-28 rounded-full font-semibold border shadow-sm 
                          ${colorClasses} transition-transform duration-300 ease-in-out 
                          flex items-center justify-center text-center text-sm p-2`}
@@ -85,15 +102,14 @@ export default function DraggableMap({ persona, bubbles }) {
         })}
       </div>
 
-      {/* Mensaje de "vacío" */}
+      {/* Mensaje de "vacío" (ajustado posición) */}
       {otherBubbles.length === 0 && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <p className="mt-28 text-center text-sm text-gray-400">
-            Usa el editor para añadir atributos (dolores, necesidades...)
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 mt-24 w-64 text-center">
+          <p className="text-sm text-gray-400 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
+            Añade atributos para verlos aquí
           </p>
         </div>
       )}
-
     </div>
   );
 }
