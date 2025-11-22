@@ -24,7 +24,7 @@ const INTRO_DATA = {
     texto: "El mundo debe conocer su solución. Preparen un mensaje claro y contundente para convencer a la audiencia." 
   },
   5: { 
-    habilidad: "Feedback", 
+    habilidad: "Evaluación", 
     lema: "Misión: Reporte de Inteligencia", 
     texto: "Analicen el desempeño de los otros equipos. Su retroalimentación es vital para mejorar las soluciones globales." 
   }
