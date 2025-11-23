@@ -17,15 +17,12 @@ const OptimizedStudentChip = ({ student, compact = false }) => {
     zIndex: 999,
   } : undefined;
 
-  // Generar display name estilo "m.guerrero"
-  const generateDisplayName = (student) => {
+  // Generar nombre compacto: solo nombre + apellido paterno
+  const generateCompactName = (student) => {
     const firstName = student.nombre || student.name?.split(' ')[0] || '';
     const lastName = student.apellido_paterno || student.name?.split(' ')[1] || '';
     
-    if (firstName && lastName) {
-      return `${firstName.charAt(0).toLowerCase()}.${lastName.toLowerCase()}`;
-    }
-    return student.displayName || student.name || 'usuario';
+    return `${firstName} ${lastName}`.trim() || student.displayName || student.name || 'Estudiante';
   };
 
   if (compact) {
@@ -53,9 +50,9 @@ const OptimizedStudentChip = ({ student, compact = false }) => {
           {student.initials}
         </div>
         
-        {/* Display name estilo m.guerrero */}
+        {/* Nombre compacto */}
         <div className="text-xs font-medium text-gray-900 leading-tight">
-          {generateDisplayName(student)}
+          {generateCompactName(student)}
         </div>
         
         {/* Email truncado */}
@@ -68,7 +65,7 @@ const OptimizedStudentChip = ({ student, compact = false }) => {
     );
   }
 
-  // Versión normal (para grupos)
+  // Versión normal compacta horizontal (para grupos)
   return (
     <div
       ref={setNodeRef}
@@ -76,39 +73,34 @@ const OptimizedStudentChip = ({ student, compact = false }) => {
       {...listeners}
       {...attributes}
       className={`
-        flex items-center space-x-2 p-2 rounded-lg 
+        flex items-center space-x-2 p-1.5 rounded border 
         cursor-grab active:cursor-grabbing
         transition-all duration-200
-        ${isDragging ? 'opacity-50 scale-95 shadow-lg' : 'hover:shadow-md'}
-        bg-white border border-gray-200 hover:border-gray-300
+        ${isDragging ? 'opacity-50 scale-95 shadow-lg' : 'hover:shadow-sm hover:border-blue-300'}
+        bg-white border-gray-200
+        min-h-[32px]
       `}
     >
-      {/* Avatar con iniciales */}
+      {/* Avatar pequeño */}
       <div className={`
-        w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold
-        ${student.avatar || 'bg-gray-500'}
+        w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0
+        ${student.avatar || 'bg-blue-500'}
       `}>
         {student.initials}
       </div>
       
-      {/* Información del estudiante */}
+      {/* Solo nombre y apellido paterno */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
-          {student.displayName || student.name}
+        <p className="text-xs font-medium text-gray-900 truncate" title={`${student.nombre || ''} ${student.apellido_paterno || ''} ${student.apellido_materno || ''}`}>
+          {generateCompactName(student)}
         </p>
-        {student.correo && (
-          <p className="text-xs text-gray-500 truncate">
-            {student.correo}
-          </p>
-        )}
       </div>
       
-      {/* Indicador de drag más sutil */}
-      <div className="flex flex-col space-y-0.5 opacity-50">
-        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+      {/* Indicador de drag más pequeño */}
+      <div className="flex flex-col space-y-0.5 opacity-40 flex-shrink-0">
+        <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
+        <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
+        <div className="w-0.5 h-0.5 bg-gray-400 rounded-full"></div>
       </div>
     </div>
   );

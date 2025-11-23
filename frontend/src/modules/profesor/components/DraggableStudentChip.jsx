@@ -11,17 +11,17 @@ const DraggableStudentChip = ({ id, student, compact = false }) => {
     zIndex: isDragging ? 1000 : 'auto',
   } : {};
 
-  // Generar nombre corto: primera letra nombre + punto + apellido
-  const generateShortName = (nombre, apellido) => {
-    const n = nombre ? nombre.charAt(0).toLowerCase() : '';
-    const a = apellido ? apellido.toLowerCase() : '';
-    return `${n}.${a}`;
+  // Generar nombre compacto: solo nombre + apellido paterno
+  const generateCompactName = (nombre, apellido_paterno) => {
+    const n = nombre ? nombre.split(' ')[0] : '';
+    const a = apellido_paterno ? apellido_paterno : '';
+    return `${n} ${a}`.trim() || 'Estudiante';
   };
 
-  const shortName = generateShortName(student.nombre, student.apellido_paterno);
+  const compactName = generateCompactName(student.nombre, student.apellido_paterno);
 
   if (compact) {
-    // Diseño ultra-compacto tipo sala de cine - 6 por fila, altura reducida
+    // Diseño ultra-compacto - altura muy reducida
     return (
       <div
         ref={setNodeRef}
@@ -29,32 +29,27 @@ const DraggableStudentChip = ({ id, student, compact = false }) => {
         {...listeners}
         {...attributes}
         className={`
-          flex flex-col items-center p-1.5 rounded-md border cursor-move transition-all duration-200
+          flex flex-col items-center p-1 rounded border cursor-move transition-all duration-200
           ${isDragging 
             ? 'opacity-50 scale-95 shadow-2xl z-50 bg-white border-blue-400' 
             : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
           }
-          min-h-[48px] w-full
+          min-h-[36px] w-full max-w-[120px] mx-auto
         `}
       >
-        {/* Avatar circular más pequeño */}
+        {/* Avatar circular muy pequeño */}
         <div className={`
-          w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold mb-1
+          w-4 h-4 rounded-full flex items-center justify-center text-white text-xs font-semibold mb-0.5
           ${student.avatar || 'bg-blue-500'}
         `}>
           {student.initials}
         </div>
         
-        {/* Nombre corto */}
-        <div className="text-center w-full">
-          <p className="text-xs font-medium text-gray-900 truncate leading-tight">
-            {shortName}
+        {/* Solo nombre y apellido paterno */}
+        <div className="text-center w-full px-0.5">
+          <p className="text-xs font-medium text-gray-900 truncate leading-tight" title={`${student.nombre || ''} ${student.apellido_paterno || ''} ${student.apellido_materno || ''}`}>
+            {compactName}
           </p>
-          {student.correo && (
-            <p className="text-[10px] text-gray-500 truncate">
-              {student.correo}
-            </p>
-          )}
         </div>
       </div>
     );

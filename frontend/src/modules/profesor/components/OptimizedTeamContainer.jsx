@@ -46,8 +46,8 @@ const OptimizedTeamContainer = ({ group }) => {
       
       {/* Contenido del equipo */}
       <div className="p-2">
-        {/* Lista de estudiantes */}
-        <div className="space-y-1.5 mb-3">
+        {/* Grid de estudiantes horizontal - 2 columnas */}
+        <div className="grid grid-cols-2 gap-1 mb-3">
           {group.students.map((student) => (
             <OptimizedStudentChip
               key={student.id}

@@ -87,6 +87,22 @@ export const useOptimizedGroupBuilder = () => {
       avatar: generateAvatar(student.nombre, student.apellido_paterno)
     }));
     
+    // VALIDACIÓN: Verificar que no hay IDs duplicados
+    const ids = processedStudents.map(s => s.id);
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      console.error('🚨 PROBLEMA: IDs duplicados detectados!', {
+        totalIds: ids.length,
+        uniqueIds: uniqueIds.size,
+        ids
+      });
+    } else {
+      console.log('✅ Validación de IDs: Todos son únicos', {
+        totalStudents: processedStudents.length,
+        sampleIds: ids.slice(0, 5)
+      });
+    }
+    
     // LIMPIAR ESTUDIANTES ANTERIORES - Resetear completamente
     setStudents(processedStudents);
     setContainers({
@@ -216,18 +232,19 @@ export const useOptimizedGroupBuilder = () => {
     }
   };
 
-  // Redistribuir automáticamente cuando cambia la cantidad de grupos
-  useEffect(() => {
-    const totalStudents = Object.values(containers).reduce((acc, container) => acc + container.length, 0);
-    if (totalStudents > 0) {
-      redistributeGroups();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupSettings.groupCount]);
+  // REMOVIDO: Auto-redistribución automática al cambiar cantidad de grupos
+  // La redistribución ahora solo ocurre cuando el usuario hace clic en "Redistribuir"
+  // useEffect(() => {
+  //   const totalStudents = Object.values(containers).reduce((acc, container) => acc + container.length, 0);
+  //   if (totalStudents > 0) {
+  //     redistributeGroups();
+  //   }
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [groupSettings.groupCount]);
 
   // No inicializar con datos dummy - solo con CSV
 
-  // Crear grupos vacíos sin redistribuir (solo cuando cambia cantidad)
+  // Crear grupos vacíos sin redistribuir estudiantes (solo cuando cambia cantidad)
   const createEmptyGroups = (newGroupCount) => {
     // Calcular total de estudiantes de todos los contenedores
     const totalStudents = Object.values(containers).reduce((acc, container) => acc + container.length, 0);
@@ -237,11 +254,36 @@ export const useOptimizedGroupBuilder = () => {
     const remainder = totalStudents % newGroupCount;
     const maxSize = baseSize + (remainder > 0 ? 1 : 0);
     
+    // Actualizar configuración de grupos
     setGroupSettings(prev => ({
       ...prev,
       groupCount: newGroupCount,
       groupSize: maxSize
     }));
+
+    // Preservar estudiantes existentes y solo crear/remover contenedores vacíos
+    setContainers(prev => {
+      const newContainers = {
+        'unassigned': prev.unassigned || [],
+        'grupo-1': prev['grupo-1'] || [],
+        'grupo-2': prev['grupo-2'] || [],
+        'grupo-3': prev['grupo-3'] || [],
+        'grupo-4': prev['grupo-4'] || []
+      };
+
+      // Si reducimos grupos, mover estudiantes de grupos eliminados a "no asignados"
+      if (newGroupCount < 4) {
+        for (let i = newGroupCount + 1; i <= 4; i++) {
+          const groupId = `grupo-${i}`;
+          if (newContainers[groupId] && newContainers[groupId].length > 0) {
+            newContainers.unassigned.push(...newContainers[groupId]);
+            newContainers[groupId] = [];
+          }
+        }
+      }
+
+      return newContainers;
+    });
   };
 
   // Generar grupos automáticamente con distribución equitativa mejorada
@@ -348,6 +390,15 @@ export const useOptimizedGroupBuilder = () => {
     const studentId = active.id;
     const targetContainerId = over.id;
 
+    console.log('🔧 Drag End Debug:', {
+      studentId,
+      targetContainerId,
+      containers: Object.keys(containers).reduce((acc, key) => ({
+        ...acc,
+        [key]: containers[key].map(s => ({ id: s.id, name: s.displayName || s.name }))
+      }), {})
+    });
+
     // Encontrar contenedor origen
     let sourceContainerId = null;
     let studentObj = null;
@@ -357,11 +408,18 @@ export const useOptimizedGroupBuilder = () => {
       if (foundStudent) {
         sourceContainerId = containerId;
         studentObj = foundStudent;
+        console.log('✅ Estudiante encontrado:', {
+          sourceContainer: containerId,
+          studentFound: { id: foundStudent.id, name: foundStudent.displayName || foundStudent.name }
+        });
         break;
       }
     }
 
-    if (!sourceContainerId || sourceContainerId === targetContainerId) return;
+    if (!sourceContainerId || sourceContainerId === targetContainerId) {
+      console.log('❌ Operación cancelada:', { sourceContainerId, targetContainerId });
+      return;
+    }
 
     // Verificar límites con cálculo equitativo correcto
     const targetContainer = containers[targetContainerId];
@@ -369,19 +427,45 @@ export const useOptimizedGroupBuilder = () => {
     const maxSizePerGroup = Math.ceil(totalStudents / groupSettings.groupCount);
     
     if (targetContainerId !== 'unassigned' && targetContainer.length >= maxSizePerGroup + 1) {
+      console.log('❌ Límite de capacidad alcanzado');
       return; // No permitir si excede capacidad equitativa
     }
 
+    console.log('🔄 Antes de actualizar containers:', {
+      sourceContainer: {
+        id: sourceContainerId,
+        students: containers[sourceContainerId].map(s => ({ id: s.id, name: s.displayName || s.name }))
+      },
+      targetContainer: {
+        id: targetContainerId,
+        students: containers[targetContainerId].map(s => ({ id: s.id, name: s.displayName || s.name }))
+      },
+      movingStudent: { id: studentObj.id, name: studentObj.displayName || studentObj.name }
+    });
+
     // Actualizar contenedores
     setContainers(prevContainers => {
+      // Crear copias profundas para evitar problemas de referencia
       const newSourceList = [...prevContainers[sourceContainerId]].filter(s => s.id !== studentId);
-      const newTargetList = [...prevContainers[targetContainerId], studentObj];
+      const newTargetList = [...prevContainers[targetContainerId], { ...studentObj }]; // Copia profunda
       
-      return {
+      console.log('🔄 Después de filtrar/agregar:', {
+        newSourceList: newSourceList.map(s => ({ id: s.id, name: s.displayName || s.name })),
+        newTargetList: newTargetList.map(s => ({ id: s.id, name: s.displayName || s.name }))
+      });
+      
+      const newContainers = {
         ...prevContainers,
         [sourceContainerId]: newSourceList,
         [targetContainerId]: newTargetList,
       };
+
+      console.log('🎯 Estado final de containers:', Object.keys(newContainers).reduce((acc, key) => ({
+        ...acc,
+        [key]: newContainers[key].map(s => ({ id: s.id, name: s.displayName || s.name }))
+      }), {}));
+      
+      return newContainers;
     });
   };
 

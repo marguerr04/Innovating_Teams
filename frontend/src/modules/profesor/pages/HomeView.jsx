@@ -4,7 +4,7 @@ import { useProfesor } from '../components/ProfessorContext';
 // nada de esto es funcional, en proximas etapas sera funcional algunas partes
 const HomeView = () => {
   const navigate = useNavigate();
-  const { profesor, juegos, loading } = useProfesor();
+  const { profesor, juegos } = useProfesor();
   const [stats, setStats] = useState({
     totalJuegos: 0,
     juegosPendientes: 0,

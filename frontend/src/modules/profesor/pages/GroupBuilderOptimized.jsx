@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import OptimizedVistaPreviaSala from '../components/OptimizedVistaPreviaSala';
 import useOptimizedGroupBuilder from '../hooks/useOptimizedGroupBuilder';
 
@@ -8,7 +8,6 @@ const GroupBuilderOptimized = () => {
     groups,
     groupSettings,
     isGenerating,
-    csvFile,
     parsedCsv,
     csvError,
     uploading,
