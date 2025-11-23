@@ -28,23 +28,23 @@ const GroupBuilderOptimized = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-blue-100">
-          {/* Header simplificado */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-6">
+          {/* Header compacto */}
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  🚀 Constructor de Grupos - Optimizado
+                <h1 className="text-2xl font-bold text-white mb-1">
+                  🚀 Constructor de Grupos
                 </h1>
-                <p className="text-blue-100 text-lg">
-                  Organiza a los estudiantes con tecnología de arrastrar y soltar
+                <p className="text-blue-100 text-sm">
+                  Organiza estudiantes con drag & drop
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row min-h-[600px]">
-            {/* Panel de Configuración - 1/3 */}
-            <div className="w-full lg:w-1/3 p-6 border-r border-gray-200 bg-gray-50">
+          <div className="flex flex-col lg:flex-row min-h-[500px]">
+            {/* Panel de Configuración - 1/4 */}
+            <div className="w-full lg:w-1/4 p-4 border-r border-gray-200 bg-gray-50">
               <div className="space-y-6">
                 {/* Metadatos de la Sesión - PRIMERO */}
                 <div className="bg-white rounded-lg p-4 shadow-sm border">
@@ -80,38 +80,38 @@ const GroupBuilderOptimized = () => {
                 </div>
 
                 {/* Configuración de CSV - SEGUNDO */}
-                <div className="bg-white rounded-lg p-4 shadow-sm border">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    📄 Cargar Estudiantes
+                <div className="bg-white rounded-lg p-3 shadow-sm border">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center text-sm">
+                    📄 Estudiantes
                   </h3>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         Archivo CSV/Excel
                       </label>
                       <input
                         type="file"
                         accept=".csv,.xlsx,.xls"
                         onChange={handleCsvFileChange}
-                        className="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full text-xs border border-gray-300 rounded p-1.5 focus:ring-1 focus:ring-blue-500"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Formato: Correo, RUT, Nombre, Apellido Paterno, Apellido Materno
+                        Correo, RUT, Nombre, Apellidos
                       </p>
                     </div>
                     
                     {csvError && (
-                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                        <p className="text-sm text-red-600">{csvError}</p>
+                      <div className="bg-red-50 border border-red-200 rounded p-2">
+                        <p className="text-xs text-red-600">{csvError}</p>
                       </div>
                     )}
                     
                     {uploadResult && (
-                      <div className="bg-green-50 border border-green-200 rounded-md p-3">
-                        <p className="text-sm text-green-700">
-                          ✅ {uploadResult.procesados || uploadResult.total} estudiantes procesados
-                          {uploadResult.backend && ` (${uploadResult.nuevos} nuevos en backend)`}
+                      <div className="bg-green-50 border border-green-200 rounded p-2">
+                        <p className="text-xs text-green-700">
+                          ✅ {uploadResult.procesados || uploadResult.total} estudiantes
+                          {uploadResult.backend && ` (${uploadResult.nuevos} nuevos)`}
                         </p>
                       </div>
                     )}
@@ -120,26 +120,26 @@ const GroupBuilderOptimized = () => {
                       <button
                         onClick={sendCsvToBackend}
                         disabled={uploading}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:bg-gray-400 transition-colors"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium disabled:bg-gray-400 transition-colors"
                       >
-                        {uploading ? 'Enviando...' : 'Enviar al Backend'}
+                        {uploading ? 'Enviando...' : 'Procesar'}
                       </button>
                     )}
                   </div>
                 </div>
 
                 {/* Configuración de Grupos */}
-                <div className="bg-white rounded-lg p-4 shadow-sm border">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    ⚙️ Reglas de Agrupación
+                <div className="bg-white rounded-lg p-3 shadow-sm border">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center text-sm">
+                    ⚙️ Agrupación
                   </h3>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {/* Número de grupos */}
                     <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-gray-700">Cantidad de Grupos</label>
-                        <span className="text-sm font-medium text-gray-900">{groupSettings.groupCount}</span>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-xs font-medium text-gray-700">Grupos</label>
+                        <span className="text-xs font-medium text-gray-900">{groupSettings.groupCount}</span>
                       </div>
                       <select
                         value={groupSettings.groupCount}
@@ -232,16 +232,16 @@ const GroupBuilderOptimized = () => {
                     <button
                       onClick={generateAutoGroups}
                       disabled={isGenerating || students.length === 0}
-                      className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-3 rounded-md font-medium disabled:bg-gray-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                      className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-3 py-2 rounded text-xs font-medium disabled:bg-gray-400 transition-all duration-200"
                     >
                       {isGenerating ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span className="flex items-center justify-center gap-1">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
                           Redistribuyendo...
                         </span>
                       ) : (
-                        <span className="flex items-center justify-center gap-2">
-                          🔄 Redistribuir Grupos
+                        <span className="flex items-center justify-center gap-1">
+                          🔄 Redistribuir
                         </span>
                       )}
                     </button>

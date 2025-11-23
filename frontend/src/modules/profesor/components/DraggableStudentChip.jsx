@@ -21,7 +21,7 @@ const DraggableStudentChip = ({ id, student, compact = false }) => {
   const shortName = generateShortName(student.nombre, student.apellido_paterno);
 
   if (compact) {
-    // Diseño compacto tipo sala de cine - 5 por fila
+    // Diseño ultra-compacto tipo sala de cine - 6 por fila, altura reducida
     return (
       <div
         ref={setNodeRef}
@@ -29,17 +29,17 @@ const DraggableStudentChip = ({ id, student, compact = false }) => {
         {...listeners}
         {...attributes}
         className={`
-          flex flex-col items-center p-2 rounded-lg border cursor-move transition-all duration-200
+          flex flex-col items-center p-1.5 rounded-md border cursor-move transition-all duration-200
           ${isDragging 
             ? 'opacity-50 scale-95 shadow-2xl z-50 bg-white border-blue-400' 
-            : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
+            : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
           }
-          min-h-[60px] w-full
+          min-h-[48px] w-full
         `}
       >
-        {/* Avatar circular */}
+        {/* Avatar circular más pequeño */}
         <div className={`
-          w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold mb-1
+          w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold mb-1
           ${student.avatar || 'bg-blue-500'}
         `}>
           {student.initials}
@@ -47,7 +47,7 @@ const DraggableStudentChip = ({ id, student, compact = false }) => {
         
         {/* Nombre corto */}
         <div className="text-center w-full">
-          <p className="text-xs font-medium text-gray-900 truncate">
+          <p className="text-xs font-medium text-gray-900 truncate leading-tight">
             {shortName}
           </p>
           {student.correo && (

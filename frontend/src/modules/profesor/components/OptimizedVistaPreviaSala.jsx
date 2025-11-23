@@ -17,20 +17,20 @@ const UnassignedStudentsZone = ({ students }) => {
         ${isOver ? 'scale-102' : ''}
       `}
     >
-      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+      <h3 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
         📋 Estudiantes sin asignar ({students.length})
-        {isOver && <span className="ml-2 text-blue-600 animate-pulse">← Soltar aquí</span>}
+        {isOver && <span className="ml-2 text-blue-600 animate-pulse text-sm">← Soltar aquí</span>}
       </h3>
       
       {students.length === 0 ? (
         // Estado placeholder mejorado con líneas punteadas
-        <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-4">
           <div className="text-center text-gray-500">
-            <div className="grid grid-cols-5 gap-3 mb-4">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-16 bg-gray-200/50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
-                  <div className="w-6 h-6 bg-gray-300/70 rounded-full mb-1"></div>
-                  <div className="w-8 h-1 bg-gray-300/50 rounded"></div>
+            <div className="grid grid-cols-6 gap-2 mb-3">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200/50 rounded border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
+                  <div className="w-4 h-4 bg-gray-300/70 rounded-full mb-0.5"></div>
+                  <div className="w-6 h-0.5 bg-gray-300/50 rounded"></div>
                 </div>
               ))}
             </div>
@@ -42,12 +42,12 @@ const UnassignedStudentsZone = ({ students }) => {
           </div>
         </div>
       ) : (
-        // Lista real de estudiantes - 5 por fila con chips compactos
+        // Lista real de estudiantes - 6 por fila con chips ultra-compactos
         <div className={`
-          bg-gray-50 rounded-lg p-4 border-2 border-dashed transition-all duration-200
+          bg-gray-50 rounded-lg p-3 border-2 border-dashed transition-all duration-200
           ${isOver ? 'border-blue-400 bg-blue-50 shadow-lg' : 'border-gray-300'}
         `}>
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-6 gap-2">
             {students.map((student) => (
               <DraggableStudentChip
                 key={student.id}
@@ -108,7 +108,7 @@ const OptimizedVistaPreviaSala = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEndWrapper}
     >
-      <div className="w-full lg:w-2/3 p-6">
+      <div className="w-full lg:w-3/4 p-4">
         {/* Loading State */}
         {isGenerating && (
           <div className="text-center py-12">
@@ -129,7 +129,7 @@ const OptimizedVistaPreviaSala = ({
           {!isGenerating && (
             <>
               {groups.length > 0 ? (
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   {groups.map((group) => (
                     <OptimizedTeamContainer
                       key={group.id}
@@ -138,18 +138,18 @@ const OptimizedVistaPreviaSala = ({
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   {Array.from({ length: groupSettings.groupCount }, (_, index) => index + 1).map((num) => (
-                    <div key={num} className="bg-gray-100 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg min-h-[200px]">
-                      <div className="bg-gray-200 px-4 py-3 rounded-t-lg">
-                        <h3 className="font-semibold">Equipo {num}</h3>
-                        <p className="text-sm">Esperando configuración...</p>
+                    <div key={num} className="bg-gray-100 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg min-h-[140px]">
+                      <div className="bg-gray-200 px-3 py-2 rounded-t-lg">
+                        <h3 className="font-semibold text-sm">Equipo {num}</h3>
+                        <p className="text-xs">Esperando configuración...</p>
                       </div>
-                      <div className="p-6 flex items-center justify-center h-32">
+                      <div className="p-3 flex items-center justify-center h-20">
                         <div className="text-center">
-                          <div className="text-3xl mb-2">🎯</div>
-                          <div className="text-sm font-medium">Presiona 'Generar Vista Previa'</div>
-                          <div className="text-xs text-gray-500 mt-1">para distribuir estudiantes</div>
+                          <div className="text-2xl mb-1">🎯</div>
+                          <div className="text-xs font-medium">Presiona 'Redistribuir'</div>
+                          <div className="text-xs text-gray-500 mt-0.5">para distribuir estudiantes</div>
                         </div>
                       </div>
                     </div>
@@ -159,23 +159,23 @@ const OptimizedVistaPreviaSala = ({
             </>
           )}
           
-          {/* Estadísticas avanzadas */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4 border border-gray-200">
+          {/* Estadísticas compactas */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3 mb-3 border border-gray-200">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
                 {groups.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="font-semibold text-green-600">✅ Asignados:</span>
-                      <span className="ml-1">{groups.reduce((total, group) => total + group.students.length, 0)}</span>
+                      <span className="font-semibold text-green-600 text-xs">✅ Asignados:</span>
+                      <span className="ml-1 text-xs">{groups.reduce((total, group) => total + group.students.length, 0)}</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-orange-600">📋 Sin asignar:</span>
-                      <span className="ml-1">{containers.unassigned?.length || 0}</span>
+                      <span className="font-semibold text-orange-600 text-xs">📋 Sin asignar:</span>
+                      <span className="ml-1 text-xs">{containers.unassigned?.length || 0}</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-blue-600">📊 Distribución:</span>
-                      <span className="ml-1">{groups.map(g => g.students.length).join('-')}</span>
+                      <span className="font-semibold text-blue-600 text-xs">📊 Distribución:</span>
+                      <span className="ml-1 text-xs">{groups.map(g => g.students.length).join('-')}</span>
                     </div>
                   </div>
                 ) : (
@@ -186,18 +186,18 @@ const OptimizedVistaPreviaSala = ({
               </div>
               
               {groups.length > 0 && (
-                <div className="text-xs text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                  🔄 Arrastra chips entre grupos fácilmente
+                <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  🔄 Arrastra chips entre grupos
                 </div>
               )}
             </div>
           </div>
           
-          {/* Botón Confirmar mejorado */}
+          {/* Botón Confirmar compacto */}
           <div className="text-center">
             <button 
               disabled={groups.length === 0 || isGenerating}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-yellow-900 font-bold px-10 py-4 rounded-xl transition-all duration-200 disabled:from-gray-300 disabled:to-gray-400 disabled:text-gray-500 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none"
+              className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-yellow-900 font-bold px-6 py-3 rounded-lg transition-all duration-200 disabled:from-gray-300 disabled:to-gray-400 disabled:text-gray-500 text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
             >
               {groups.length === 0 ? (
                 <span className="flex items-center gap-2">

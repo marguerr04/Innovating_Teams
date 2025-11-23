@@ -19,7 +19,7 @@ const OptimizedTeamContainer = ({ group }) => {
     <div 
       ref={setNodeRef}
       className={`
-        relative rounded-lg border-2 transition-all duration-300 min-h-[200px]
+        relative rounded-lg border-2 transition-all duration-300 min-h-[140px]
         ${isOver && canAcceptMore ? 'border-green-400 bg-green-50 shadow-lg scale-105' : 
           isOver && !canAcceptMore ? 'border-red-400 bg-red-50' :
           'border-gray-200 bg-white shadow-sm hover:shadow-md'}
@@ -27,16 +27,16 @@ const OptimizedTeamContainer = ({ group }) => {
     >
       {/* Header del equipo */}
       <div className={`
-        px-4 py-3 rounded-t-lg border-b-2 
+        px-3 py-2 rounded-t-lg border-b-2 
         ${group.color} text-white
       `}>
-        <h3 className="font-semibold text-lg">{group.name}</h3>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-sm opacity-90">
+        <h3 className="font-semibold text-base">{group.name}</h3>
+        <div className="flex justify-between items-center mt-0.5">
+          <span className="text-xs opacity-90">
             {studentsCount} integrante{studentsCount !== 1 ? 's' : ''}
           </span>
           <span className={`
-            text-xs px-2 py-1 rounded-full font-medium
+            text-xs px-2 py-0.5 rounded-full font-medium
             ${isFull ? 'bg-yellow-200 text-yellow-800' : 'bg-white/20 text-white'}
           `}>
             {studentsCount}/{maxSize}
@@ -45,9 +45,9 @@ const OptimizedTeamContainer = ({ group }) => {
       </div>
       
       {/* Contenido del equipo */}
-      <div className="p-4">
+      <div className="p-2">
         {/* Lista de estudiantes */}
-        <div className="space-y-2 mb-4">
+        <div className="space-y-1.5 mb-3">
           {group.students.map((student) => (
             <OptimizedStudentChip
               key={student.id}
@@ -59,13 +59,13 @@ const OptimizedTeamContainer = ({ group }) => {
         {/* Área de drop cuando está vacío */}
         {studentsCount === 0 && (
           <div className={`
-            border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200
+            border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200
             ${isOver ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50'}
           `}>
             <div className="text-gray-500">
-              <div className="text-2xl mb-2">👥</div>
-              <p className="text-sm font-medium">Arrastra estudiantes aquí</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <div className="text-xl mb-1">👥</div>
+              <p className="text-xs font-medium">Arrastra estudiantes aquí</p>
+              <p className="text-xs text-gray-400 mt-0.5">
                 Máximo {maxSize} estudiantes
               </p>
             </div>
