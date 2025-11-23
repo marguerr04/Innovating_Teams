@@ -1,8 +1,7 @@
-// src/modules/student/features/Phase2/components/DraggableMap.jsx
 import React, { useMemo } from 'react'; 
 import { arr, CATS } from '../../../../../utils/helpers.js';
 
-// --- 1. MAPA DE AVATARES (Para mostrar la foto en el centro) ---
+// --- MAPA DE AVATARES ---
 const AVATAR_MAP = {
   Osvaldo: "/avatars/osvaldo.png",
   Humberto: "/avatars/humberto.png",
@@ -47,7 +46,6 @@ const calculatePositions = (bubbleCount) => {
 export default function DraggableMap({ persona, bubbles }) {
   
   const allBubbles = arr(bubbles);
-  // El texto central ahora es secundario, priorizamos la imagen visualmente
   const centerBubble = { 
     id: 'center', 
     text: persona?.name || 'Persona', 
@@ -66,21 +64,28 @@ export default function DraggableMap({ persona, bubbles }) {
     <div 
       className="relative w-full h-full min-h-[420px] p-4 bg-gray-50 rounded-lg overflow-hidden"
     >
-      {/* --- BURBUJA CENTRAL (FOTO) --- */}
+      {/* --- 1. BURBUJA CENTRAL (FOTO) --- */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 
                    w-32 h-32 rounded-full shadow-2xl border-4 border-red-500 bg-white 
-                   overflow-hidden flex items-center justify-center"
+                   overflow-hidden flex items-center justify-center group"
       >
-        {/* CAMBIO: Mostrar imagen en vez de texto */}
         <img 
           src={avatarSrc} 
           alt={centerBubble.text} 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
 
-      {/* Ancla para burbujas satélite */}
+      {/* --- 2. ETIQUETA NOMBRE (NUEVO) --- */}
+      {/* Se posiciona en el centro y se baja con mt-20 para quedar bajo la foto */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 mt-20 z-30">
+        <div className="bg-white/95 backdrop-blur-sm px-4 py-1 rounded-full shadow-md border border-slate-200 text-sm font-extrabold text-slate-800 whitespace-nowrap">
+          {centerBubble.text}
+        </div>
+      </div>
+
+      {/* --- 3. BURBUJAS SATÉLITE --- */}
       <div className="absolute top-1/2 left-1/2 w-0 h-0 z-0">
         {otherBubbles.map((b, index) => {
           const colorClasses = categoryClasses[b.cat] || defaultClasses;
@@ -102,11 +107,11 @@ export default function DraggableMap({ persona, bubbles }) {
         })}
       </div>
 
-      {/* Mensaje de "vacío" (ajustado posición) */}
+      {/* Mensaje de "vacío" */}
       {otherBubbles.length === 0 && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 mt-24 w-64 text-center">
-          <p className="text-sm text-gray-400 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
-            Añade atributos para verlos aquí
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 mt-28 w-64 text-center">
+          <p className="text-xs text-gray-400 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm border border-dashed border-gray-300">
+            (El mapa está vacío)
           </p>
         </div>
       )}
