@@ -260,289 +260,292 @@ const GroupBuilder = () => {
 
   return (
     <>
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Constructor de Grupos</h1>
-          <p className="text-gray-600 mt-2">Organiza a tus estudiantes en grupos equilibrados para los juegos</p>
-        </div>
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Constructor de Grupos</h1>
+            <p className="text-gray-600 mt-2">Organiza a tus estudiantes en grupos equilibrados para los juegos</p>
+          </div>
 
-        {/* Game Selection */}
-        <div className="mb-8">
-          <label htmlFor="game-select" className="block text-sm font-medium text-gray-700 mb-2">
-            Seleccionar Juego (Opcional)
-          </label>
-          <select
-            id="game-select"
-            value={selectedGame}
-            onChange={(e) => setSelectedGame(e.target.value)}
-            className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">Configuración general</option>
-            {juegos.map((juego) => (
-              <option key={juego.id} value={juego.id}>
-                {juego.nombre || `Juego ${juego.id}`}
-              </option>
-            ))}
-          </select>
-        </div>
+          {/* Game Selection */}
+          <div className="mb-8">
+            <label htmlFor="game-select" className="block text-sm font-medium text-gray-700 mb-2">
+              Seleccionar Juego (Opcional)
+            </label>
+            <select
+              id="game-select"
+              value={selectedGame}
+              onChange={(e) => setSelectedGame(e.target.value)}
+              className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Configuración general</option>
+              {juegos.map((juego) => (
+                <option key={juego.id} value={juego.id}>
+                  {juego.nombre || `Juego ${juego.id}`}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Students Management */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Gestión de Estudiantes</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Students Management */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Gestión de Estudiantes</h2>
 
-            {/* CSV Upload */}
-            <div className="mb-4 space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Importar desde CSV</label>
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleCsvFileChange}
-                className="w-full text-sm"
-              />
-              {csvError && <p className="text-xs text-red-600">{csvError}</p>}
-              {parsedCsv.length > 0 && (
-                <div className="text-xs text-gray-600 flex items-center justify-between">
-                  <span>{parsedCsv.length} filas parseadas</span>
-                  <button
-                    onClick={sendCsvToBackend}
-                    disabled={uploading}
-                    className="px-2 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700 disabled:bg-gray-400"
-                  >{uploading ? 'Enviando...' : 'Enviar al backend'}</button>
-                </div>
-              )}
-            </div>
-            
-            {/* Add Student */}
-            <div className="mb-4 flex gap-2">
-              <input
-                type="text"
-                value={newStudentName}
-                onChange={(e) => setNewStudentName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addStudent()}
-                placeholder="Nombre del estudiante"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <button
-                onClick={addStudent}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-              >
-                Agregar
-              </button>
-            </div>
-
-            {/* Students List */}
-            <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
-              <h3 className="font-medium text-gray-900 mb-3">
-                Estudiantes ({students.length})
-              </h3>
-              {uploadResult && (
-                <p className="text-xs mb-2 text-green-700">
-                  Backend recibió {uploadResult.total} registros (nuevos: {uploadResult.nuevos}).
-                </p>
-              )}
-              {parsedCsv.length > 0 && students.length === exampleStudents.length && (
-                <p className="text-xs text-orange-600 mb-2">CSV parseado listo, envíalo al backend para reemplazar la lista.</p>
-              )}
-              <div className="space-y-2">
-                {students.map((student) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-900">{student.name}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          student.level === 'avanzado' ? 'bg-green-100 text-green-800' :
-                          student.level === 'intermedio' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {student.level}
-                        </span>
-                        {student.skills.length > 0 && (
-                          <span className="text-xs text-gray-500">
-                            {student.skills.join(', ')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+              {/* CSV Upload */}
+              <div className="mb-4 space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Importar desde CSV</label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCsvFileChange}
+                  className="w-full text-sm"
+                />
+                {csvError && <p className="text-xs text-red-600">{csvError}</p>}
+                {parsedCsv.length > 0 && (
+                  <div className="text-xs text-gray-600 flex items-center justify-between">
+                    <span>{parsedCsv.length} filas parseadas</span>
                     <button
-                      onClick={() => removeStudent(student.id)}
-                      className="text-red-500 hover:text-red-700 p-1"
+                      onClick={sendCsvToBackend}
+                      disabled={uploading}
+                      className="px-2 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700 disabled:bg-gray-400"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      {uploading ? 'Enviando...' : 'Enviar al backend'}
                     </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Student */}
+              <div className="mb-4 flex gap-2">
+                <input
+                  type="text"
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addStudent()}
+                  placeholder="Nombre del estudiante"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={addStudent}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                >
+                  Agregar
+                </button>
+              </div>
+
+              {/* Students List */}
+              <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
+                <h3 className="font-medium text-gray-900 mb-3">
+                  Estudiantes ({students.length})
+                </h3>
+                {uploadResult && (
+                  <p className="text-xs mb-2 text-green-700">
+                    Backend recibió {uploadResult.total} registros (nuevos: {uploadResult.nuevos}).
+                  </p>
+                )}
+                {parsedCsv.length > 0 && students.length === exampleStudents.length && (
+                  <p className="text-xs text-orange-600 mb-2">CSV parseado listo, envíalo al backend para reemplazar la lista.</p>
+                )}
+                <div className="space-y-2">
+                  {students.map((student) => (
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between bg-white p-3 rounded-md shadow-sm"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">{student.name}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            student.level === 'avanzado' ? 'bg-green-100 text-green-800' :
+                            student.level === 'intermedio' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {student.level}
+                          </span>
+                          {student.skills.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              {student.skills.join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeStudent(student.id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Group Settings */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Configuración de Grupos</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="group-size" className="block text-sm font-medium text-gray-700 mb-2">
+                    Tamaño de Grupo
+                  </label>
+                  <input
+                    type="number"
+                    id="group-size"
+                    min="2"
+                    max="10"
+                    value={groupSettings.groupSize}
+                    onChange={(e) => setGroupSettings(prev => ({ ...prev, groupSize: parseInt(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-sm text-gray-600">
+                    Con {students.length} estudiantes y grupos de {groupSettings.groupSize}, 
+                    se formarán <strong>{groupSettings.groupCount} grupos</strong>.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="random-assignment"
+                      checked={groupSettings.randomAssignment}
+                      onChange={(e) => setGroupSettings(prev => ({ 
+                        ...prev, 
+                        randomAssignment: e.target.checked,
+                        balanceSkills: e.target.checked ? false : prev.balanceSkills
+                      }))}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="random-assignment" className="ml-2 text-sm text-gray-700">
+                      Asignación aleatoria
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="balance-skills"
+                      checked={groupSettings.balanceSkills}
+                      onChange={(e) => setGroupSettings(prev => ({ 
+                        ...prev, 
+                        balanceSkills: e.target.checked,
+                        randomAssignment: e.target.checked ? false : prev.randomAssignment
+                      }))}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="balance-skills" className="ml-2 text-sm text-gray-700">
+                      Balancear habilidades
+                    </label>
+                  </div>
+                </div>
+
+                <div className="pt-4 space-y-2">
+                  <button
+                    onClick={generateGroups}
+                    disabled={students.length === 0 || isGenerating}
+                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isGenerating ? 'Generando...' : 'Generar Grupos'}
+                  </button>
+
+                  {groups.length > 0 && (
+                    <>
+                      <button
+                        onClick={resetGroups}
+                        className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors"
+                      >
+                        Reiniciar Grupos
+                      </button>
+                      <button
+                        onClick={exportGroups}
+                        className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                      >
+                        Exportar CSV
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Generated Groups - funcionalidad original preservada */}
+          {groups.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Grupos Generados (Original)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groups.map((group) => (
+                  <div
+                    key={group.id}
+                    className={`border-2 rounded-lg p-4 ${group.color}`}
+                  >
+                    <h3 className="font-semibold text-gray-900 mb-3">{group.name}</h3>
+                    <div className="space-y-2">
+                      {group.members.map((member, index) => (
+                        <div key={member.id} className="flex items-center">
+                          <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-medium mr-2">
+                            {index + 1}
+                          </div>
+                          <span className="text-sm text-gray-800">{member.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-300">
+                      <p className="text-xs text-gray-600">
+                        {group.members.length} miembro{group.members.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Group Settings */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Configuración de Grupos</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="group-size" className="block text-sm font-medium text-gray-700 mb-2">
-                  Tamaño de Grupo
-                </label>
-                <input
-                  type="number"
-                  id="group-size"
-                  min="2"
-                  max="10"
-                  value={groupSettings.groupSize}
-                  onChange={(e) => setGroupSettings(prev => ({ ...prev, groupSize: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm text-gray-600">
-                  Con {students.length} estudiantes y grupos de {groupSettings.groupSize}, 
-                  se formarán <strong>{groupSettings.groupCount} grupos</strong>.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="random-assignment"
-                    checked={groupSettings.randomAssignment}
-                    onChange={(e) => setGroupSettings(prev => ({ 
-                      ...prev, 
-                      randomAssignment: e.target.checked,
-                      balanceSkills: e.target.checked ? false : prev.balanceSkills
-                    }))}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="random-assignment" className="ml-2 text-sm text-gray-700">
-                    Asignación aleatoria
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="balance-skills"
-                    checked={groupSettings.balanceSkills}
-                    onChange={(e) => setGroupSettings(prev => ({ 
-                      ...prev, 
-                      balanceSkills: e.target.checked,
-                      randomAssignment: e.target.checked ? false : prev.randomAssignment
-                    }))}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="balance-skills" className="ml-2 text-sm text-gray-700">
-                    Balancear habilidades
-                  </label>
-                </div>
-              </div>
-
-              <div className="pt-4 space-y-2">
-                <button
-                  onClick={generateGroups}
-                  disabled={students.length === 0 || isGenerating}
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isGenerating ? 'Generando...' : 'Generar Grupos'}
-                </button>
-
-                {groups.length > 0 && (
-                  <>
-                    <button
-                      onClick={resetGroups}
-                      className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors"
-                    >
-                      Reiniciar Grupos
-                    </button>
-                    <button
-                      onClick={exportGroups}
-                      className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                    >
-                      Exportar CSV
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-
-        {/* Generated Groups */}
-        {groups.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Grupos Generados</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {groups.map((group) => (
-                <div
-                  key={group.id}
-                  className={`border-2 rounded-lg p-4 ${group.color}`}
-                >
-                  <h3 className="font-semibold text-gray-900 mb-3">{group.name}</h3>
-                  <div className="space-y-2">
-                    {group.members.map((member, index) => (
-                      <div key={member.id} className="flex items-center">
-                        <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-medium mr-2">
-                          {index + 1}
-                        </div>
-                        <span className="text-sm text-gray-800">{member.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-gray-300">
-                    <p className="text-xs text-gray-600">
-                      {group.members.length} miembro{group.members.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
-    {/* Sección de verificación backend */}
-    {backendStudentsRaw.length > 0 && (
-      <div className="max-w-6xl mx-auto mt-4 bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Verificación: Estudiantes recibidos del backend</h2>
-        <p className="text-sm text-gray-600 mb-4">Esta tabla muestra exactamente lo que devolvió el endpoint <code>/api/estudiantes/bulk_create/</code>.</p>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-3 py-2 text-left border">#</th>
-                <th className="px-3 py-2 text-left border">Correo</th>
-                <th className="px-3 py-2 text-left border">Nombre</th>
-                <th className="px-3 py-2 text-left border">Apellido</th>
-                <th className="px-3 py-2 text-left border">RUT</th>
-                <th className="px-3 py-2 text-left border">Nuevo?</th>
-              </tr>
-            </thead>
-            <tbody>
-              {backendStudentsRaw.map((est, idx) => (
-                <tr key={est.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-3 py-2 border">{idx + 1}</td>
-                  <td className="px-3 py-2 border whitespace-nowrap">{est.correo}</td>
-                  <td className="px-3 py-2 border">{est.nombre}</td>
-                  <td className="px-3 py-2 border">{est.apellido}</td>
-                  <td className="px-3 py-2 border">{est.rut || '-'}</td>
-                  <td className="px-3 py-2 border">{est.nuevo ? 'Sí' : 'No'}</td>
+      
+      {/* Sección de verificación backend */}
+      {backendStudentsRaw.length > 0 && (
+        <div className="max-w-6xl mx-auto mt-4 bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Verificación: Estudiantes recibidos del backend</h2>
+          <p className="text-sm text-gray-600 mb-4">Esta tabla muestra exactamente lo que devolvió el endpoint <code>/api/estudiantes/bulk_create/</code>.</p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm border">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-3 py-2 text-left border">#</th>
+                  <th className="px-3 py-2 text-left border">Correo</th>
+                  <th className="px-3 py-2 text-left border">Nombre</th>
+                  <th className="px-3 py-2 text-left border">Apellido</th>
+                  <th className="px-3 py-2 text-left border">RUT</th>
+                  <th className="px-3 py-2 text-left border">Nuevo?</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {backendStudentsRaw.map((est, idx) => (
+                  <tr key={est.id || idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-3 py-2 border">{idx + 1}</td>
+                    <td className="px-3 py-2 border whitespace-nowrap">{est.correo}</td>
+                    <td className="px-3 py-2 border">{est.nombre}</td>
+                    <td className="px-3 py-2 border">{est.apellido}</td>
+                    <td className="px-3 py-2 border">{est.rut || '-'}</td>
+                    <td className="px-3 py-2 border">{est.nuevo ? 'Sí' : 'No'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">Total: {backendStudentsRaw.length} registros. Puedes reenviar otro CSV para actualizar esta vista.</p>
         </div>
-        <p className="text-xs text-gray-500 mt-3">Total: {backendStudentsRaw.length} registros. Puedes reenviar otro CSV para actualizar esta vista.</p>
-      </div>
-    )}
+      )}
     </>
   );
 };
