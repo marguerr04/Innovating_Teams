@@ -95,25 +95,20 @@ const DroppableTeamContainer = ({
           </div>
         )}
         
-        {/* Indicadores de estado */}
+        {/* Indicadores de estado - MENOS INVASIVO */}
         {isDraggedOver && (
           <div className={`
-            absolute inset-0 flex items-center justify-center rounded-lg
-            ${canDrop ? 'bg-green-100/80' : 'bg-red-100/80'}
+            absolute top-2 right-2 px-3 py-1 rounded-full shadow-md font-semibold text-sm
+            ${canDrop ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
           `}>
-            <div className={`
-              px-4 py-2 rounded-lg shadow-lg font-semibold
-              ${canDrop ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
-            `}>
-              {canDrop ? '✓ Soltar aquí' : '✗ Equipo lleno'}
-            </div>
+            {canDrop ? '✓ Soltar' : '✗ Lleno'}
           </div>
         )}
         
         {isFull && !isDraggedOver && (
-          <div className="mt-2 text-center">
-            <span className="text-xs text-yellow-700 bg-yellow-200 px-2 py-1 rounded-full">
-              ⚠ Equipo completo
+          <div className="absolute top-2 right-2">
+            <span className="text-xs text-orange-700 bg-orange-200 px-2 py-1 rounded-full shadow-sm">
+              ⚠ Completo
             </span>
           </div>
         )}

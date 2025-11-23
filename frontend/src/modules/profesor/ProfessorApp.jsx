@@ -9,6 +9,7 @@ import PerfilView from "./pages/PerfilView";
 import GroupBuilder from "./pages/GroupBuilder";
 import GroupBuilderNew from "./pages/GroupBuilderNew";
 import GroupBuilderVisual from "./pages/GroupBuilderVisual";
+import GroupBuilderOptimized from "./pages/GroupBuilderOptimized";
 
 export default function ProfessorApp() {
   return (
@@ -20,6 +21,7 @@ export default function ProfessorApp() {
           <Route path="/home" element={<HomeView />} />
           <Route path="/crear" element={<CrearJuegoView />} />
           <Route path="/perfil" element={<PerfilView />} />
+          <Route path="/grupos" element={<GroupBuilderOptimized />} />
           <Route path="/grupos-new" element={<GroupBuilderNew />} />
           <Route path="/grupos-visual" element={<GroupBuilderVisual />} />
           <Route path="/grupos-legacy" element={<GroupBuilder />} />
