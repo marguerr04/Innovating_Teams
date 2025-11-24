@@ -5,6 +5,7 @@ import StatsAdmin from './pages/StatsAdmin';
 import ProfileAdmin from './pages/ProfileAdmin';
 import AboutPage from './pages/AboutPage';
 import PaginaTesteo from './pages/PaginaTesteo';
+import CrearDesafiosPage from './pages/CrearDesafiosPage';
 
 const AdminApp = () => {
   return (
@@ -15,6 +16,7 @@ const AdminApp = () => {
       <Route path="/profile" element={<ProfileAdmin />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/testeo" element={<PaginaTesteo />} />
+      <Route path="/crear-desafios" element={<CrearDesafiosPage />} />
     </Routes>
   );
 };

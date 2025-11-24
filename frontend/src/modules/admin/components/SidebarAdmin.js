@@ -24,6 +24,16 @@ const SidebarAdmin = () => {
       )
     },
     {
+      name: 'Crear Desafíos', // Nuevo elemento añadido
+      path: '/admin/crear-desafios', // Nueva ruta
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Icono de Trofeo o Premio para 'Desafíos' */}
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.015A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-5.618 1.042M12 12v2.5m-6 3H6a2 2 0 002 2h8a2 2 0 002-2h-1.5" />
+        </svg>
+      )
+    },
+    {
       name: 'Perfil',
       path: '/admin/profile',
       icon: (
