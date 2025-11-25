@@ -127,3 +127,61 @@ def login_admin(request):
         "username": user.nombre,
         "role": user.tipousuario
     })
+
+
+@api_view(["POST"])
+def validar_codigo_acceso(request):
+    """
+    Valida que un código de acceso sea válido para entrar a una partida.
+    
+    POST /api/validar-codigo/
+    Body: { "codigo": "123456" }
+    
+    Retorna:
+    - valido: True si el código existe
+    - partida_id: ID de la partida
+    - estado: Estado actual de la partida
+    - mensaje: Mensaje descriptivo
+    
+    Errores:
+    - 400: Código no proporcionado
+    - 404: Código no existe
+    - 403: Partida no disponible (estado incorrecto)
+    """
+    from ..repositories import PartidaRepository
+    
+    codigo = request.data.get("codigo", "").strip()
+    
+    if not codigo:
+        return Response({
+            "error": "Código de acceso requerido"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Validar que el código tenga el formato correcto (6 dígitos)
+    if not codigo.isdigit() or len(codigo) != 6:
+        return Response({
+            "error": "Código inválido. Debe ser un número de 6 dígitos"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Buscar partida por código
+    partida = PartidaRepository.get_by_codigo_acceso(codigo)
+    
+    if not partida:
+        return Response({
+            "error": "Código de acceso inválido. Verifica con tu profesor"
+        }, status=status.HTTP_404_NOT_FOUND)
+    
+    # Verificar que la partida esté en un estado válido para unirse
+    estados_validos = ['CONFIGURACION', 'EN_CURSO', 'ACTIVO']
+    if partida.estado not in estados_validos:
+        return Response({
+            "error": f"La partida ya finalizó o no está disponible"
+        }, status=status.HTTP_403_FORBIDDEN)
+    
+    # Código válido
+    return Response({
+        "valido": True,
+        "partida_id": partida.id,
+        "estado": partida.estado,
+        "mensaje": "Código válido. Bienvenido al juego!"
+    }, status=status.HTTP_200_OK)

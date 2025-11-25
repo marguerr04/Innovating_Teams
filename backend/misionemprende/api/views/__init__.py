@@ -1,7 +1,7 @@
 # views/__init__.py
 # Importar todas las vistas para mantener compatibilidad con urls.py
 
-from .auth_views import login_view, login_profesor, login_admin
+from .auth_views import login_view, login_profesor, login_admin, validar_codigo_acceso
 from .usuario_views import UsuarioViewSet, EstudianteViewSet
 from .contenido_views import CursoViewSet, VideoViewSet
 

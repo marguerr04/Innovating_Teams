@@ -7,7 +7,7 @@ from .views import (
     # ViewSets
     UsuarioViewSet, EstudianteViewSet, CursoViewSet, VideoViewSet,
     # Autenticación
-    login_view, login_profesor, login_admin,
+    login_view, login_profesor, login_admin, validar_codigo_acceso,
     # Endpoints de función
     assign_groups, bulk_create_estudiantes, crear_partida,
     asignar_grupos, obtener_grupos, get_estudiantes_por_equipo,
@@ -34,6 +34,7 @@ urlpatterns = [
     path('estudiantes/bulk_create/', bulk_create_estudiantes, name='bulk-create-estudiantes'),
     path('login/profesor/', login_profesor, name='login_profesor'),
     path('login/admin/', login_admin, name='login_admin'),
+    path('validar-codigo/', validar_codigo_acceso, name='validar_codigo_acceso'),
     path("crear-partida/", crear_partida, name="crear_partida"),
 
 # Endpoint para la asignacion de grupos
