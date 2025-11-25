@@ -21,14 +21,17 @@ export default function ProfesorLogin() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) throw new Error("Credenciales inválidas");
-      const errorMessage = "Credenciales inválidas";
-      showErrorAlert(errorMessage); // Mostrar alerta de erro
+      if (!res.ok) {
+        const errorMessage = "Credenciales inválidas";
+        showErrorAlert(errorMessage);
+        throw new Error(errorMessage);
+      }
+      
       const data = await res.json();
 
       if (data.role !== "PROFESOR") {
         const errorMessage = "No tiene permisos para acceder como profesor";
-        showErrorAlert(errorMessage); // Mostrar alerta de error
+        showErrorAlert(errorMessage);
         throw new Error(errorMessage);
       }
 

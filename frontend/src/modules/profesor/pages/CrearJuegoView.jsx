@@ -110,16 +110,21 @@ const CrearJuegoView = () => {
       return;
     }
 
+    // Generar PIN aleatorio de 6 dígitos
+    const gamePin = Math.floor(100000 + Math.random() * 900000).toString();
+
     const nuevoJuego = {
       id: Date.now(),
+      pin: gamePin,
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       duracion: formData.duracion,
       maxParticipantes: formData.maxParticipantes,
       tipo: formData.tipoJuego,
-      estado: 'pendiente',
+      estado: 'waiting', // Estado inicial: esperando
       fechaCreacion: new Date().toLocaleDateString(),
       participantes: 0,
+      grupos: grupos, // Incluir los grupos generados
       metadatos: {
         anoCursado: formData.anoCursado,
         universidad: formData.universidad,
@@ -128,6 +133,14 @@ const CrearJuegoView = () => {
     };
 
     addJuego(nuevoJuego);
+    
+    // Navegar a la sala de espera del profesor
+    navigate(`/profesor/waiting-room/${gamePin}`, { 
+      state: { 
+        gameData: nuevoJuego,
+        grupos: grupos 
+      } 
+    });
     alert('Juego creado exitosamente');
     navigate('/profesor/home');
   };

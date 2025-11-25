@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import OptimizedVistaPreviaSala from '../components/OptimizedVistaPreviaSala';
 import useOptimizedGroupBuilder from '../hooks/useOptimizedGroupBuilder';
+import gameService from '../../../services/gameService';
 
 const GroupBuilderOptimized = () => {
+  const navigate = useNavigate();
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [gameError, setGameError] = useState(null);
+
   const {
     students,
     groups,
@@ -22,6 +28,61 @@ const GroupBuilderOptimized = () => {
     createEmptyGroups,
     handleDragEnd
   } = useOptimizedGroupBuilder();
+
+  // Función para lanzar el juego y navegar a la sala de espera
+  const handleLaunchGame = async () => {
+    try {
+      setIsCreatingGame(true);
+      setGameError(null);
+      
+      console.log('🎮 Iniciando proceso de creación del juego...');
+      
+      // Validar que haya grupos con estudiantes
+      const gruposConEstudiantes = groups.filter(g => g.students && g.students.length > 0);
+      
+      if (gruposConEstudiantes.length === 0) {
+        setGameError('Debes asignar al menos un estudiante a un grupo antes de crear el juego');
+        setIsCreatingGame(false);
+        return;
+      }
+      
+      // Preparar los grupos en el formato correcto para el backend
+      const gruposParaBackend = gruposConEstudiantes.map((grupo) => ({
+        nombre: grupo.name,
+        integrantes: grupo.students.map(estudiante => ({
+          correo: estudiante.correo || estudiante.email,
+          nombre: estudiante.nombre,
+          apellido_paterno: estudiante.apellido_paterno || '',
+          apellido_materno: estudiante.apellido_materno || '',
+          rut: estudiante.rut || ''
+        }))
+      }));
+      
+      console.log('📋 Grupos preparados para backend:', gruposParaBackend);
+      
+      // Crear la partida con grupos en el backend
+      const partidaCreada = await gameService.crearPartidaConGrupos(gruposParaBackend, {
+        estado: 'CONFIGURACION'
+      });
+      
+      console.log('✅ Partida creada exitosamente:', partidaCreada);
+      
+      // Navegar a la sala de espera con el PIN generado por el backend
+      navigate(`/profesor/waiting-room/${partidaCreada.pin}`, {
+        state: {
+          partidaId: partidaCreada.id,
+          pin: partidaCreada.pin,
+          grupos: gruposParaBackend,
+          totalEstudiantes: gruposParaBackend.reduce((sum, g) => sum + g.integrantes.length, 0)
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Error al crear el juego:', error);
+      setGameError('Error al crear el juego: ' + error.message);
+      setIsCreatingGame(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
@@ -290,14 +351,46 @@ const GroupBuilderOptimized = () => {
             </div>
 
             {/* Vista Previa Optimizada */}
-            <OptimizedVistaPreviaSala 
-              groups={groups}
-              groupSettings={groupSettings}
-              students={students}
-              isGenerating={isGenerating}
-              containers={containers}
-              handleDragEnd={handleDragEnd}
-            />
+            <div className="w-full lg:w-3/4 p-4 bg-white overflow-y-auto">
+              {/* Mostrar mensaje de error si existe */}
+              {gameError && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">❌</span>
+                    <div>
+                      <h3 className="text-red-800 font-semibold mb-1">Error al crear el juego</h3>
+                      <p className="text-red-600 text-sm">{gameError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Mostrar estado de carga si está creando el juego */}
+              {isCreatingGame && (
+                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                    <div>
+                      <h3 className="text-blue-800 font-semibold mb-1">Creando juego...</h3>
+                      <p className="text-blue-600 text-sm">
+                        Guardando grupos y estudiantes en la base de datos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <OptimizedVistaPreviaSala 
+                groups={groups}
+                groupSettings={groupSettings}
+                students={students}
+                isGenerating={isGenerating}
+                containers={containers}
+                handleDragEnd={handleDragEnd}
+                onLaunchGame={handleLaunchGame}
+                isCreatingGame={isCreatingGame}
+              />
+            </div>
           </div>
           
           {/* Footer con información de optimización */}

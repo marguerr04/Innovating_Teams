@@ -386,10 +386,29 @@ def crear_partida(request):
     """
     try:
         # Datos enviados desde el frontend
-        estado = request.data.get("estado", "EN_CURSO")  # Estado por defecto
+        estado = request.data.get("estado", "CONFIGURACION")  # Estado por defecto (válidos: CONFIGURACION, EN_CURSO, FINALIZADO)
         max_equipos = request.data.get("max_equipos", 4)  # Número máximo de equipos
         max_participantes = request.data.get("max_participantes", 20)  # Número máximo de participantes
-        codigo_acceso = str(uuid.uuid4())[:8]  # Generar un código único de acceso (8 caracteres)
+        
+        # Generar un código único de acceso (PIN numérico de 6 dígitos)
+        # Más fácil de compartir y recordar que UUID
+        codigo_acceso = None
+        intentos = 0
+        max_intentos = 10
+        
+        while codigo_acceso is None and intentos < max_intentos:
+            # Generar PIN de 6 dígitos (100000 a 999999)
+            pin_candidato = str(random.randint(100000, 999999))
+            
+            # Verificar que no exista en la BD
+            if not Partida.objects.filter(codigoacceso=pin_candidato).exists():
+                codigo_acceso = pin_candidato
+            
+            intentos += 1
+        
+        # Si después de 10 intentos no se encontró PIN único, usar UUID como fallback
+        if codigo_acceso is None:
+            codigo_acceso = str(uuid.uuid4())[:8]
 
         # Crear la partida en la base de datos
         partida = Partida.objects.create(
