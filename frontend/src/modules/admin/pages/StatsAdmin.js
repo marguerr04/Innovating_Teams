@@ -1,182 +1,154 @@
-import React, { useState } from 'react';
-import AdminLayout from '../components/AdminLayout';
+// File: frontend/src/modules/admin/pages/StatsAdmin.js
+
+import React, { useState, useEffect } from 'react';
+// Eliminamos la dependencia de axios ya que usaremos mock data
+import { FaPlay, FaTrophy, FaGraduationCap, FaStar, FaCamera } from 'react-icons/fa'; 
+
+// --- MOCK DATA SIMULADA PARA TESTING DE FRONTEND ---
+const mockStats = {
+    total_partidas: 58,
+    total_desafios: 12,
+    evaluacion_promedio_juego: 4.35,
+    carreras_participantes_count: 8,
+    partidas_por_carrera: [
+        { carrera_nombre: 'Ingeniería', count: 25 },
+        { carrera_nombre: 'Diseño', count: 18 },
+        { carrera_nombre: 'Comercial', count: 15 },
+        { carrera_nombre: 'Humanidades', count: 9 },
+    ],
+    // Métrica adicional que se podría pedir:
+    fotos_lego_url: [
+        'https://via.placeholder.com/150/0000FF/808080?text=Lego+1',
+        'https://via.placeholder.com/150/FF0000/FFFFFF?text=Lego+2',
+        'https://via.placeholder.com/150/00FF00/000000?text=Lego+3',
+    ]
+};
+// ----------------------------------------------------
+
+
+// Componente auxiliar para las tarjetas de estadísticas
+const StatCard = ({ icon: Icon, title, value, subtitle, color }) => (
+    <div className={`p-4 rounded-lg shadow-md flex items-center ${color}`}>
+        <div className="p-3 rounded-full bg-white bg-opacity-30 mr-4 text-white">
+            <Icon className="h-6 w-6" />
+        </div>
+        <div>
+            <p className="text-sm font-medium text-white">{title}</p>
+            <p className="text-3xl font-bold text-white">{value}</p>
+            {subtitle && <p className="text-xs text-white opacity-80">{subtitle}</p>}
+        </div>
+    </div>
+);
+
+// Componente para el gráfico (simulación de barras)
+const CarreraChart = ({ data }) => {
+    if (!data || data.length === 0) return <p className="text-center text-gray-500">No hay datos de carreras para mostrar.</p>;
+
+    const total = data.reduce((sum, item) => sum + item.count, 0);
+
+    return (
+        <div className="p-4">
+            <h3 className="text-lg font-semibold mb-3 border-b pb-2">Distribución de Partidas por Carrera</h3>
+            {data.map(item => (
+                <div key={item.carrera_nombre} className="mb-4">
+                    <div className="flex justify-between text-sm font-medium">
+                        <p>{item.carrera_nombre}</p>
+                        <p className="font-bold">{item.count} partidas</p>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-4">
+                        <div 
+                            className="bg-indigo-600 h-4 rounded-full transition-all duration-500" 
+                            style={{ width: `${(item.count / total) * 100}%` }}
+                        ></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 
 const StatsAdmin = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
+    const [stats, setStats] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-  const chartData = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-    students: [120, 135, 148, 162, 175, 189],
-    projects: [45, 52, 48, 61, 55, 67],
-    completion: [78, 82, 79, 85, 88, 92]
-  };
+    useEffect(() => {
+        // Simulación de la carga de datos del backend (reemplaza el axios.get)
+        setIsLoading(true);
+        setTimeout(() => {
+            setStats(mockStats);
+            setIsLoading(false);
+        }, 300);
+    }, []);
 
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Estadísticas</h2>
-            <p className="text-gray-600">Análisis detallado del rendimiento del sistema</p>
-          </div>
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="week">Última semana</option>
-            <option value="month">Último mes</option>
-            <option value="quarter">Último trimestre</option>
-            <option value="year">Último año</option>
-          </select>
-        </div>
+    if (isLoading) return <div className="p-8 text-center text-indigo-500">Cargando estadísticas del sistema (Simulado)...</div>;
+    if (!stats) return <div className="p-8 text-center text-red-500">Error simulado: No se pudieron cargar las estadísticas.</div>;
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="bg-blue-500 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v1M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Estudiantes</p>
-                <p className="text-2xl font-bold text-gray-900">1,234</p>
-                <p className="text-sm text-green-600">+12.5%</p>
-              </div>
+    const formattedAvg = stats.evaluacion_promedio_juego ? stats.evaluacion_promedio_juego.toFixed(2) : 'N/A';
+
+    return (
+        <div className="p-6 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Dashboard de Administración (MOCK)</h1>
+            <p className="text-gray-600 mb-8">Resumen de métricas clave del sistema.</p>
+            
+            {/* Tarjetas de Métricas Clave */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatCard 
+                    icon={FaPlay}
+                    title="Juegos Jugados (Total)"
+                    value={stats.total_partidas}
+                    color="bg-blue-600"
+                />
+                <StatCard 
+                    icon={FaTrophy}
+                    title="Desafíos Disponibles"
+                    value={stats.total_desafios}
+                    color="bg-green-600"
+                />
+                <StatCard 
+                    icon={FaStar}
+                    title="Evaluación Promedio"
+                    value={formattedAvg}
+                    subtitle="Encuesta de Satisfacción (1-5)"
+                    color="bg-yellow-600"
+                />
+                <StatCard 
+                    icon={FaGraduationCap}
+                    title="Carreras Únicas"
+                    value={stats.carreras_participantes_count}
+                    color="bg-purple-600"
+                />
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="bg-green-500 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Proyectos Completados</p>
-                <p className="text-2xl font-bold text-gray-900">2,567</p>
-                <p className="text-sm text-green-600">+8.2%</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="bg-yellow-500 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tasa de Éxito</p>
-                <p className="text-2xl font-bold text-gray-900">92%</p>
-                <p className="text-sm text-green-600">+3.1%</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="bg-purple-500 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tiempo Promedio</p>
-                <p className="text-2xl font-bold text-gray-900">4.2h</p>
-                <p className="text-sm text-red-600">-0.3h</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Mock Chart 1 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Crecimiento de Estudiantes</h3>
-            <div className="h-64 bg-gradient-to-t from-blue-50 to-white rounded-lg flex items-end justify-between px-4 pb-4">
-              {chartData.students.map((value, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div
-                    className="bg-blue-500 w-8 rounded-t"
-                    style={{ height: `${(value / Math.max(...chartData.students)) * 200}px` }}
-                  ></div>
-                  <span className="text-xs text-gray-600 mt-2">{chartData.labels[index]}</span>
+            {/* Gráfico de Distribución por Carrera y Galería de Soluciones */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <div className="bg-white p-6 rounded-lg shadow-xl col-span-1">
+                    <h2 className="text-xl font-bold mb-4 text-gray-700">Métricas en Gráficos</h2>
+                    <CarreraChart data={stats.partidas_por_carrera} />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Mock Chart 2 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Proyectos por Mes</h3>
-            <div className="h-64 bg-gradient-to-t from-green-50 to-white rounded-lg flex items-end justify-between px-4 pb-4">
-              {chartData.projects.map((value, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div
-                    className="bg-green-500 w-8 rounded-t"
-                    style={{ height: `${(value / Math.max(...chartData.projects)) * 200}px` }}
-                  ></div>
-                  <span className="text-xs text-gray-600 mt-2">{chartData.labels[index]}</span>
+                <div className="bg-white p-6 rounded-lg shadow-xl col-span-1">
+                    <h2 className="text-xl font-bold mb-4 text-gray-700 flex items-center">
+                        <FaCamera className='mr-2' />
+                        Galería de Soluciones Lego
+                    </h2>
+                    <p className="text-gray-500 mb-4">
+                        Visualización de prototipos subidos por los equipos (Simulado).
+                    </p>
+                    <div className="flex space-x-4 overflow-x-auto">
+                        {stats.fotos_lego_url.map((url, index) => (
+                            <img 
+                                key={index} 
+                                src={url} 
+                                alt={`Lego Solution ${index + 1}`} 
+                                className="w-32 h-32 object-cover rounded shadow-lg border-2 border-gray-100"
+                            />
+                        ))}
+                    </div>
                 </div>
-              ))}
             </div>
-          </div>
+           
         </div>
-
-        {/* Performance by Phase */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Rendimiento por Fase</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fase</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participantes</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completados</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tasa de Éxito</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promedio</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {[
-                  { phase: 'Fase 1: Rompehielos', participants: 234, completed: 228, success: 97.4, average: 8.7 },
-                  { phase: 'Fase 2: Empatía', participants: 228, completed: 215, success: 94.3, average: 8.2 },
-                  { phase: 'Fase 3: Definición', participants: 215, completed: 198, success: 92.1, average: 7.9 },
-                  { phase: 'Fase 4: Ideación', participants: 198, completed: 186, success: 93.9, average: 8.4 },
-                  { phase: 'Fase 5: Prototipado', participants: 186, completed: 172, success: 92.5, average: 8.1 },
-                  { phase: 'Fase 6: Testeo', participants: 172, completed: 165, success: 95.9, average: 8.6 },
-                  { phase: 'Fase 7: Implementación', participants: 165, completed: 152, success: 92.1, average: 8.3 }
-                ].map((row, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.phase}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.participants}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.completed}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        row.success >= 95 ? 'bg-green-100 text-green-800' :
-                        row.success >= 90 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {row.success}%
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.average}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </AdminLayout>
-  );
+    );
 };
 
 export default StatsAdmin;

@@ -29,7 +29,7 @@ const ProfileAdmin = () => {
   };
 
   return (
-    <AdminLayout>
+   
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -232,7 +232,7 @@ const ProfileAdmin = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+   
   );
 };
 
