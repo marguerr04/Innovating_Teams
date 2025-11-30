@@ -8,6 +8,8 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retry, setRetry] = useState(0);
+  const [isMuted, setIsMuted] = useState(false); // Intentar iniciar sin mute
+  const [showUnmuteButton, setShowUnmuteButton] = useState(false); // Solo mostrar si es necesario
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -37,6 +39,47 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
     };
   }, [videoId, retry]);
 
+  // Función para intentar reproducir con audio automáticamente
+  const attemptAutoplay = async () => {
+    if (videoRef.current) {
+      try {
+        // Primero intenta sin mute
+        videoRef.current.muted = false;
+        await videoRef.current.play();
+        setIsMuted(false);
+        setShowUnmuteButton(false);
+      } catch (error) {
+        // Si falla, intenta con mute
+        try {
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+          setIsMuted(true);
+          setShowUnmuteButton(true); // Mostrar botón solo si está muteado
+        } catch (mutedError) {
+          console.log('Autoplay falló completamente:', mutedError);
+        }
+      }
+    }
+  };
+
+  // Función para activar/desactivar el sonido
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+      setShowUnmuteButton(false); // Ocultar el botón después del primer clic
+    }
+  };
+
+  // Función para intentar unmute automático después de que el usuario interactúe
+  const handleVideoClick = () => {
+    if (videoRef.current && isMuted) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+      setShowUnmuteButton(false);
+    }
+  };
+
   // Ajustes de tamaño
   const maxWidthClass = size === 'medium' ? 'max-w-4xl' : 'max-w-5xl';
 
@@ -57,18 +100,39 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
               <button className="btn mt-2 px-3 py-1 text-xs" onClick={() => setRetry(r => r + 1)}>Reintentar</button>
             </div>
           ) : videoUrl ? (
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              controls
-              playsInline
-              preload="auto"
-              onLoadedData={() => setLoading(false)}
-              onError={() => setError('Error al cargar video')}
-            />
+            <div className="relative w-full h-full">
+              <video
+                ref={videoRef}
+                src={videoUrl}
+                className="w-full h-full object-cover"
+                muted={isMuted}
+                controls
+                playsInline
+                preload="auto"
+                onClick={handleVideoClick}
+                onLoadedData={() => {
+                  setLoading(false);
+                  attemptAutoplay(); // Intentar autoplay cuando el video se carga
+                }}
+                onError={() => setError('Error al cargar video')}
+              />
+              {/* Botón de activar sonido superpuesto */}
+              {showUnmuteButton && isMuted && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                  <button
+                    onClick={toggleMute}
+                    className="bg-white/90 hover:bg-white text-gray-800 font-bold py-3 px-6 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-200 transform hover:scale-105"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.824L4.35 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.35l4.033-3.824a1 1 0 011 0zM8 5.432L5.616 7.316A1 1 0 005 8H3v4h2a1 1 0 01.616.316L8 14.568V5.432z" />
+                      <path d="M12.2 8.2a1 1 0 011.6 1.2 2 2 0 000 1.2 1 1 0 11-1.6 1.2 4 4 0 000-3.6z" />
+                      <path d="M14.2 6.2a1 1 0 011.6 1.2 6 6 0 010 5.2 1 1 0 11-1.6 1.2 4 4 0 000-7.6z" />
+                    </svg>
+                    <span>Activar Audio</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="text-center space-y-2">
               <p className="text-xl sm:text-2xl font-bold">Intro del Juego</p>

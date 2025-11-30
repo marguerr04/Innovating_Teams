@@ -122,11 +122,11 @@ WSGI_APPLICATION = 'misionemprende.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'InnovatingTeamsv6',  # El nombre EXACTO de tu base de datos en PostgreSQL
-        'USER': 'postgres',       # Tu usuario de PostgreSQL
-        'PASSWORD': '123456',   # Tu contraseña de PostgreSQL
-        'HOST': 'localhost',                   # O la IP del servidor de BD (usualmente localhost)
-        'PORT': '5432',                      # Puerto por defecto de PostgreSQL
+        'NAME': 'InnovatingTeamsv5',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
