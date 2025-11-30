@@ -221,11 +221,19 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
           )}
         </div>
         
-        {isMyTeamPresenting ? (
-          <p className="text-slate-600 mt-4 font-semibold">¡Es su turno de presentar! Tienen 90 segundos.</p>
-        ) : (
-          <p className="text-slate-600 mt-4">Escuchen atentamente. Después de los 90 segundos, podrán evaluar a este equipo.</p>
-        )}
+        {/* CAMBIO: Texto de rol más grande */}
+        <div className="mt-6 p-4 bg-slate-50 rounded-xl">
+            {isMyTeamPresenting ? (
+              <p className="text-slate-700 font-bold text-xl md:text-2xl">
+                ¡Es su momento! Véndanle su idea al mundo. Tienen 90 segundos.
+              </p>
+            ) : (
+              <p className="text-slate-600 text-lg md:text-2xl">
+                <strong>Rol de Juez:</strong> Escuchen atentamente. Busquen innovación y viabilidad. <br/>
+                ¿Esta solución realmente ayuda a la persona?
+              </p>
+            )}
+        </div>
         
         {currentTeamIndex === 0 && (
           <button className="btn bg-slate-100 mt-6" onClick={onBack}>
@@ -270,9 +278,16 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
           ) : (
             // Vista para evaluar a OTRO equipo
             <>
-              <p className="text-slate-600 my-6 text-center">
-                Tienen 2 minutos para otorgar un puntaje de 1 a 10 para cada habilidad, observando su prototipo.
-              </p>
+             {/* CAMBIO: Instrucción de evaluación más grande */}
+       {!isMyTeamPresenting && (
+          <p className="text-slate-600 my-6 text-center text-lg md:text-2xl font-medium max-w-3xl mx-auto">
+            Como evaluadores, su misión es dar feedback honesto. 
+            <br/>
+            <span className="text-slate-500 text-base md:text-xl">
+                ¿El equipo entendió el problema? ¿La solución es creativa? Califiquen del 1 al 10.
+            </span>
+          </p>
+       )}
               
               {/* --- 3. LAYOUT RESPONSIVO (FOTO + RÚBRICA) --- */}
               <div className="grid grid-cols-1 gap-6 lg:gap-8 items-start">

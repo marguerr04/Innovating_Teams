@@ -1,111 +1,98 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { FaChartLine, FaTrophy, FaUserCircle, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 
-const SidebarAdmin = () => {
-  const [isOpen, setIsOpen] = useState(true);
+const navigation = [
+    { name: 'Dashboard Principal', href: '/admin/stats', icon: FaChartLine }, 
+    { name: 'Gestión de Desafíos', href: '/admin/challenges', icon: FaTrophy },
+    { name: 'Perfil de Usuario', href: '/admin/profile', icon: FaUserCircle },
+];
 
-  const menuItems = [
-    {
-      name: 'Dashboard',
-      path: '/admin/home',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Estadísticas',
-      path: '/admin/stats',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 002 2h2a2 2 0 012-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 00-2 2h-2a2 2 0 00-2 2v6a2 2 0 01-2 2H9z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Perfil',
-      path: '/admin/profile',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Acerca de',
-      path: '/admin/about',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
-    },
-    {
-      name: 'Testeo',
-      path: '/admin/testeo',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      )
-    }
-  ];
+function classNames(...classes) {
+    return classes.filter(Boolean).join(' ');
+}
 
-  return (
-    <div className={`text-white transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`} style={{ backgroundColor: '#2E5E8C' }}>
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <h2 className={`font-bold text-xl ${isOpen ? 'block' : 'hidden'}`}>
-            Admin Panel
-          </h2>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg transition-colors"
-            style={{ backgroundColor: '#254c72' }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#1e3a5f'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#254c72'}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
+const SidebarAdmin = ({ isOpen, setOpen }) => {
+    // Definimos los colores del Profesor/Admin para usar en Tailwind
+    const SIDEBAR_BG = '#2E5E8C'; // Color de fondo principal (Azul Oscuro)
+    const ACTIVE_BG = '#00B8A9'; // Color de acento activo (Verde/Cian)
+    const HOVER_BG = '#4A7F9F'; // Un color ligeramente más claro para el hover
+    
+    // *** SOLUCIÓN DEL ERROR: Definir handleLogout dentro del componente ***
+    const handleLogout = () => {
+        console.log('Cerrando sesión de Administrador...');
+        // TODO: Implementar la lógica real de deslogueo (limpiar tokens, redirigir al login)
+    };
+    // *******************************************************************
 
-      <nav className="mt-8">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors ${
-                isActive ? 'text-white border-r-4' : 'text-gray-300 hover:text-white'
-              }`
-            }
-            style={({ isActive }) => ({
-              backgroundColor: isActive ? '#00B8A9' : 'transparent',
-              borderRightColor: isActive ? '#FDC328' : 'transparent'
-            })}
-            onMouseEnter={(e) => {
-              if (!e.target.classList.contains('active')) {
-                e.target.style.backgroundColor = '#254c72';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!e.target.classList.contains('active')) {
-                e.target.style.backgroundColor = 'transparent';
-              }
-            }}
-          >
-            <span className="mr-3">{item.icon}</span>
-            {isOpen && <span>{item.name}</span>}
-          </NavLink>
-        ))}
-      </nav>
-    </div>
-  );
+    return (
+        <>
+            {/* Overlay para móviles */}
+            <div 
+                className={classNames(
+                    isOpen ? 'fixed inset-0 z-30 bg-gray-600 bg-opacity-75 md:hidden transition-opacity ease-linear duration-300' : 'hidden'
+                )}
+                onClick={() => setOpen(false)}
+            ></div>
+
+            {/* Sidebar Principal */}
+            <div 
+                className={classNames(
+                    'fixed inset-y-0 left-0 z-40 flex flex-col w-64 transition-transform duration-300 ease-in-out md:translate-x-0',
+                    isOpen ? 'translate-x-0' : '-translate-x-full'
+                )}
+                style={{ backgroundColor: SIDEBAR_BG }}
+            >
+                <div className="flex items-center justify-between h-16 flex-shrink-0 px-4" style={{ backgroundColor: '#1A3957' }}>
+                    <span className="text-xl font-bold text-white tracking-wider">
+                        ADMIN PANEL
+                    </span>
+                    <button 
+                        className="text-white md:hidden"
+                        onClick={() => setOpen(false)}
+                    >
+                        <FaTimes className="h-6 w-6" />
+                    </button>
+                </div>
+                
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                    <nav className="flex-1 px-2 py-4 space-y-1">
+                        {navigation.map((item) => (
+                            <NavLink
+                                key={item.name}
+                                to={item.href}
+                                className={({ isActive }) => classNames(
+                                    isActive
+                                        ? 'text-white shadow-inner'
+                                        : 'text-indigo-100 hover:text-white',
+                                    'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition duration-150 ease-in-out'
+                                )}
+                                style={({ isActive }) => ({
+                                    backgroundColor: isActive ? ACTIVE_BG : 'transparent',
+                                    '--tw-bg-opacity': isActive ? '1' : '0',
+                                })}
+                            >
+                                <item.icon className="mr-3 flex-shrink-0 h-6 w-6 text-indigo-300" aria-hidden="true" />
+                                {item.name}
+                            </NavLink>
+                        ))}
+                    </nav>
+                </div>
+                
+                {/* Enlace de Cerrar Sesión */}
+                <div className="border-t p-4" style={{ borderColor: HOVER_BG }}>
+                    <button
+                        onClick={handleLogout} // <--- Ahora handleLogout está definido
+                        className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-300 hover:text-white transition duration-150 ease-in-out"
+                        style={{ backgroundColor: 'transparent', '--tw-bg-opacity': '0' }}
+                    >
+                        <FaSignOutAlt className="mr-3 h-6 w-6" aria-hidden="true" />
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </>
+    );
 };
 
 export default SidebarAdmin;

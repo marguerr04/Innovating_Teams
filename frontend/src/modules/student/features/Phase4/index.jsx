@@ -57,7 +57,7 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
         {/* Contenedor de Título y Timer (sin cambios) */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-extrabold mb-1">Communicación</h1>
+            <h1 className="text-4xl font-extrabold mb-1">Comunicación</h1>
           </div>
           <div className="card p-4">
             <Timer 
@@ -69,11 +69,20 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
         </div>
         
         {/* Bloque de Instrucción (sin cambios) */}
-        <p className="text-lg text-white/80 mb-6 max-w-3xl">
-          ¡Es hora de comunicar su idea! Preparen un pitch de 90 segundos.
-          Expliquen la solución que prototiparon para <strong>{p2?.persona?.name || 'la persona'}</strong>, 
-          basándose en lo que aprendieron en el mapa de empatía.
-        </p>
+        {/* CAMBIO: Estructura clara de lo que se espera en el pitch */}
+<div className="mb-8 max-w-4xl space-y-4">
+          <p className="text-xl md:text-3xl font-bold text-white/95">
+            Tu Misión: Convencer al resto de que su solución es la mejor.
+          </p>
+          <div className="text-lg md:text-2xl text-white/85 leading-relaxed bg-white/10 p-4 rounded-xl border border-white/20">
+            Preparen un pitch de <strong>90 segundos</strong> respondiendo claramente:
+            <ol className="list-decimal list-inside mt-2 space-y-1 font-semibold">
+              <li>¿Quién es su usuario?</li>
+              <li>¿Qué problema tiene?</li>
+              <li>¿Cómo su emprendimiento lo soluciona?</li>
+            </ol>
+          </div>
+        </div>
         
         {/* === 4. NUEVO BLOQUE DE TEXTAREA === */}
         <div className="card p-6 mb-6">

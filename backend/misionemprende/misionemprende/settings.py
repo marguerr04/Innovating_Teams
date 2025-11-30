@@ -122,7 +122,7 @@ WSGI_APPLICATION = 'misionemprende.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'InnovatingTeamsv5',  # El nombre EXACTO de tu base de datos en PostgreSQL
+        'NAME': 'InnovatingTeamsv6',  # El nombre EXACTO de tu base de datos en PostgreSQL
         'USER': 'postgres',       # Tu usuario de PostgreSQL
         'PASSWORD': '123456',   # Tu contraseña de PostgreSQL
         'HOST': 'localhost',                   # O la IP del servidor de BD (usualmente localhost)
