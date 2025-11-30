@@ -190,11 +190,11 @@ def validar_codigo_acceso(request):
 @api_view(["POST"])
 def validar_codigo_equipo(request):
     """
-    Valida un código compuesto partida-equipo.
+    Valida un código compuesto partida-equipo y registra la conexión del estudiante.
     El código tiene 7 dígitos: primeros 6 = código partida, último dígito = número de equipo.
     
     POST /api/validar-equipo/
-    Body: { "codigo": "1234561" }
+    Body: { "codigo": "1234561", "usuario_id": 123 }  (usuario_id opcional, se puede crear si no existe)
     
     Ejemplo:
     - Código "1234561" → Partida: 123456, Equipo: 1
@@ -214,7 +214,7 @@ def validar_codigo_equipo(request):
     - 404: Código no existe en la base de datos
     - 403: Partida no disponible
     """
-    from ..models import Equipo, PartidaUsuario
+    from ..models import Equipo, PartidaUsuario, ConexionPartida, Usuario
     from ..repositories import PartidaRepository
     
     codigo = request.data.get("codigo", "").strip()
@@ -269,6 +269,24 @@ def validar_codigo_equipo(request):
     
     # Extraer número de equipo del código (último dígito)
     equipo_numero = int(codigo[-1])
+    
+    # Marcar el equipo completo como conectado (no rastreamos estudiantes individuales)
+    # Solo registramos que este equipo ingresó su código y está activo
+    conexion, created = ConexionPartida.objects.get_or_create(
+        partida=partida,
+        equipo=equipo,
+        defaults={
+            'codigo_ingresado': codigo,
+            'activo': True,
+            'usuario': None  # No rastreamos usuarios individuales, solo equipos
+        }
+    )
+    
+    # Si ya existía, reactivarlo
+    if not created:
+        conexion.activo = True
+        conexion.codigo_ingresado = codigo
+        conexion.save()
     
     # Código válido - devolver toda la información
     return Response({

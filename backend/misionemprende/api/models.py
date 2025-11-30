@@ -426,3 +426,26 @@ class ProgresoEtapa(models.Model):
     class Meta:
         app_label = 'api'
         unique_together = ('equipo', 'etapa') # Un equipo solo pasa una vez por etapa
+
+
+class ConexionPartida(models.Model):
+    """
+    Trackea las conexiones activas de EQUIPOS (no estudiantes individuales) a una partida.
+    Se crea cuando alguien del equipo ingresa su código de 7 dígitos.
+    Permite mostrar los estudiantes del equipo solo cuando el equipo está conectado.
+    """
+    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='conexiones')
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='conexiones')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='conexiones_partida', null=True, blank=True)
+    codigo_ingresado = models.CharField(max_length=7, help_text='Código de 7 dígitos ingresado')
+    timestamp_conexion = models.DateTimeField(auto_now_add=True, help_text='Momento en que el equipo se conectó')
+    activo = models.BooleanField(default=True, help_text='Si el equipo está actualmente conectado')
+    
+    class Meta:
+        app_label = 'api'
+        db_table = 'conexion_partida'
+        unique_together = ('partida', 'equipo')  # Un equipo solo puede estar conectado una vez por partida
+        ordering = ['timestamp_conexion']
+        
+    def __str__(self):
+        return f"{self.equipo.nombreequipo} (Partida {self.partida.id}) - {'Activo' if self.activo else 'Inactivo'}"

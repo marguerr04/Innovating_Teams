@@ -180,41 +180,61 @@ def asignar_grupos_logic(partida, data_grupos):
 
 def obtener_grupos_logic(partida_id):
     """
-    Obtiene los grupos y usuarios de una partida específica.
+    Obtiene los grupos con sus estudiantes asignados.
+    Muestra estudiantes SOLO si el equipo está activamente conectado (ingresó código).
     
     Args:
         partida_id: ID de la partida
         
     Returns:
-        dict: Grupos con sus alumnos
+        dict: Grupos con estudiantes (vacío si el equipo no se ha conectado)
         
     Raises:
         ValueError: Si la partida no existe
     """
+    from ..models import ConexionPartida
+    
     partida = PartidaRepository.get_by_id(partida_id)
     if not partida:
         raise ValueError("La partida especificada no existe")
 
-    # Buscar equipos por código de partida (equipos cuyo código empiece con el código de partida)
+    # Buscar equipos por código de partida
     codigo_partida = str(partida.codigoacceso)
     equipos = Equipo.objects.filter(codigo_equipo__startswith=codigo_partida).order_by('codigo_equipo')
     resultado = []
 
     for equipo in equipos:
-        # Buscar usuarios asignados a este equipo en esta partida
-        usuarios = Usuario.objects.filter(partidausuario__equipo=equipo, partidausuario__partida=partida)
-        resultado.append({
-            "equipo_id": equipo.id,
-            "nombre_equipo": equipo.nombreequipo,
-            "codigo_equipo": equipo.codigo_equipo,
-            "usuarios": [
+        # Verificar si este equipo está conectado (ingresó código)
+        equipo_conectado = ConexionPartida.objects.filter(
+            partida=partida,
+            equipo=equipo,
+            activo=True
+        ).exists()
+        
+        # Solo mostrar estudiantes si el equipo está conectado
+        if equipo_conectado:
+            # Obtener los estudiantes asignados por el profesor en PartidaUsuario
+            usuarios = Usuario.objects.filter(
+                partidausuario__equipo=equipo, 
+                partidausuario__partida=partida
+            )
+            usuarios_list = [
                 {
                     "correo": usuario.email,
                     "nombre": usuario.nombre,
                     "apellido": usuario.apellido,
                 }
                 for usuario in usuarios
-            ],
+            ]
+        else:
+            # Equipo no conectado = lista vacía
+            usuarios_list = []
+        
+        resultado.append({
+            "equipo_id": equipo.id,
+            "nombre_equipo": equipo.nombreequipo,
+            "codigo_equipo": equipo.codigo_equipo,
+            "usuarios": usuarios_list,
         })
 
     return {"partida_id": partida_id, "codigo_partida": partida.codigoacceso, "grupos": resultado}
