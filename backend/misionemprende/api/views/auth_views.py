@@ -185,3 +185,100 @@ def validar_codigo_acceso(request):
         "estado": partida.estado,
         "mensaje": "Código válido. Bienvenido al juego!"
     }, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def validar_codigo_equipo(request):
+    """
+    Valida un código compuesto partida-equipo.
+    El código tiene 7 dígitos: primeros 6 = código partida, último dígito = número de equipo.
+    
+    POST /api/validar-equipo/
+    Body: { "codigo": "1234561" }
+    
+    Ejemplo:
+    - Código "1234561" → Partida: 123456, Equipo: 1
+    - Código "1234562" → Partida: 123456, Equipo: 2
+    
+    Retorna:
+    - valido: True si el código existe
+    - partida_id: ID de la partida
+    - partida_codigo: Código de la partida (6 dígitos)
+    - equipo_id: ID del equipo
+    - equipo_nombre: Nombre del equipo
+    - equipo_numero: Número del equipo (1, 2, 3, 4...)
+    - mensaje: Mensaje de bienvenida
+    
+    Errores:
+    - 400: Código no proporcionado o formato inválido
+    - 404: Código no existe en la base de datos
+    - 403: Partida no disponible
+    """
+    from ..models import Equipo, PartidaUsuario
+    from ..repositories import PartidaRepository
+    
+    codigo = request.data.get("codigo", "").strip()
+    
+    # Validación básica
+    if not codigo:
+        return Response({
+            "error": "Código requerido"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Validar formato: debe tener 7 dígitos (6 partida + 1 equipo)
+    if not codigo.isdigit() or len(codigo) != 7:
+        return Response({
+            "error": "Código inválido. Debe ser un número de 7 dígitos (ej: 1234561)"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Buscar equipo por código compuesto
+    try:
+        equipo = Equipo.objects.get(codigo_equipo=codigo)
+    except Equipo.DoesNotExist:
+        return Response({
+            "error": "Código inválido. Verifica con tu profesor el código correcto de tu equipo"
+        }, status=status.HTTP_404_NOT_FOUND)
+    
+    # Obtener la partida desde el código (primeros 6 dígitos)
+    try:
+        codigo_partida = codigo[:6]  # Primeros 6 dígitos
+        partida = PartidaRepository.get_by_codigo_acceso(codigo_partida)
+        
+        if not partida:
+            return Response({
+                "error": "El código de partida no existe. Verifica con tu profesor"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        return Response({
+            "error": f"Error al obtener información de la partida"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    # Verificar estado de la partida
+    estados_validos = ['CONFIGURACION', 'EN_CURSO', 'ACTIVO']
+    if partida.estado not in estados_validos:
+        return Response({
+            "error": "La partida ya finalizó o no está disponible para jugar"
+        }, status=status.HTTP_403_FORBIDDEN)
+    
+    # Verificar que el código de partida coincida
+    if partida.codigoacceso != codigo_partida:
+        return Response({
+            "error": "El código no corresponde a la partida correcta"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Extraer número de equipo del código (último dígito)
+    equipo_numero = int(codigo[-1])
+    
+    # Código válido - devolver toda la información
+    return Response({
+        "valido": True,
+        "partida_id": partida.id,
+        "partida_codigo": partida.codigoacceso,
+        "equipo_id": equipo.id,
+        "equipo_nombre": equipo.nombreequipo,
+        "equipo_numero": equipo_numero,
+        "codigo_equipo": codigo,
+        "estado_partida": partida.estado,
+        "mensaje": f"¡Bienvenido al {equipo.nombreequipo}!"
+    }, status=status.HTTP_200_OK)

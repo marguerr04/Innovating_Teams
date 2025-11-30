@@ -116,6 +116,7 @@ class Desafio(models.Model):
 class Equipo(models.Model):
     nombreequipo = models.CharField(max_length=100)
     tamanoequipo = models.IntegerField(blank=True, null=True)
+    codigo_equipo = models.CharField(max_length=10, unique=True, null=True, blank=True, help_text="Código único partida-equipo para acceso del dispositivo")
 
     class Meta:
         app_label = 'api'

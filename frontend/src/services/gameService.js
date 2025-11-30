@@ -153,6 +153,7 @@ const gameService = {
       return {
         ...partidaData,
         grupos: resultadoGrupos.gruposCreados,
+        gruposCreados: resultadoGrupos.gruposCreados, // Incluir códigos de equipo
         mensaje: 'Partida y grupos creados exitosamente'
       };
     } catch (error) {

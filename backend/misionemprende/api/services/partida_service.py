@@ -85,13 +85,15 @@ def asignar_grupos_logic(partida, data_grupos):
         raise ValueError("Se esperaba una lista de 'grupos' en el JSON.")
 
     resultado_final = []
+    codigo_partida = partida.codigoacceso  # Código de 6 dígitos de la partida
     
     # 3. Iterar sobre la lista de grupos del JSON
-    for grupo_data in data_grupos:
+    for idx, grupo_data in enumerate(data_grupos, start=1):
         nombre_grupo_recibido = grupo_data.get('nombre')
         alumnos_data = grupo_data.get('alumnos')
 
-        if not nombre_grupo_recibido or not alumnos_data:
+        # Validar que tenga nombre y que alumnos sea una lista (puede estar vacía)
+        if not nombre_grupo_recibido or alumnos_data is None:
             continue  # Omitir grupo mal formado
 
         # --- CAMBIO IMPORTANTE ---
@@ -102,11 +104,18 @@ def asignar_grupos_logic(partida, data_grupos):
             nombre=nombre_grupo_recibido,
             tamano=len(alumnos_data)
         )
+        
+        # Generar código único para el equipo: {codigo_partida}{numero_equipo}
+        # Ejemplo: Si partida es 123456 y es el equipo 1 → 1234561
+        codigo_equipo = f"{codigo_partida}{idx}"
+        nuevo_equipo.codigo_equipo = codigo_equipo
+        nuevo_equipo.save(update_fields=['codigo_equipo'])
         # -------------------------
-
+        
         grupo_resultado = {
             "id_equipo_creado": nuevo_equipo.id,
             "nombre_grupo": nuevo_equipo.nombreequipo,
+            "codigo_equipo": codigo_equipo,  # Incluir código en respuesta
             "alumnos_asignados": []
         }
 
@@ -186,14 +195,19 @@ def obtener_grupos_logic(partida_id):
     if not partida:
         raise ValueError("La partida especificada no existe")
 
-    equipos = Equipo.objects.filter(partidausuario__partida=partida).distinct()
+    # Buscar equipos por código de partida (equipos cuyo código empiece con el código de partida)
+    codigo_partida = str(partida.codigoacceso)
+    equipos = Equipo.objects.filter(codigo_equipo__startswith=codigo_partida).order_by('codigo_equipo')
     resultado = []
 
     for equipo in equipos:
+        # Buscar usuarios asignados a este equipo en esta partida
         usuarios = Usuario.objects.filter(partidausuario__equipo=equipo, partidausuario__partida=partida)
         resultado.append({
-            "nombre_grupo": equipo.nombreequipo,
-            "alumnos": [
+            "equipo_id": equipo.id,
+            "nombre_equipo": equipo.nombreequipo,
+            "codigo_equipo": equipo.codigo_equipo,
+            "usuarios": [
                 {
                     "correo": usuario.email,
                     "nombre": usuario.nombre,
@@ -203,4 +217,4 @@ def obtener_grupos_logic(partida_id):
             ],
         })
 
-    return {"partida_id": partida_id, "grupos": resultado}
+    return {"partida_id": partida_id, "codigo_partida": partida.codigoacceso, "grupos": resultado}

@@ -16,9 +16,9 @@ export default function PhaseSalaCodigo({ onJoin }) {
       return;
     }
 
-    // Validar formato (6 dígitos)
-    if (!/^\d{6}$/.test(code.trim())) {
-      setError('El código debe ser de 6 dígitos numéricos');
+    // Validar formato (7 dígitos: 6 de partida + 1 de equipo)
+    if (!/^\d{7}$/.test(code.trim())) {
+      setError('El código debe ser de 7 dígitos numéricos');
       return;
     }
 
@@ -27,17 +27,21 @@ export default function PhaseSalaCodigo({ onJoin }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/validar-codigo/', {
+      const response = await axios.post('http://localhost:8000/api/validar-equipo/', {
         codigo: code.trim()
       });
 
-      // Código válido
+      // Código válido - ir directo a sala de espera
       if (response.data.valido) {
-        // Guardar partida_id en localStorage por si se necesita después
+        // Guardar información de la partida y equipo en localStorage
         localStorage.setItem('partida_id', response.data.partida_id);
-        localStorage.setItem('codigo_acceso', code.trim());
+        localStorage.setItem('partida_codigo', response.data.partida_codigo);
+        localStorage.setItem('equipo_id', response.data.equipo_id);
+        localStorage.setItem('equipo_nombre', response.data.equipo_nombre);
+        localStorage.setItem('equipo_numero', response.data.equipo_numero);
+        localStorage.setItem('codigo_equipo', code.trim());
         
-        // Llamar a onJoin para avanzar
+        // Llamar a onJoin para avanzar directo a sala de espera
         onJoin(code);
       }
     } catch (err) {
@@ -58,10 +62,10 @@ export default function PhaseSalaCodigo({ onJoin }) {
     <div className="max-w-md mx-auto mt-20 text-center">
       <div className="card p-8">
         <h1 className="text-3xl font-extrabold mb-4 text-slate-800">
-          Unirse a la Sala
+          Unirse a tu Equipo
         </h1>
         <p className="text-slate-600 mb-6">
-          Ingresa el código de 6 dígitos proporcionado por tu profesor para unirte a la sesión.
+          Ingresa el código de 7 dígitos de tu equipo proporcionado por tu profesor.
         </p>
         
         <input
@@ -72,8 +76,8 @@ export default function PhaseSalaCodigo({ onJoin }) {
             setCode(value);
             setError(''); // Limpiar error al escribir
           }}
-          maxLength={6}
-          placeholder="123456"
+          maxLength={7}
+          placeholder="1234567"
           disabled={isValidating}
           className="w-full text-center text-3xl font-mono tracking-widest p-4 rounded-lg border border-slate-300 focus:ring-2 focus:ring-mint-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
         />
@@ -86,7 +90,7 @@ export default function PhaseSalaCodigo({ onJoin }) {
         
         <button
           onClick={handleJoin}
-          disabled={isValidating || code.length !== 6}
+          disabled={isValidating || code.length !== 7}
           className="btn bg-mint-500 hover:bg-mint-600 text-white w-full mt-6 py-3 text-lg font-semibold rounded-lg transition-all disabled:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isValidating ? (

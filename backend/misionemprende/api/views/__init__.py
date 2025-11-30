@@ -1,9 +1,10 @@
 # views/__init__.py
 # Importar todas las vistas para mantener compatibilidad con urls.py
 
-from .auth_views import login_view, login_profesor, login_admin, validar_codigo_acceso
+from .auth_views import login_view, login_profesor, login_admin, validar_codigo_acceso, validar_codigo_equipo
 from .usuario_views import UsuarioViewSet, EstudianteViewSet
 from .contenido_views import CursoViewSet, VideoViewSet
+from .student_views import unirse_equipo
 
 # Importar endpoints de función desde endpoints.py (módulo renombrado)
 from api import endpoints
@@ -24,6 +25,8 @@ __all__ = [
     'login_view',
     'login_profesor', 
     'login_admin',
+    'validar_codigo_acceso',
+    'validar_codigo_equipo',
     # ViewSets
     'UsuarioViewSet',
     'EstudianteViewSet',
@@ -39,4 +42,5 @@ __all__ = [
     'guardar_imagen_solucion',
     'obtener_imagen_equipo',
     'listar_equipos',
+    'unirse_equipo',
 ]

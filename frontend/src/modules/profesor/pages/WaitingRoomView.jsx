@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import GameLayout from '../components/GameLayout';
 import GroupsDisplay from '../components/GroupsDisplay';
+import TeamCodesDisplay from '../components/TeamCodesDisplay';
 import { useGameData } from '../hooks/useGameData';
+import gameService from '../../../services/gameService';
 
 const WaitingRoomView = () => {
   const navigate = useNavigate();
@@ -12,14 +14,33 @@ const WaitingRoomView = () => {
   // Usar el hook personalizado para manejo de datos
   const { gameData, grupos, jugadores, loading, error, actions } = useGameData(gamePin);
   
-  // Estado local para datos desde navegación
+  // Estado local para datos desde navegación y códigos de equipo
   const [localGameData, setLocalGameData] = useState(
     location.state?.gameData || null
+  );
+  const [teamCodes, setTeamCodes] = useState(
+    location.state?.gruposCreados || []
   );
 
   // Usar datos locales si existen, sino los del hook
   const currentGameData = localGameData || gameData;
   const currentGrupos = location.state?.grupos || grupos;
+  
+  // Cargar códigos de equipo si no vienen del estado de navegación
+  useEffect(() => {
+    const loadTeamCodes = async () => {
+      if (teamCodes.length === 0 && location.state?.partidaId) {
+        try {
+          const grupos = await gameService.obtenerGrupos(location.state.partidaId);
+          setTeamCodes(grupos);
+        } catch (error) {
+          console.error('Error al cargar códigos de equipo:', error);
+        }
+      }
+    };
+    
+    loadTeamCodes();
+  }, [location.state?.partidaId, teamCodes.length]);
 
   const handleComenzarJuego = () => {
     // Actualizar estado del juego a 'playing'
@@ -145,6 +166,11 @@ const WaitingRoomView = () => {
             </div>
           </div>
         </div>
+
+        {/* Mostrar códigos de equipo */}
+        {teamCodes.length > 0 && (
+          <TeamCodesDisplay grupos={teamCodes} />
+        )}
 
         {/* Componente de grupos reutilizable */}
         <div className="mb-6">

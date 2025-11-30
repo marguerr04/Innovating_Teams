@@ -73,6 +73,7 @@ const GroupBuilderOptimized = () => {
           partidaId: partidaCreada.id,
           pin: partidaCreada.pin,
           grupos: gruposParaBackend,
+          gruposCreados: partidaCreada.gruposCreados, // Códigos de equipo generados
           totalEstudiantes: gruposParaBackend.reduce((sum, g) => sum + g.integrantes.length, 0)
         }
       });

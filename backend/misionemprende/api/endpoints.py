@@ -144,7 +144,6 @@ def crear_partida(request):
 # Endpoints relacionados a la asignacion de grupos
 
 @api_view(['POST'])
-@parser_classes([JSONParser])
 def asignar_grupos(request, partida_id):
     """
     Endpoint: /api/partida/<partida_id>/asignar-grupos/
@@ -157,8 +156,24 @@ def asignar_grupos(request, partida_id):
         # 1. Obtener la Partida existente usando el ID de la URL
         partida = get_object_or_404(Partida, id=partida_id)
 
-        # 2. Obtener el JSON que envió el frontend
-        data_grupos = request.data.get('grupos')
+        # 2. DEBUG: Ver qué está llegando realmente
+        print("=" * 50)
+        print("DEBUG - request.data:", request.data)
+        print("DEBUG - type(request.data):", type(request.data))
+        print("DEBUG - Content-Type:", request.content_type)
+        print("=" * 50)
+
+        # 2. Obtener el JSON - DRF ya parsea automáticamente
+        # Si el JSON tiene "grupos" en el root, acceder directamente
+        if isinstance(request.data, dict):
+            data_grupos = request.data.get('grupos')
+        else:
+            # Si request.data ya es la lista
+            data_grupos = request.data
+        
+        print("DEBUG - data_grupos:", data_grupos)
+        print("DEBUG - type(data_grupos):", type(data_grupos))
+        print("=" * 50)
 
         # 3. Ejecutar lógica de negocio
         resultado = asignar_grupos_logic(partida, data_grupos)
