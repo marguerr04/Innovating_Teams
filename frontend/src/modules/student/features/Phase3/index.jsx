@@ -79,7 +79,7 @@ export default function Phase3({ role, isProf, onNext, onBack }) {
       {/* Cabecera con Timer mejorado */}
       <div className="flex justify-between items-start mb-6">
         <div>
-  <h1 className="text-3xl font-extrabold mb-1">Creatividad: La Solución</h1>
+  <h1 className="text-4xl font-extrabold mb-1">Creatividad: La Solución</h1>
   {/* CAMBIO: Pregunta explícita y requerimiento de innovación */}
   {/* CAMBIO: Instrucción destacada y responsiva */}
           <div className="text-white/95 max-w-4xl mt-4 space-y-4">

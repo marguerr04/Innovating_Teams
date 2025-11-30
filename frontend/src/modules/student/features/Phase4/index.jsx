@@ -57,7 +57,7 @@ export default function Phase4({ role, isProf, onNext, onBack }) {
         {/* Contenedor de Título y Timer (sin cambios) */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-extrabold mb-1">Comunicación</h1>
+            <h1 className="text-4xl font-extrabold mb-1">Comunicación</h1>
           </div>
           <div className="card p-4">
             <Timer 

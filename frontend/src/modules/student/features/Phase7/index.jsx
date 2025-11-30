@@ -14,10 +14,10 @@ export default function Phase7({ onBack }) {
       {/* --- Título --- */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-extrabold mb-2 text-white">
-          ¡Muchas gracias por jugar!
+          ¡Muchas gracias por participar!
         </h1>
         <p className="text-lg text-white/80">
-          La participación de todos ha sido fundamental.
+          Los esperamos en futuras actividades de Emprendimiento UDD.
         </p>
       </div>
 
