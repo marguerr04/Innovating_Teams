@@ -3,6 +3,7 @@ import React from 'react';
 
 // Mapeo de Fases a las nuevas imágenes
 const phaseImages = {
+  '-1': '/assets/backgrounds/fase0.png',
   0: null, 
   1: '/assets/backgrounds/fase1.png', // Amarillo (Creatividad/Ideas)
   2: '/assets/backgrounds/fase2.png', // Verde (Empatía/Colaboración)
