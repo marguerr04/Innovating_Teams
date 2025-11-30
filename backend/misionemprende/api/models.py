@@ -449,3 +449,66 @@ class ConexionPartida(models.Model):
         
     def __str__(self):
         return f"{self.equipo.nombreequipo} (Partida {self.partida.id}) - {'Activo' if self.activo else 'Inactivo'}"
+
+
+class EstadoPartida(models.Model):
+    """
+    Trackea cambios de estado/fase de una partida en tiempo real.
+    Optimizado para consultas rápidas sin modificar tabla Partida constantemente.
+    Permite historial completo de transiciones de estado.
+    
+    Estados válidos:
+    - CONFIGURACION: Profesor configurando equipos
+    - EN_ESPERA: Sala de espera, esperando que todos se conecten
+    - INICIADA: Juego iniciado por profesor
+    - FASE_VIDEO: Reproduciendo video introductorio
+    - FASE_1 a FASE_7: Fases del juego
+    - FINALIZADA: Partida terminada
+    """
+    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='estados_historial')
+    estado_actual = models.CharField(
+        max_length=50,
+        help_text='Estado actual de la partida (CONFIGURACION, EN_ESPERA, INICIADA, FASE_VIDEO, FASE_1-7, FINALIZADA)'
+    )
+    fase_actual = models.IntegerField(
+        default=0,
+        help_text='Número de fase actual: 0=espera, 1=video, 2-8=fases 1-7'
+    )
+    timestamp = models.DateTimeField(auto_now_add=True, help_text='Momento del cambio de estado')
+    activo = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text='Solo el registro activo=True representa el estado actual'
+    )
+    mensaje = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Mensaje opcional para contexto del cambio'
+    )
+    
+    class Meta:
+        app_label = 'api'
+        db_table = 'estado_partida'
+        indexes = [
+            models.Index(fields=['partida', 'activo'], name='idx_partida_activo'),
+            models.Index(fields=['timestamp'], name='idx_timestamp'),
+            models.Index(fields=['estado_actual'], name='idx_estado'),
+        ]
+        ordering = ['-timestamp']
+        
+    def __str__(self):
+        return f"Partida {self.partida.id} - {self.estado_actual} (Fase {self.fase_actual})"
+    
+    def save(self, *args, **kwargs):
+        """
+        Al guardar un nuevo estado activo, desactiva los anteriores automáticamente.
+        Esto garantiza que solo haya un estado activo por partida.
+        """
+        if self.activo:
+            # Desactivar estados anteriores de esta partida
+            EstadoPartida.objects.filter(
+                partida=self.partida,
+                activo=True
+            ).update(activo=False)
+        super().save(*args, **kwargs)

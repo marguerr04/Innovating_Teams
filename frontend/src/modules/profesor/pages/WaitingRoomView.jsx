@@ -69,9 +69,40 @@ const WaitingRoomView = () => {
     actions.updateGroupName(groupId, newName);
   };
 
-  const handleIniciarVotacion = () => {
-    // Funcionalidad futura: iniciar votación de actividades
-    alert('Funcionalidad de votación será implementada con backend real');
+  const handleIniciarVotacion = async () => {
+    const partidaId = location.state?.partidaId || localStorage.getItem(`partida_${gamePin}_id`);
+    
+    if (!partidaId) {
+      alert('Error: No se encontró el ID de la partida');
+      return;
+    }
+
+    try {
+      // Llamar al endpoint para cambiar el estado a INICIADA
+      const response = await fetch(`http://localhost:8000/api/partida/${partidaId}/iniciar-juego/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Juego iniciado:', data);
+        
+        // Opcional: redirigir al profesor a otra vista
+        alert('¡Juego iniciado! Los estudiantes serán redirigidos automáticamente.');
+        
+        // Puedes redirigir al profesor a monitoreo o mantenerlo aquí
+        // navigate(`/profesor/game-active/${gamePin}`, { state: { partidaId } });
+      } else {
+        console.error('Error al iniciar juego:', await response.text());
+        alert('Error al iniciar el juego. Por favor intenta de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error de red al iniciar juego:', error);
+      alert('Error de conexión. Verifica que el servidor esté corriendo.');
+    }
   };
 
   if (loading) {

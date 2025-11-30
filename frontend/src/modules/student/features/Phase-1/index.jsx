@@ -56,13 +56,37 @@ export default function PhaseSalaEspera({ onStart, isProf }) {
       }
     };
 
+    // Función para detectar cambio de estado (profesor inicia juego)
+    const checkEstadoPartida = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/partida/${partidaId}/estado-actual/`
+        );
+        
+        // Si el estado es INICIADA o fase >= 1, iniciar el juego (ir a fase 0 = video)
+        if (response.data && (response.data.estado_actual === 'INICIADA' || response.data.fase_actual >= 1)) {
+          console.log('🎮 Juego iniciado por el profesor, avanzando a video...');
+          onStart(); // Llama a la función del padre que cambia phase de -1 a 0
+        }
+      } catch (err) {
+        console.error('Error al verificar estado:', err);
+        // No mostrar error al usuario, solo log
+      }
+    };
+
     // Cargar grupos inmediatamente
     cargarGrupos();
 
     // Polling: actualizar cada 3 segundos para ver nuevos estudiantes que se unan
     const pollingInterval = setInterval(cargarGrupos, 3000);
 
-    return () => clearInterval(pollingInterval);
+    // Polling de estado: verificar cada 2 segundos si el juego inició
+    const estadoInterval = setInterval(checkEstadoPartida, 2000);
+
+    return () => {
+      clearInterval(pollingInterval);
+      clearInterval(estadoInterval);
+    };
   }, []);
 
   // Calcular total de jugadores conectados (CON PROTECCIÓN '?.')

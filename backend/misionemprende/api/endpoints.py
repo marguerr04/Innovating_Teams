@@ -263,3 +263,63 @@ def listar_equipos(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': f'Error al obtener equipos: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ========== GESTIÓN DE ESTADOS Y JUEGO ==========
+
+@api_view(['POST'])
+def iniciar_juego(request, partida_id):
+    """
+    Profesor inicia el juego, cambia estado a INICIADA y fase a 1 (video).
+    Todos los estudiantes en sala de espera detectarán el cambio y redirigirán automáticamente.
+    
+    POST /api/partida/<partida_id>/iniciar-juego/
+    
+    Returns:
+        dict: Estado actualizado con timestamp
+    """
+    from .services.partida_service import cambiar_estado_partida
+    
+    try:
+        resultado = cambiar_estado_partida(
+            partida_id=partida_id,
+            nuevo_estado='INICIADA',
+            fase_actual=1,
+            mensaje='Profesor inició el juego'
+        )
+        return Response(resultado, status=status.HTTP_200_OK)
+    
+    except Partida.DoesNotExist:
+        return Response(
+            {'error': 'Partida no encontrada'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Error al iniciar juego: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def estado_actual(request, partida_id):
+    """
+    Endpoint ligero para que estudiantes consulten el estado actual de la partida.
+    Optimizado para polling frecuente (cada 2-3 segundos).
+    
+    GET /api/partida/<partida_id>/estado-actual/
+    
+    Returns:
+        dict: Estado actual, fase y timestamp
+    """
+    from .services.partida_service import obtener_estado_actual
+    
+    try:
+        estado = obtener_estado_actual(partida_id)
+        return Response(estado, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        return Response(
+            {'error': f'Error al obtener estado: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

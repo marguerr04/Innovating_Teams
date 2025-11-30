@@ -238,3 +238,71 @@ def obtener_grupos_logic(partida_id):
         })
 
     return {"partida_id": partida_id, "codigo_partida": partida.codigoacceso, "grupos": resultado}
+
+
+# ========== GESTIÓN DE ESTADOS DE PARTIDA ==========
+
+def cambiar_estado_partida(partida_id, nuevo_estado, fase_actual, mensaje=None):
+    """
+    Crea un nuevo registro de estado activo para una partida.
+    Auto-desactiva estados anteriores (manejado por el modelo).
+    
+    Args:
+        partida_id: ID de la partida
+        nuevo_estado: Nombre del estado (CONFIGURACION, EN_ESPERA, INICIADA, FASE_VIDEO, FASE_1-7, FINALIZADA)
+        fase_actual: Número de fase (0=espera, 1=video, 2-8=fases 1-7)
+        mensaje: Mensaje opcional de contexto
+        
+    Returns:
+        dict: Estado actualizado
+    """
+    from ..models import EstadoPartida
+    
+    partida = PartidaRepository.get_by_id(partida_id)
+    
+    estado = EstadoPartida.objects.create(
+        partida=partida,
+        estado_actual=nuevo_estado,
+        fase_actual=fase_actual,
+        activo=True,
+        mensaje=mensaje or f"Estado cambiado a {nuevo_estado}"
+    )
+    
+    return {
+        "success": True,
+        "estado_actual": estado.estado_actual,
+        "fase_actual": estado.fase_actual,
+        "timestamp": estado.timestamp.isoformat()
+    }
+
+
+def obtener_estado_actual(partida_id):
+    """
+    Consulta rápida del estado activo actual de una partida.
+    Usa índice (partida, activo) para optimizar.
+    
+    Args:
+        partida_id: ID de la partida
+        
+    Returns:
+        dict: Estado actual o None si no existe
+    """
+    from ..models import EstadoPartida
+    
+    estado = EstadoPartida.objects.filter(
+        partida_id=partida_id,
+        activo=True
+    ).first()
+    
+    if not estado:
+        return {
+            "estado_actual": "CONFIGURACION",
+            "fase_actual": 0,
+            "timestamp": None
+        }
+    
+    return {
+        "estado_actual": estado.estado_actual,
+        "fase_actual": estado.fase_actual,
+        "timestamp": estado.timestamp.isoformat()
+    }

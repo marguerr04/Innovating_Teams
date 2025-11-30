@@ -14,6 +14,9 @@ from .views import (
     guardar_imagen_solucion, obtener_imagen_equipo, listar_equipos, unirse_equipo
 )
 
+# Endpoints de gestión de estados
+from .endpoints import iniciar_juego, estado_actual
+
 # Servicios externos
 from .storage_service import generate_signed_url
 from .database_test import test_database_connection
@@ -59,5 +62,12 @@ urlpatterns = [
     
     # Endpoint de diagnóstico de base de datos
     path('test-db/', test_database_connection, name='test_database_connection'),
+
+# ========== GESTIÓN DE ESTADOS Y JUEGO ==========
+    # Profesor inicia el juego (cambia estado a INICIADA, fase 1)
+    path('partida/<int:partida_id>/iniciar-juego/', iniciar_juego, name='iniciar_juego'),
+    
+    # Estudiantes consultan estado actual (polling ligero)
+    path('partida/<int:partida_id>/estado-actual/', estado_actual, name='estado_actual'),
 
 ]
