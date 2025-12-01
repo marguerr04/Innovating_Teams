@@ -76,7 +76,7 @@ export default function StudentApp() {
     setPhase(7);
 
     // disparar video manualmente
-    setPhaseVideoShown(prev => ({ ...prev, [7]: false }));
+    setPhaseVideoShown(prev => ({ ...prev, '7': false }));
     setShowPhaseVideo(true);
 
     return;

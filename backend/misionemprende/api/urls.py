@@ -11,7 +11,9 @@ from .views import (
     # Endpoints de función
     assign_groups, bulk_create_estudiantes, crear_partida,
     asignar_grupos, obtener_grupos, get_estudiantes_por_equipo,
-    guardar_imagen_solucion, obtener_imagen_equipo, listar_equipos, unirse_equipo
+    guardar_imagen_solucion, obtener_imagen_equipo, listar_equipos, unirse_equipo,
+    # Vistas de administrador
+    admin_temas_list, admin_tema_detail, admin_desafios_list, admin_desafio_detail, admin_get_personas
 )
 
 # Endpoints de gestión de estados
@@ -69,5 +71,17 @@ urlpatterns = [
     
     # Estudiantes consultan estado actual (polling ligero)
     path('partida/<int:partida_id>/estado-actual/', estado_actual, name='estado_actual'),
+
+# ========== CRUD DE ADMINISTRADOR ==========
+    # Gestión de temas de desafío
+    path('admin/temas/', admin_temas_list, name='admin_temas_list'),
+    path('admin/temas/<int:tema_id>/', admin_tema_detail, name='admin_tema_detail'),
+    
+    # Gestión de desafíos
+    path('admin/desafios/', admin_desafios_list, name='admin_desafios_list'),
+    path('admin/desafios/<int:desafio_id>/', admin_desafio_detail, name='admin_desafio_detail'),
+    
+    # Datos auxiliares
+    path('admin/personas/', admin_get_personas, name='admin_get_personas'),
 
 ]

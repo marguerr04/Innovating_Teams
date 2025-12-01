@@ -5,6 +5,10 @@ from .auth_views import login_view, login_profesor, login_admin, validar_codigo_
 from .usuario_views import UsuarioViewSet, EstudianteViewSet
 from .contenido_views import CursoViewSet, VideoViewSet
 from .student_views import unirse_equipo
+from .admin_views import (
+    admin_temas_list, admin_tema_detail, admin_desafios_list, 
+    admin_desafio_detail, admin_get_personas
+)
 
 # Importar endpoints de función desde endpoints.py (módulo renombrado)
 from api import endpoints
@@ -43,4 +47,10 @@ __all__ = [
     'obtener_imagen_equipo',
     'listar_equipos',
     'unirse_equipo',
+    # Vistas de administrador
+    'admin_temas_list',
+    'admin_tema_detail', 
+    'admin_desafios_list',
+    'admin_desafio_detail',
+    'admin_get_personas',
 ]

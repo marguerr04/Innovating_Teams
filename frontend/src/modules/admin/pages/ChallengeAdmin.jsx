@@ -2,24 +2,33 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { FaTrash, FaEdit, FaPlus, FaSave, FaTimes, FaUser, FaBuilding } from 'react-icons/fa';
 
-// --- MOCK DATA SIMULADA PARA TESTING DE FRONTEND ---
-// Usamos 'let' para simular la mutabilidad que tendríamos con una base de datos real
-let mockThemes = [
-    { id: 1, nombretema: 'Educación', descripcion: 'Temas relacionados con el aprendizaje', estado: 'activo' },
-    { id: 2, nombretema: 'Sustentabilidad', descripcion: 'Temas medioambientales', estado: 'activo' },
-    { id: 3, nombretema: 'Salud', descripcion: 'Temas de bienestar', estado: 'activo' },
-];
+// Configuración de la API
+const API_BASE_URL = 'http://localhost:8000/api';
 
-let mockPeople = [
-    { id: 101, nombrepersona: 'Juanita Pérez', edad: 45, contextopersona: 'Madre soltera en busca de un trabajo flexible', imagenurl: '/avatars/juana.png' },
-    { id: 102, nombrepersona: 'Roberto Gómez', edad: 22, contextopersona: 'Estudiante con problemas de motivación', imagenurl: '/avatars/osvaldo.png' },
-];
-
-let mockChallenges = [
-    { id: 1001, titulo: 'Mejorar acceso a talleres online', descripcion: 'Problema de acceso a internet', contexto: 'El 80% de los estudiantes de zonas rurales tiene baja conectividad.', tema_desafio: 1, tema_desafio_nombre: 'Educación', persona: 101, persona_nombre: 'Juanita Pérez', edadpersona: 45 },
-    { id: 1002, titulo: 'Reducir el desperdicio de agua', descripcion: 'El consumo promedio es alto.', contexto: 'Los habitantes no tienen conciencia del uso responsable del agua.', tema_desafio: 2, tema_desafio_nombre: 'Sustentabilidad', persona: 102, persona_nombre: 'Roberto Gómez', edadpersona: 22 },
-];
-// ----------------------------------------------------
+// Función helper para hacer peticiones HTTP
+const apiRequest = async (endpoint, options = {}) => {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        ...options,
+    };
+    
+    try {
+        const response = await fetch(url, config);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error(`API Error (${endpoint}):`, error);
+        throw error;
+    }
+};
 
 const defaultAvatars = [
     { name: 'Andrés', url: '/avatars/andres.png' },
@@ -58,16 +67,27 @@ const ChallengeAdmin = () => {
     
     // --- LÓGICA DE CARGA Y ESTADO ---
 
-    const fetchAllData = () => {
+    const fetchAllData = async () => {
         setIsLoading(true);
-        // Simula la latencia de red con un setTimeout
-        setTimeout(() => {
-            // Se usa [...mockX] para obtener una copia y forzar el re-renderizado
-            setChallenges([...mockChallenges]); 
-            setThemes([...mockThemes]);
-            setPeople([...mockPeople]);
+        try {
+            // Cargar todas las datos en paralelo
+            const [challengesResponse, themesResponse, peopleResponse] = await Promise.all([
+                apiRequest('/admin/desafios/'),
+                apiRequest('/admin/temas/'),
+                apiRequest('/admin/personas/')
+            ]);
+            
+            // Los desafíos vienen en data.desafios debido a la paginación
+            setChallenges(challengesResponse.data.desafios || []);
+            setThemes(themesResponse.data || []);
+            setPeople(peopleResponse.data || []);
+            
+        } catch (error) {
+            console.error('Error cargando datos:', error);
+            Swal.fire('Error', 'No se pudieron cargar los datos. Verifique la conexión con el servidor.', 'error');
+        } finally {
             setIsLoading(false);
-        }, 300); 
+        }
     };
 
     useEffect(() => {
@@ -106,64 +126,61 @@ const ChallengeAdmin = () => {
     };
 
 
-    // --- LÓGICA DE CREACIÓN (MOCK) ---
+    // --- LÓGICA DE CREACIÓN ---
 
-    const handleCreatePersonaAndChallenge = (e) => {
+    const handleCreatePersonaAndChallenge = async (e) => {
         e.preventDefault();
         
-        // Generar IDs y encontrar tema seleccionado
-        const newPersonaId = Math.max(...mockPeople.map(p => p.id), 102) + 1;
-        const newChallengeId = Math.max(...mockChallenges.map(c => c.id), 1002) + 1;
-        const temaSeleccionado = mockThemes.find(t => t.id === parseInt(challengeFormData.tema_desafio));
-
-        if (!temaSeleccionado) {
+        if (!challengeFormData.tema_desafio) {
             Swal.fire('Error', 'Debe seleccionar un área de desafío.', 'error');
             return;
         }
 
-        // Simular la creación de la Persona
-        const newPersona = {
-            id: newPersonaId,
-            nombrepersona: challengeFormData.nombrepersona || 'Persona por defecto',
-            edad: challengeFormData.edadpersona || 30,
-            contextopersona: challengeFormData.contexto, 
-            imagenurl: challengeFormData.avatar_url,
-        };
-        mockPeople.push(newPersona);
+        try {
+            // Buscar la persona seleccionada o usar datos del formulario
+            const personaData = challengeFormData.persona_id 
+                ? people.find(p => p.id === challengeFormData.persona_id)
+                : null;
 
-        // Simular la creación del Desafío
-        const newChallenge = {
-            id: newChallengeId,
-            titulo: challengeFormData.titulo,
-            descripcion: challengeFormData.descripcion,
-            contexto: challengeFormData.contexto,
-            tema_desafio: parseInt(challengeFormData.tema_desafio),
-            tema_desafio_nombre: temaSeleccionado.nombretema,
-            persona: newPersonaId,
-            persona_nombre: newPersona.nombrepersona,
-            edadpersona: newPersona.edad,
-        };
-        mockChallenges.push(newChallenge);
-        
-        Swal.fire('¡Éxito!', 'Desafío creado *SIMULADO* correctamente.', 'success');
-        resetForm();
-        fetchAllData(); 
+            const desafioData = {
+                titulo: challengeFormData.titulo,
+                descripcion: challengeFormData.descripcion,
+                contexto: challengeFormData.contexto,
+                tema_desafio_id: parseInt(challengeFormData.tema_desafio),
+                persona_id: personaData ? personaData.id : null,
+                nombrepersona: challengeFormData.nombrepersona,
+                edadpersona: parseInt(challengeFormData.edadpersona)
+            };
+
+            const response = await apiRequest('/admin/desafios/', {
+                method: 'POST',
+                body: JSON.stringify(desafioData)
+            });
+            
+            Swal.fire('¡Éxito!', 'Desafío creado correctamente.', 'success');
+            resetForm();
+            fetchAllData();
+            
+        } catch (error) {
+            console.error('Error creando desafío:', error);
+            Swal.fire('Error', `No se pudo crear el desafío: ${error.message}`, 'error');
+        }
     };
 
     // --- LÓGICA DE EDICIÓN (CARGAR DATOS) ---
 
     const handleEdit = (challenge) => {
-        const personData = people.find(p => p.id === challenge.persona);
+        const personData = people.find(p => p.id === challenge.persona_id);
 
-        // Cargar todos los datos al formulario
+        // Cargar todos los datos al formulario usando los nombres correctos del backend
         setChallengeFormData({
             titulo: challenge.titulo,
             descripcion: challenge.descripcion,
-            contexto: challenge.contexto,
-            tema_desafio: challenge.tema_desafio,
-            nombrepersona: challenge.persona_nombre,
-            edadpersona: challenge.edadpersona,
-            persona_id: challenge.persona,
+            contexto: challenge.contexto || '',
+            tema_desafio: challenge.tema_desafio_id,
+            nombrepersona: challenge.nombrepersona || challenge.persona_nombre || '',
+            edadpersona: challenge.edadpersona || '',
+            persona_id: challenge.persona_id,
             avatar_url: personData ? personData.imagenurl : '/avatars/default.png',
         });
         
@@ -173,101 +190,119 @@ const ChallengeAdmin = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // --- LÓGICA DE ACTUALIZACIÓN (MOCK) ---
+    // --- LÓGICA DE ACTUALIZACIÓN ---
 
-    const handleUpdateChallenge = (e) => {
+    const handleUpdateChallenge = async (e) => {
         e.preventDefault();
         
-        const challengeIndex = mockChallenges.findIndex(c => c.id === editingChallengeId);
-        const personaIndex = mockPeople.findIndex(p => p.id === challengeFormData.persona_id);
-        const temaSeleccionado = mockThemes.find(t => t.id === parseInt(challengeFormData.tema_desafio));
-        
-        if (challengeIndex === -1 || !temaSeleccionado) return;
-
-        // 1. Simular actualización de la Persona
-        if (personaIndex !== -1) {
-            mockPeople[personaIndex] = {
-                ...mockPeople[personaIndex],
-                nombrepersona: challengeFormData.nombrepersona,
-                edad: challengeFormData.edadpersona,
-                imagenurl: challengeFormData.avatar_url,
-                contextopersona: challengeFormData.contexto, // El contexto se usa en la persona para simplificar el mock
-            };
+        if (!challengeFormData.tema_desafio) {
+            Swal.fire('Error', 'Debe seleccionar un área de desafío.', 'error');
+            return;
         }
-        
-        // 2. Simular actualización del Desafío
-        mockChallenges[challengeIndex] = {
-            ...mockChallenges[challengeIndex],
-            ...challengeFormData,
-            tema_desafio: parseInt(challengeFormData.tema_desafio),
-            tema_desafio_nombre: temaSeleccionado.nombretema,
-            id: editingChallengeId,
-            persona_nombre: challengeFormData.nombrepersona,
-        };
 
-        Swal.fire('¡Éxito!', 'Desafío actualizado *SIMULADO* correctamente.', 'success');
-        resetForm();
-        fetchAllData();
+        try {
+            const personaData = challengeFormData.persona_id 
+                ? people.find(p => p.id === challengeFormData.persona_id)
+                : null;
+
+            const desafioData = {
+                titulo: challengeFormData.titulo,
+                descripcion: challengeFormData.descripcion,
+                contexto: challengeFormData.contexto,
+                tema_desafio_id: parseInt(challengeFormData.tema_desafio),
+                persona_id: personaData ? personaData.id : null,
+                nombrepersona: challengeFormData.nombrepersona,
+                edadpersona: parseInt(challengeFormData.edadpersona)
+            };
+
+            const response = await apiRequest(`/admin/desafios/${editingChallengeId}/`, {
+                method: 'PUT',
+                body: JSON.stringify(desafioData)
+            });
+            
+            Swal.fire('¡Éxito!', 'Desafío actualizado correctamente.', 'success');
+            resetForm();
+            fetchAllData();
+            
+        } catch (error) {
+            console.error('Error actualizando desafío:', error);
+            Swal.fire('Error', `No se pudo actualizar el desafío: ${error.message}`, 'error');
+        }
     };
 
     // --- DISPATCHER DE FORMULARIO ---
     const handleSubmit = isEditing ? handleUpdateChallenge : handleCreatePersonaAndChallenge;
 
-    // --- LÓGICA DE ELIMINACIÓN (MOCK) ---
+    // --- LÓGICA DE ELIMINACIÓN ---
     
     const handleDelete = (id, type) => {
         Swal.fire({
             title: `¿Estás seguro de eliminar el ${type}?`,
-            text: "Esta acción es solo SIMULADA en el frontend.",
+            text: "Esta acción no se puede deshacer.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, eliminar (Simular)'
-        }).then((result) => {
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                if (type === 'Tema') {
-                    mockThemes = mockThemes.filter(t => t.id !== id);
-                } else if (type === 'Desafío') {
-                    mockChallenges = mockChallenges.filter(c => c.id !== id);
+                try {
+                    const endpoint = type === 'Tema' ? `/admin/temas/${id}/` : `/admin/desafios/${id}/`;
+                    
+                    await apiRequest(endpoint, {
+                        method: 'DELETE'
+                    });
+                    
+                    Swal.fire('Eliminado!', `${type} ha sido eliminado correctamente.`, 'success');
+                    fetchAllData();
+                    
+                } catch (error) {
+                    console.error(`Error eliminando ${type}:`, error);
+                    Swal.fire('Error', `No se pudo eliminar el ${type}: ${error.message}`, 'error');
                 }
-                
-                Swal.fire('Eliminado!', `${type} ha sido eliminado (SIMULADO).`, 'success');
-                fetchAllData(); 
             }
         });
     };
 
-    // --- LÓGICA DE TEMAS (MOCK) ---
+    // --- LÓGICA DE TEMAS ---
 
-    const handleCreateTheme = () => {
+    const handleCreateTheme = async () => {
         if (!newThemeName.trim()) {
             Swal.fire('Advertencia', 'El nombre del área no puede estar vacío.', 'warning');
             return;
         }
-        const newThemeId = Math.max(...mockThemes.map(t => t.id), 3) + 1;
-        const newTheme = {
-            id: newThemeId,
-            nombretema: newThemeName.trim(),
-            descripcion: 'Nueva área creada por el administrador (SIMULADA)',
-            estado: 'activo',
-        };
-        mockThemes.push(newTheme);
         
-        Swal.fire('¡Éxito!', `Área "${newThemeName}" creada *SIMULADA*.`, 'success');
-        setNewThemeName('');
-        setIsCreatingTheme(false);
-        fetchAllData(); 
+        try {
+            const temaData = {
+                nombretema: newThemeName.trim(),
+                descripcion: 'Nueva área creada por el administrador'
+            };
+            
+            await apiRequest('/admin/temas/', {
+                method: 'POST',
+                body: JSON.stringify(temaData)
+            });
+            
+            Swal.fire('¡Éxito!', `Área "${newThemeName}" creada correctamente.`, 'success');
+            setNewThemeName('');
+            setIsCreatingTheme(false);
+            fetchAllData();
+            
+        } catch (error) {
+            console.error('Error creando tema:', error);
+            Swal.fire('Error', `No se pudo crear el área: ${error.message}`, 'error');
+        }
     };
     
     // --- RENDERIZADO ---
 
-    if (isLoading) return <div className="text-center p-8 text-xl font-semibold text-indigo-500">Cargando gestión de desafíos (Simulado)...</div>;
+    if (isLoading) return <div className="text-center p-8 text-xl font-semibold text-indigo-500">Cargando gestión de desafíos...</div>;
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Gestión de Desafíos (CRUD MOCK)</h1>
-            <p className="text-sm text-red-500 mb-4">⚠️ **AVISO:** Las operaciones CRUD (Crear, Editar, Eliminar) son simuladas en el Frontend. No hay persistencia en el Backend.</p>
+            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Gestión de Desafíos</h1>
+            <p className="text-sm text-green-600 mb-4">✅ Sistema CRUD completo - Gestión de desafíos y temas conectada con la base de datos PostgreSQL.</p>
 
             {/* SECCIÓN DE CREACIÓN/EDICIÓN */}
             <div className="bg-white p-6 rounded-lg shadow-md mb-8 border border-green-200">
@@ -312,8 +347,60 @@ const ChallengeAdmin = () => {
                         {/* Columna 2: Perfil de la Persona */}
                         <div className="col-span-1 border-r pr-4">
                             <h3 className="font-bold mb-3 flex items-center"><FaUser className="mr-1" /> Perfil de Persona</h3>
-                            <input type="text" name="nombrepersona" placeholder="Nombre de la Persona *" value={challengeFormData.nombrepersona} onChange={handleChallengeChange} className="w-full p-2 border rounded mb-3" required />
-                            <input type="number" name="edadpersona" placeholder="Edad de la Persona *" value={challengeFormData.edadpersona} onChange={handleChallengeChange} className="w-full p-2 border rounded mb-3" required />
+                            
+                            {/* Selector de persona existente */}
+                            <select 
+                                name="persona_id" 
+                                onChange={(e) => {
+                                    const personaId = parseInt(e.target.value) || null;
+                                    const persona = people.find(p => p.id === personaId);
+                                    if (persona) {
+                                        setChallengeFormData(prev => ({
+                                            ...prev,
+                                            persona_id: persona.id,
+                                            nombrepersona: persona.nombre,
+                                            edadpersona: persona.edad,
+                                            avatar_url: persona.imagenurl || '/avatars/default.png'
+                                        }));
+                                    } else {
+                                        setChallengeFormData(prev => ({
+                                            ...prev,
+                                            persona_id: null,
+                                            nombrepersona: '',
+                                            edadpersona: '',
+                                            avatar_url: '/avatars/default.png'
+                                        }));
+                                    }
+                                }}
+                                value={challengeFormData.persona_id || ''} 
+                                className="w-full p-2 border rounded mb-3 bg-white"
+                            >
+                                <option value="">Crear nueva persona...</option>
+                                {people.map(p => (
+                                    <option key={p.id} value={p.id}>{p.nombre} ({p.edad} años)</option>
+                                ))}
+                            </select>
+                            
+                            <input 
+                                type="text" 
+                                name="nombrepersona" 
+                                placeholder="Nombre de la Persona *" 
+                                value={challengeFormData.nombrepersona} 
+                                onChange={handleChallengeChange} 
+                                className="w-full p-2 border rounded mb-3" 
+                                required 
+                                disabled={challengeFormData.persona_id !== null}
+                            />
+                            <input 
+                                type="number" 
+                                name="edadpersona" 
+                                placeholder="Edad de la Persona *" 
+                                value={challengeFormData.edadpersona} 
+                                onChange={handleChallengeChange} 
+                                className="w-full p-2 border rounded mb-3" 
+                                required 
+                                disabled={challengeFormData.persona_id !== null}
+                            />
                             
                             <h4 className="font-semibold mt-4 mb-2">Seleccionar Avatar</h4>
                             <div className="flex space-x-2 overflow-x-auto pb-2">
@@ -335,10 +422,10 @@ const ChallengeAdmin = () => {
                                 type="submit"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition duration-200"
                             >
-                                <FaSave className="mr-2" /> {isEditing ? 'GUARDAR CAMBIOS (MOCK)' : 'FINALIZAR CREACIÓN (MOCK)'}
+                                <FaSave className="mr-2" /> {isEditing ? 'GUARDAR CAMBIOS' : 'FINALIZAR CREACIÓN'}
                             </button>
                             <p className="text-sm text-gray-500 mt-2">
-                                {isEditing ? 'Modifica el desafío existente.' : 'Crea un nuevo perfil y desafío.'}
+                                {isEditing ? 'Actualiza el desafío en la base de datos.' : 'Crea un nuevo desafío y persona en la base de datos.'}
                             </p>
                         </div>
                     </form>
@@ -362,8 +449,11 @@ const ChallengeAdmin = () => {
                             {challenges.map((challenge) => (
                                 <tr key={challenge.id} className={challenge.id === editingChallengeId ? 'bg-yellow-50' : ''}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{challenge.titulo}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{challenge.tema_desafio_nombre}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{challenge.persona_nombre} ({challenge.edadpersona})</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{challenge.tema_nombre}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {challenge.nombrepersona || challenge.persona_nombre} 
+                                        {challenge.edadpersona ? ` (${challenge.edadpersona})` : ''}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button 
                                             onClick={() => handleEdit(challenge)} 

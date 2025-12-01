@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Robot Component con Video</title>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function MissyCompanion({ phase, showTokens }) {
+            const videoRef = useRef(null);
+            const [videoLoaded, setVideoLoaded] = useState(false);
+            
+            // Seleccionar el video apropiado según la fase
+            const getVideoForPhase = () => {
+                if (showTokens) return '/assets/videos/robot_celebration.webm';
+                
+                switch(phase) {
+                    case 1:
+                    case 2:
+                        return '/assets/videos/robot_explaining.webm';
+                    case 3:
+                    case 4:
+                        return '/assets/videos/robot_thinking.webm';
+                    case 5:
+                    case 6:
+                        return '/assets/videos/robot_celebration.webm';
+                    default:
+                        return '/assets/videos/robot_idle.webm';
+                }
+            };
+
+            // Mensaje según la fase
+            const getMessage = () => {
+                if (showTokens) return "¡Excelente trabajo! 🎉";
+                
+                const messages = {
+                    '-1': "¡Hola, soy tu Robot Guía! 🤖",
+                    '0': "¡Hola, soy tu Robot Guía! 🤖",
+                    '1': "El primer paso es conectar.",
+                    '2': "Ponte en los zapatos del usuario.",
+                    '3': "¡No hay ideas locas! Construye tu prototipo.",
+                    '4': "Es hora de brillar.",
+                    '5': "Observa con atención.",
+                    '6': "¡Misión Cumplida!"
+                };
+                
+                return messages[phase] || "¡Tú puedes!";
+            };
+
+            if (phase < -1) return null;
+
+            const currentVideo = getVideoForPhase();
+            const message = getMessage();
+
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    bottom: '20px',
+                    left: '20px',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'end',
+                    gap: '15px'
+                }
+            }, [
+                // Contenedor del robot con video o fallback
+                React.createElement('div', {
+                    key: 'robot-container',
+                    style: {
+                        position: 'relative',
+                        width: '80px',
+                        height: '80px'
+                    }
+                }, [
+                    // Video del robot
+                    React.createElement('video', {
+                        key: 'robot-video',
+                        ref: videoRef,
+                        width: '80',
+                        height: '80',
+                        autoPlay: true,
+                        loop: true,
+                        muted: true,
+                        playsInline: true,
+                        onLoadedData: () => setVideoLoaded(true),
+                        onError: () => setVideoLoaded(false),
+                        style: {
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                            transition: 'transform 0.2s ease',
+                            display: videoLoaded ? 'block' : 'none'
+                        },
+                        onMouseOver: (e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                        },
+                        onMouseOut: (e) => {
+                            e.target.style.transform = 'scale(1)';
+                        }
+                    }, [
+                        React.createElement('source', {
+                            key: 'webm-source',
+                            src: currentVideo,
+                            type: 'video/webm'
+                        })
+                    ]),
+                    
+                    // Fallback emoji si el video no carga
+                    React.createElement('div', {
+                        key: 'robot-fallback',
+                        style: {
+                            position: videoLoaded ? 'absolute' : 'static',
+                            top: 0,
+                            left: 0,
+                            width: '80px',
+                            height: '80px',
+                            backgroundColor: '#3b82f6',
+                            borderRadius: '50%',
+                            display: videoLoaded ? 'none' : 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '32px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                            transition: 'transform 0.2s ease'
+                        },
+                        onMouseOver: (e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                        },
+                        onMouseOut: (e) => {
+                            e.target.style.transform = 'scale(1)';
+                        }
+                    }, '🤖')
+                ]),
+                
+                // Mensaje con animación
+                React.createElement('div', {
+                    key: 'message',
+                    style: {
+                        backgroundColor: 'white',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        maxWidth: '200px',
+                        fontSize: '13px',
+                        color: '#333',
+                        border: '2px solid #3b82f6',
+                        position: 'relative',
+                        animation: 'fadeInUp 0.3s ease-out'
+                    }
+                }, [
+                    message,
+                    showTokens && React.createElement('div', {
+                        key: 'tokens',
+                        style: {
+                            fontSize: '11px',
+                            color: '#666',
+                            marginTop: '5px',
+                            fontWeight: 'bold'
+                        }
+                    }, `Tokens: +${Math.floor(Math.random() * 50) + 10}`)
+                ])
+            ]);
+        }
+
+        function TestApp() {
+            const [phase, setPhase] = useState(0);
+            const [showTokens, setShowTokens] = useState(false);
+            
+            return React.createElement('div', {
+                style: {
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    padding: '20px',
+                    fontFamily: 'Arial, sans-serif'
+                }
+            }, [
+                React.createElement('style', {
+                    key: 'animations'
+                }, `
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                `),
+                React.createElement('div', {
+                    key: 'content',
+                    style: {
+                        backgroundColor: 'white',
+                        padding: '30px',
+                        borderRadius: '20px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        maxWidth: '600px',
+                        margin: '0 auto'
+                    }
+                }, [
+                    React.createElement('h1', { 
+                        key: 'title',
+                        style: {
+                            color: '#333',
+                            textAlign: 'center',
+                            marginBottom: '30px'
+                        }
+                    }, 'Test Robot Component con Video'),
+                    
+                    React.createElement('div', {
+                        key: 'controls',
+                        style: {
+                            display: 'flex',
+                            gap: '10px',
+                            marginBottom: '20px',
+                            flexWrap: 'wrap'
+                        }
+                    }, [
+                        React.createElement('button', {
+                            key: 'prev',
+                            onClick: () => setPhase(Math.max(-1, phase - 1)),
+                            disabled: phase <= -1,
+                            style: {
+                                padding: '10px 20px',
+                                backgroundColor: phase > -1 ? '#6b7280' : '#d1d5db',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: phase > -1 ? 'pointer' : 'not-allowed'
+                            }
+                        }, 'Fase Anterior'),
+                        
+                        React.createElement('button', {
+                            key: 'next',
+                            onClick: () => setPhase(Math.min(6, phase + 1)),
+                            disabled: phase >= 6,
+                            style: {
+                                padding: '10px 20px',
+                                backgroundColor: phase < 6 ? '#3b82f6' : '#d1d5db',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: phase < 6 ? 'pointer' : 'not-allowed'
+                            }
+                        }, 'Siguiente Fase'),
+                        
+                        React.createElement('button', {
+                            key: 'tokens',
+                            onClick: () => setShowTokens(!showTokens),
+                            style: {
+                                padding: '10px 20px',
+                                backgroundColor: showTokens ? '#10b981' : '#f59e0b',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer'
+                            }
+                        }, showTokens ? 'Ocultar Tokens' : 'Mostrar Tokens')
+                    ]),
+                    
+                    React.createElement('div', {
+                        key: 'info',
+                        style: {
+                            padding: '15px',
+                            backgroundColor: '#f8fafc',
+                            borderRadius: '8px',
+                            marginBottom: '20px'
+                        }
+                    }, [
+                        React.createElement('p', { key: 'current-phase' }, `Fase Actual: ${phase}`),
+                        React.createElement('p', { key: 'tokens-status' }, `Tokens Activos: ${showTokens ? 'Sí' : 'No'}`),
+                        React.createElement('p', { 
+                            key: 'video-info',
+                            style: { fontSize: '12px', color: '#666' }
+                        }, 'Los videos se reproducen automáticamente en bucle según la fase')
+                    ])
+                ]),
+                
+                React.createElement(MissyCompanion, { 
+                    key: 'robot', 
+                    phase: phase, 
+                    showTokens: showTokens 
+                })
+            ]);
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(TestApp));
+    </script>
+</body>
+</html>
