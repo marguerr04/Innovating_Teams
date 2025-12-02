@@ -1,65 +1,48 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function SkillRater({ skill, value, onRate }) {
-  // Estado local para mostrar/ocultar la descripción
-  const [showDesc, setShowDesc] = useState(false);
   const val = value; // 'value' es el score actual (ej. 5)
 
   return (
-    // Card de habilidad (de index.html)
+    // Card de habilidad simple
     <div className="bg-slate-50 rounded-2xl p-4">
-      {/* Header de la habilidad (título y botón 'ver') */}
+      {/* Header con título y descripción */}
       <div className="flex items-center justify-between gap-4 mb-2">
-        <button
-          type="button"
-          className="flex items-center gap-2"
-          onClick={() => setShowDesc(!showDesc)} // Controla el estado local
-        >
+        <div className="flex-1">
           <span className="font-semibold text-slate-900">{skill.label}</span>
-          <span className="text-xs bg-slate-200/70 text-slate-600 px-2 py-0.5 rounded-full">
-            ver descripción
-          </span>
-        </button>
+          {/* Descripción siempre visible debajo del título */}
+          <p className="text-sm text-slate-500 mt-1">{skill.desc}</p>
+        </div>
         <span className="hidden md:inline text-xs text-slate-400">Califica de 1 a 10</span>
       </div>
 
-      {/* Descripción (se muestra con 'max-h-40') */}
-      <div
-        className={`text-sm text-slate-500 overflow-hidden transition-all duration-200 ${
-          showDesc ? 'max-h-40' : 'max-h-0'
-        }`}
-      >
-        {skill.desc}
+      {/* Grilla de 10 botones */}
+      <div className="grid grid-cols-10 gap-3 mt-4">
+        {Array.from({ length: 10 }).map((_, i) => {
+          const n = i + 1;
+          const isActive = n === val;
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onRate(skill.key, n)}
+              className={
+                "w-full aspect-square rounded-xl font-bold text-lg transition-all border-b-4 active:border-b-0 active:translate-y-1 " +
+                (isActive
+                  ? "bg-[#3AB6B5] border-[#2E8F8E] text-white" // Mint activo
+                  : "bg-slate-100 border-slate-300 text-slate-500 hover:bg-slate-200")
+              }
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
-
-      {/* Grilla de 10 botones (de index.html) */}
-      <div className="mt-4">
-        <div className="grid grid-cols-10 gap-3">
-          {Array.from({ length: 10 }).map((_, i) => {
-            const n = i + 1;
-            const isActive = n === val;
-            return (
-              <button
-  key={n}
-  type="button"
-  onClick={() => onRate(skill.key, n)}
-  className={
-    "w-full aspect-square rounded-xl font-bold text-lg transition-all border-b-4 active:border-b-0 active:translate-y-1 " +
-    (isActive
-      ? "bg-[#3AB6B5] border-[#2E8F8E] text-white" // Mint activo
-      : "bg-slate-100 border-slate-300 text-slate-500 hover:bg-slate-200")
-  }
->
-  {n}
-</button>
-            );
-          })}
-        </div>
-        <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
-          <span>1 = no se reflejó</span>
-          <span>5 = se reflejó</span>
-          <span>10 = totalmente reflejada</span>
-        </div>
+      
+      <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+        <span>1 = no se reflejó</span>
+        <span>5 = se reflejó</span>
+        <span>10 = totalmente reflejada</span>
       </div>
     </div>
   );

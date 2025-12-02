@@ -28,20 +28,29 @@ const DESCRIPTIONS = {
   "COLABORAR": "Trabajar en conjunto, escuchando y aportando, para llegar más rápido o a una mejor respuesta."
 };
 
-// --- Hook personalizado para timer simple ---
-const useSimpleTimer = (autoStart) => {
-  const [seconds, setSeconds] = useState(0);
+// --- Hook personalizado para timer regresivo ---
+const useSimpleTimer = (autoStart, onTimeUp = null) => {
+  const GAME_DURATION = 300; // 5 minutos en segundos
+  const [seconds, setSeconds] = useState(GAME_DURATION);
   const [isRunning, setIsRunning] = useState(false);
   
   useEffect(() => {
     if (!isRunning) return;
     
     const interval = setInterval(() => {
-      setSeconds(s => s + 1);
+      setSeconds(s => {
+        if (s <= 1) {
+          // Tiempo agotado
+          setIsRunning(false);
+          if (onTimeUp) onTimeUp();
+          return 0;
+        }
+        return s - 1;
+      });
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, onTimeUp]);
   
   useEffect(() => {
     if (autoStart && !isRunning) {
@@ -52,7 +61,7 @@ const useSimpleTimer = (autoStart) => {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
   
-  return `${mm}:${ss}`;
+  return { timeDisplay: `${mm}:${ss}`, timeRemaining: seconds, isRunning };
 };
 
 // --- Función para mezclar array ---
@@ -72,9 +81,19 @@ export default function AnagramaGame({ onComplete }) {
   const [usedIndices, setUsedIndices] = useState([]);
   const [feedback, setFeedback] = useState({ msg: '', type: '' });
   const [gameStarted, setGameStarted] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
 
-  // Timer simple que cuenta hacia arriba como en el HTML original
-  const timeDisplay = useSimpleTimer(gameStarted);
+  // Callback cuando se agota el tiempo
+  const handleTimeUp = useCallback(() => {
+    setGameEnded(true);
+    setFeedback({ 
+      msg: '¡Se acabó el tiempo! Puedes continuar o revisar tus respuestas.', 
+      type: 'warning' 
+    });
+  }, []);
+
+  // Timer regresivo de 5 minutos
+  const { timeDisplay, timeRemaining, isRunning } = useSimpleTimer(gameStarted, handleTimeUp);
 
   // Sonidos organizados
   const playTap = useAudio(SOUNDS.ui.click);
@@ -185,7 +204,15 @@ export default function AnagramaGame({ onComplete }) {
   const getFeedbackClass = () => {
     if (feedback.type === 'ok') return 'bg-emerald-400/10 text-emerald-100 border border-emerald-400/40';
     if (feedback.type === 'error') return 'bg-rose-400/5 text-rose-100 border border-rose-400/40';
+    if (feedback.type === 'warning') return 'bg-yellow-400/10 text-yellow-100 border border-yellow-400/40';
     return 'hidden';
+  };
+
+  // Clase para el tiempo basada en el tiempo restante
+  const getTimeClass = () => {
+    if (timeRemaining <= 60) return 'text-red-400 animate-pulse'; // Último minuto
+    if (timeRemaining <= 180) return 'text-yellow-400'; // Últimos 3 minutos
+    return 'text-emerald-300'; // Tiempo normal
   };
   
   return (
@@ -198,8 +225,11 @@ export default function AnagramaGame({ onComplete }) {
             <p className="text-sm text-slate-200/70">Lee la descripción y ordena las letras.</p>
           </div>
           <div className="text-right">
-            <p className="text-[0.6rem] uppercase text-slate-200/40">tiempo</p>
-            <p className="text-3xl font-mono text-emerald-300">{timeDisplay}</p>
+            <p className="text-[0.6rem] uppercase text-slate-200/40">tiempo restante</p>
+            <p className={`text-3xl font-mono ${getTimeClass()}`}>{timeDisplay}</p>
+            {timeRemaining <= 60 && timeRemaining > 0 && (
+              <p className="text-xs text-red-400 mt-1">¡Último minuto!</p>
+            )}
           </div>
         </div>
       </header>
