@@ -1,6 +1,7 @@
 // src/components/TokensOverlay.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import MissyCompanion from './MissyCompanion';
 
 function getRewardForPhase(n) {
   if (n === 1) return { amount: 4, reason: "¡Primeros en terminar!" };
@@ -59,47 +60,51 @@ export default function TokensOverlay({ show, phase, onContinue }) {
     // --- FONDO: MORADO VIBRANTE (bg-violet-600) ---
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-violet-600 animate-in fade-in zoom-in duration-300 origin-center">
       
-      <div className="text-center flex flex-col items-center p-6">
-        
-        {/* TÍTULO */}
-        <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.15)] mb-8 uppercase tracking-tight animate-bounce">
-          ¡Misión Cumplida!
-        </h1>
+      {/* TÍTULO */}
+      <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.15)] mb-8 uppercase tracking-tight animate-bounce">
+        ¡Misión Cumplida!
+      </h1>
 
-        {/* TARJETA DE PUNTOS */}
+      {/* Contenedor centrado del robot + tarjeta de tokens */}
+      <div className="flex items-center justify-center gap-4 mb-8">
+        
+        {/* ROBOT */}
+        <MissyCompanion phase={6} showTokens={true} positioning="relative" />
+        
+        {/* TARJETA DE TOKENS */}
         {reward.amount > 0 && (
-            <div className="bg-white rounded-[2rem] p-8 md:p-10 mb-8 border-b-[8px] border-violet-200 shadow-2xl transform transition hover:scale-105 hover:-rotate-2">
-                {/* Texto de puntos en morado para combinar */}
-                <div className="text-8xl font-black text-violet-600 mb-2 leading-none">
-                    +{reward.amount}
-                </div>
-                <div className="text-xl font-bold text-slate-400 uppercase tracking-widest">
-                    Tokens
-                </div>
+          <div className="bg-white rounded-[2rem] p-8 md:p-10 border-b-[8px] border-violet-200 shadow-2xl transform transition hover:scale-105 hover:-rotate-2">
+            {/* Texto de puntos en morado para combinar */}
+            <div className="text-8xl font-black text-violet-600 mb-2 leading-none">
+              +{reward.amount}
             </div>
+            <div className="text-xl font-bold text-slate-400 uppercase tracking-widest">
+              Tokens
+            </div>
+          </div>
         )}
 
-        {/* MENSAJE (Texto claro sobre fondo oscuro) */}
-        <p className="text-2xl md:text-3xl text-violet-100 font-bold mb-12 max-w-2xl leading-tight">
-            {reward.reason}
-        </p>
-
-        {/* BOTÓN "JUICY" (Color Menta para contrastar con el morado) */}
-        <button 
-          onClick={onContinue}
-          className="
-            bg-teal-400 text-teal-900 text-2xl font-extrabold py-5 px-16 rounded-2xl
-            border-b-[8px] border-teal-600 
-            shadow-[0_10px_20px_rgba(0,0,0,0.25)]
-            active:border-b-0 active:translate-y-[8px] active:shadow-none
-            transition-all duration-150 hover:bg-teal-300
-            uppercase tracking-wide
-          "
-        >
-          Continuar
-        </button>
-
       </div>
+
+      {/* MENSAJE (Texto claro sobre fondo oscuro) */}
+      <p className="text-2xl md:text-3xl text-violet-100 font-bold mb-12 max-w-2xl leading-tight text-center">
+        {reward.reason}
+      </p>
+
+      {/* BOTÓN "JUICY" (Color Menta para contrastar con el morado) */}
+      <button 
+        onClick={onContinue}
+        className="
+          bg-teal-400 text-teal-900 text-2xl font-extrabold py-5 px-16 rounded-2xl
+          border-b-[8px] border-teal-600 
+          shadow-[0_10px_20px_rgba(0,0,0,0.25)]
+          active:border-b-0 active:translate-y-[8px] active:shadow-none
+          transition-all duration-150 hover:bg-teal-300
+          uppercase tracking-wide
+        "
+      >
+        Continuar
+      </button>
 
       <audio ref={audioRef} src="/assets/sounds/games/success.mp3" /> 
     </div>

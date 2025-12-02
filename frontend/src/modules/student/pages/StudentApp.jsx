@@ -259,10 +259,13 @@ export default function StudentApp() {
         )}
       </div>
       {/* Le pasamos la fase actual y si se están mostrando tokens para que reaccione */}
-      <MissyCompanion 
-        phase={phase} 
-        showTokens={showTokens} 
-      />
+      {/* Solo mostrar el robot normal cuando NO se están mostrando tokens */}
+      {!showTokens && (
+        <MissyCompanion 
+          phase={phase} 
+          showTokens={showTokens} 
+        />
+      )}
     </div>
   );
 }

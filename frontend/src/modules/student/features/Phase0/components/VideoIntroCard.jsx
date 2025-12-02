@@ -1,5 +1,5 @@
 // VideoIntroCard.jsx
-// Componente responsive para alojar el video introductorio (placeholder por ahora)
+// Componente responsive para alojar el video introductorio con controles
 import React, { useEffect, useState, useRef } from 'react';
 
 // General VideoIntroCard: acepta `videoId` (por defecto 15) y `size` ('large'|'medium')
@@ -8,8 +8,8 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retry, setRetry] = useState(0);
-  const [isMuted, setIsMuted] = useState(false); // Intentar iniciar sin mute
-  const [showUnmuteButton, setShowUnmuteButton] = useState(false); // Solo mostrar si es necesario
+  const [isMuted, setIsMuted] = useState(false); // Iniciar con sonido
+  const [showUnmuteButton, setShowUnmuteButton] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -39,22 +39,22 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
     };
   }, [videoId, retry]);
 
-  // Función para intentar reproducir con audio automáticamente
+  // Función para intentar autoplay con sonido
   const attemptAutoplay = async () => {
     if (videoRef.current) {
       try {
-        // Primero intenta sin mute
+        // Primero intenta con sonido
         videoRef.current.muted = false;
         await videoRef.current.play();
         setIsMuted(false);
         setShowUnmuteButton(false);
       } catch (error) {
-        // Si falla, intenta con mute
+        // Si falla, intenta sin sonido y muestra botón
         try {
           videoRef.current.muted = true;
           await videoRef.current.play();
           setIsMuted(true);
-          setShowUnmuteButton(true); // Mostrar botón solo si está muteado
+          setShowUnmuteButton(true);
         } catch (mutedError) {
           console.log('Autoplay falló completamente:', mutedError);
         }
@@ -112,7 +112,7 @@ export default function VideoIntroCard({ videoId = 15, size = 'large' }) {
                 onClick={handleVideoClick}
                 onLoadedData={() => {
                   setLoading(false);
-                  attemptAutoplay(); // Intentar autoplay cuando el video se carga
+                  attemptAutoplay(); // Intentar autoplay con sonido cuando el video se carga
                 }}
                 onError={() => setError('Error al cargar video')}
               />
