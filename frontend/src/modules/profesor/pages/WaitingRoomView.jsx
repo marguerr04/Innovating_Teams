@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import GameLayout from '../components/GameLayout';
 import GroupsDisplay from '../components/GroupsDisplay';
-import TeamCodesDisplay from '../components/TeamCodesDisplay';
 import { useGameData } from '../hooks/useGameData';
-import gameService from '../../../services/gameService';
 
 const WaitingRoomView = () => {
   const navigate = useNavigate();
@@ -14,33 +12,14 @@ const WaitingRoomView = () => {
   // Usar el hook personalizado para manejo de datos
   const { gameData, grupos, jugadores, loading, error, actions } = useGameData(gamePin);
   
-  // Estado local para datos desde navegación y códigos de equipo
+  // Estado local para datos desde navegación
   const [localGameData, setLocalGameData] = useState(
     location.state?.gameData || null
-  );
-  const [teamCodes, setTeamCodes] = useState(
-    location.state?.gruposCreados || []
   );
 
   // Usar datos locales si existen, sino los del hook
   const currentGameData = localGameData || gameData;
   const currentGrupos = location.state?.grupos || grupos;
-  
-  // Cargar códigos de equipo si no vienen del estado de navegación
-  useEffect(() => {
-    const loadTeamCodes = async () => {
-      if (teamCodes.length === 0 && location.state?.partidaId) {
-        try {
-          const grupos = await gameService.obtenerGrupos(location.state.partidaId);
-          setTeamCodes(grupos);
-        } catch (error) {
-          console.error('Error al cargar códigos de equipo:', error);
-        }
-      }
-    };
-    
-    loadTeamCodes();
-  }, [location.state?.partidaId, teamCodes.length]);
 
   const handleComenzarJuego = () => {
     // Actualizar estado del juego a 'playing'
@@ -69,40 +48,9 @@ const WaitingRoomView = () => {
     actions.updateGroupName(groupId, newName);
   };
 
-  const handleIniciarVotacion = async () => {
-    const partidaId = location.state?.partidaId || localStorage.getItem(`partida_${gamePin}_id`);
-    
-    if (!partidaId) {
-      alert('Error: No se encontró el ID de la partida');
-      return;
-    }
-
-    try {
-      // Llamar al endpoint para cambiar el estado a INICIADA
-      const response = await fetch(`http://localhost:8000/api/partida/${partidaId}/iniciar-juego/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Juego iniciado:', data);
-        
-        // Opcional: redirigir al profesor a otra vista
-        alert('¡Juego iniciado! Los estudiantes serán redirigidos automáticamente.');
-        
-        // Puedes redirigir al profesor a monitoreo o mantenerlo aquí
-        // navigate(`/profesor/game-active/${gamePin}`, { state: { partidaId } });
-      } else {
-        console.error('Error al iniciar juego:', await response.text());
-        alert('Error al iniciar el juego. Por favor intenta de nuevo.');
-      }
-    } catch (error) {
-      console.error('Error de red al iniciar juego:', error);
-      alert('Error de conexión. Verifica que el servidor esté corriendo.');
-    }
+  const handleIniciarVotacion = () => {
+    // Funcionalidad futura: iniciar votación de actividades
+    alert('Funcionalidad de votación será implementada con backend real');
   };
 
   if (loading) {
@@ -197,11 +145,6 @@ const WaitingRoomView = () => {
             </div>
           </div>
         </div>
-
-        {/* Mostrar códigos de equipo */}
-        {teamCodes.length > 0 && (
-          <TeamCodesDisplay grupos={teamCodes} />
-        )}
 
         {/* Componente de grupos reutilizable */}
         <div className="mb-6">
