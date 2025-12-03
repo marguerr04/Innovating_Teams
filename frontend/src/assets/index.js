@@ -20,6 +20,11 @@ export const SOUNDS = {
     // Nuevo: sonidos de temporizador (agregar archivos en public/assets/sounds/ui/)
     tick: '/assets/sounds/ui/tick.mp3', // reproducido cada segundo en el último minuto
     alarm: '/assets/sounds/ui/alarm.mp3' // reproducido al finalizar el tiempo
+  },
+
+  // Sonidos de recompensas (tokens, logros, etc.)
+  rewards: {
+    tokens: '/assets/sounds/rewards/token-sound.mp3'
   }
 };
 
