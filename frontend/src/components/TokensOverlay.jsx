@@ -10,9 +10,18 @@ function getRewardForPhase(n) {
   return { amount: 0, reason: "¡Fase superada!" };
 }
 
+const TOKEN_VIDEO_MAP = {
+  1: '/assets/videos/coins/1_coin.webm',
+  2: '/assets/videos/coins/2_coin.webm',
+  3: '/assets/videos/coins/3_coin.webm',
+  4: '/assets/videos/coins/4_coin.webm',
+};
+
 export default function TokensOverlay({ show, phase, onContinue }) {
   const [reward, setReward] = useState({ amount: 0, reason: "" });
   const audioRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     if (show) {
@@ -54,6 +63,80 @@ export default function TokensOverlay({ show, phase, onContinue }) {
     }
   }, [show, phase]);
 
+  const videoSrc = show ? (TOKEN_VIDEO_MAP[reward.amount] || null) : null;
+
+  useEffect(() => {
+    if (!show || !videoSrc) return;
+
+    const videoEl = videoRef.current;
+    const canvasEl = canvasRef.current;
+    if (!videoEl || !canvasEl) return;
+
+    const ctx = canvasEl.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+    let rafId;
+
+    const ensureCanvasSize = () => {
+      if (!videoEl.videoWidth || !videoEl.videoHeight) return;
+      if (canvasEl.width !== videoEl.videoWidth || canvasEl.height !== videoEl.videoHeight) {
+        canvasEl.width = videoEl.videoWidth;
+        canvasEl.height = videoEl.videoHeight;
+      }
+    };
+
+      const tryPlay = () => {
+        const playPromise = videoEl.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.catch(() => {});
+        }
+      };
+
+      tryPlay();
+
+    const renderFrame = () => {
+      if (videoEl.readyState >= 2) {
+        ensureCanvasSize();
+          ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+          ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
+        try {
+          const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+          const data = frame.data;
+          const threshold = 28; // remove near-black pixels
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i] < threshold && data[i + 1] < threshold && data[i + 2] < threshold) {
+              data[i + 3] = 0;
+            }
+          }
+          ctx.putImageData(frame, 0, 0);
+        } catch (err) {
+          // getImageData might fail on cross-origin media; fallback by keeping frame as-is
+        }
+      }
+      rafId = requestAnimationFrame(renderFrame);
+    };
+
+    renderFrame();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      }
+    };
+  }, [show, videoSrc]);
+
+  const handleVideoMetadata = () => {
+    const videoEl = videoRef.current;
+    const canvasEl = canvasRef.current;
+    if (!videoEl || !canvasEl) return;
+    if (videoEl.videoWidth && videoEl.videoHeight) {
+      canvasEl.width = videoEl.videoWidth;
+      canvasEl.height = videoEl.videoHeight;
+    }
+  };
+
   if (!show) return null;
 
   return (
@@ -66,24 +149,46 @@ export default function TokensOverlay({ show, phase, onContinue }) {
       </h1>
 
       {/* Contenedor centrado del robot + tarjeta de tokens */}
-      <div className="flex items-center justify-center gap-4 mb-8">
-        
-        {/* ROBOT */}
-        <MissyCompanion phase={6} showTokens={true} positioning="relative" />
-        
+      <div className="flex items-center justify-center gap-8 flex-wrap mb-8">
+        {videoSrc && (
+          <div
+            className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center drop-shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
+          >
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 w-full h-full pointer-events-none select-none"
+            />
+            <video
+              ref={videoRef}
+              src={videoSrc}
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-hidden="true"
+              tabIndex={-1}
+              disablePictureInPicture
+              controlsList="nodownload noplaybackrate nofullscreen"
+              className="absolute inset-0 opacity-0 pointer-events-none select-none"
+              onLoadedMetadata={handleVideoMetadata}
+            />
+          </div>
+        )}
+
         {/* TARJETA DE TOKENS */}
         {reward.amount > 0 && (
-          <div className="bg-white rounded-[2rem] p-8 md:p-10 border-b-[8px] border-violet-200 shadow-2xl transform transition hover:scale-105 hover:-rotate-2">
-            {/* Texto de puntos en morado para combinar */}
-            <div className="text-8xl font-black text-violet-600 mb-2 leading-none">
+          <div className="bg-white rounded-[2.75rem] p-10 md:p-14 border-b-[10px] border-violet-200 shadow-2xl transform transition hover:scale-105 hover:-rotate-2">
+            <div className="text-9xl font-black text-violet-600 mb-4 leading-none">
               +{reward.amount}
             </div>
-            <div className="text-xl font-bold text-slate-400 uppercase tracking-widest">
+            <div className="text-2xl font-bold text-slate-400 uppercase tracking-[0.4em]">
               Tokens
             </div>
           </div>
         )}
 
+        {/* ROBOT */}
+        <MissyCompanion phase={6} showTokens={true} positioning="relative" />
       </div>
 
       {/* MENSAJE (Texto claro sobre fondo oscuro) */}
