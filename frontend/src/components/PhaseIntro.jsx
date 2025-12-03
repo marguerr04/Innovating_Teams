@@ -1,6 +1,19 @@
 // src/components/PhaseIntro.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+import teamworkImg from '../assets/images/instructions/trabajo_equipo.png';
+import empathyImg from '../assets/images/instructions/empatia.png';
+import creativityImg from '../assets/images/instructions/creatividad.png';
+import communicationImg from '../assets/images/instructions/comunicacion.png';
+import feedbackImg from '../assets/images/instructions/feedback.png';
+
+const PHASE_ILLUSTRATIONS = {
+  1: { src: teamworkImg, alt: 'Ilustración trabajo en equipo' },
+  2: { src: empathyImg, alt: 'Ilustración empatía' },
+  3: { src: creativityImg, alt: 'Ilustración creatividad' },
+  4: { src: communicationImg, alt: 'Ilustración comunicación' },
+  5: { src: feedbackImg, alt: 'Ilustración evaluación y feedback' },
+};
 
 const INTRO_DATA = {
   1: { 
@@ -38,6 +51,7 @@ export default function PhaseIntro({ phase, onDone }) {
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
   const data = INTRO_DATA[phase];
+  const illustration = PHASE_ILLUSTRATIONS[phase];
   const notifiedRef = useRef(false);
 
   useEffect(() => {
@@ -105,16 +119,32 @@ export default function PhaseIntro({ phase, onDone }) {
           ></div>
         </div>
 
-        {/* Botón Saltar (Más grande y visible) */}
+        {/* Botón Saltar (móvil) */}
         <button 
-          className="absolute top-8 right-8 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white text-lg font-bold rounded-xl transition-colors border border-slate-600"
+          className="absolute top-8 right-8 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white text-lg font-bold rounded-xl transition-colors border border-slate-600 lg:hidden"
           onClick={() => notify("skip")}
         >
           Saltar Intro ⏭
         </button>
 
+        {/* Controles top-right en escritorio */}
+        <div className="hidden lg:flex absolute top-6 right-6 flex-col items-end gap-4">
+          <button 
+            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white text-lg font-bold rounded-xl transition-colors border border-slate-600"
+            onClick={() => notify("skip")}
+          >
+            Saltar Intro ⏭
+          </button>
+          {illustration && (
+            <div className="w-40 h-40 xl:w-48 xl:h-48 bg-slate-900/30 border border-slate-700 rounded-[1.75rem] shadow-inner backdrop-blur-sm pointer-events-none flex items-center justify-center">
+              <img src={illustration.src} alt={illustration.alt} className="max-w-full max-h-full object-contain" loading="lazy" />
+            </div>
+          )}
+        </div>
+
         {/* --- CONTENIDO --- */}
-        <div className="p-8 md:p-12 flex flex-col justify-center h-full">
+        <div className="p-8 md:p-12 flex flex-col lg:flex-row lg:items-center lg:gap-10 justify-center h-full">
+          <div className="flex-1">
           
           {/* Badge de Fase (Más grande) */}
           <div className="inline-flex items-center gap-3 mb-6">
@@ -143,6 +173,15 @@ export default function PhaseIntro({ phase, onDone }) {
           <div className="mt-12 text-slate-500 text-base md:text-lg font-semibold">
             ℹ️ La transmisión finalizará automáticamente en unos segundos...
           </div>
+          </div>
+
+          {illustration && (
+            <div className="lg:hidden mt-10 flex justify-center">
+              <div className="w-48 h-48 bg-slate-900/40 border border-slate-700 rounded-[1.75rem] shadow-inner flex items-center justify-center">
+                <img src={illustration.src} alt={illustration.alt} className="max-w-full max-h-full object-contain" loading="lazy" />
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

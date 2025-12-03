@@ -3,6 +3,7 @@ import React from 'react';
 
 // Mapeo de Fases a las nuevas imágenes
 const phaseImages = {
+  '-2': '/assets/backgrounds/fase7.png',
   '-1': '/assets/backgrounds/fase0.png',
   0: null, 
   1: '/assets/backgrounds/fase1.png', // Amarillo (Creatividad/Ideas)
@@ -35,7 +36,7 @@ export default function PhaseBackground({ phase }) {
         
         return (
           <div
-            key={src}
+            key={phaseKey}
             className="absolute inset-0 transition-opacity duration-1000"
             style={{
               backgroundImage: `url(${src})`,

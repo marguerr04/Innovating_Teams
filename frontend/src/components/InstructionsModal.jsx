@@ -1,6 +1,11 @@
 // Archivo: src/components/InstructionsModal.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
+import teamworkImg from '../assets/images/instructions/trabajo_equipo.png';
+import empathyImg from '../assets/images/instructions/empatia.png';
+import creativityImg from '../assets/images/instructions/creatividad.png';
+import communicationImg from '../assets/images/instructions/comunicacion.png';
+import feedbackImg from '../assets/images/instructions/feedback.png';
 
 // 1. Pega el array 'stages' de tu index.html
 const stages = [
@@ -10,6 +15,7 @@ const stages = [
     duration: "5 minutos",
     skill: "Comunicación efectiva",
     rule: "Tokens por orden de finalización: 1° 4, 2° 3, 3° 2, 4° 1.",
+    illustration: { src: teamworkImg, alt: 'Ilustración trabajo en equipo' },
     body: `
       <p><strong>Objetivo:</strong> Poner a prueba la capacidad de colaboración y comunicación del equipo.</p>
       <p><strong>Dinámica:</strong> El equipo elige cómo iniciará la dinámica:</p>
@@ -34,6 +40,7 @@ const stages = [
     duration: "8 minutos",
     skill: "Empatía",
     rule: "1 token si se completa dentro del tiempo.",
+    illustration: { src: empathyImg, alt: 'Ilustración empatía' },
     body: `
       <p><strong>Objetivo:</strong> Seleccionar un problema y caracterizar a la persona que lo vive.</p>
       <p><strong>Dinámica:</strong></p>
@@ -54,6 +61,7 @@ const stages = [
         duration: "10 minutos",
         skill: "Pensamiento creativo y prototipado",
         rule: "1 token si se completa dentro del tiempo.",
+        illustration: { src: creativityImg, alt: 'Ilustración creatividad' },
         body: `
           <p><strong>Objetivo:</strong> Conceptualizar una solución mediante el prototipado.</p>
           <p><strong>Dinámica:</strong> Construir una solución usando <strong>LEGO físico</strong> a partir del problema elegido en la etapa anterior.</p>
@@ -69,6 +77,7 @@ const stages = [
         duration: "6 minutos + pitch 90s",
         skill: "Habilidad de comunicación",
         rule: "1 token si se completa dentro del tiempo.",
+        illustration: { src: communicationImg, alt: 'Ilustración comunicación' },
         body: `
           <p><strong>Objetivo:</strong> Entrenar la habilidad de presentar la idea de forma clara y concisa (pitch).</p>
           <p><strong>Dinámica:</strong> Preparar un pitch de <strong>90 segundos</strong>. El sistema muestra una guía con la estructura del pitch:</p>
@@ -91,6 +100,7 @@ emprendimiento</li>
         duration: "Variable",
         skill: "Pensamiento crítico y feedback",
         rule: "1 token por participar + ranking (5, 4, 3, 2).",
+        illustration: { src: feedbackImg, alt: 'Ilustración feedback' },
         body: `
           <p><strong>Objetivo:</strong> Desarrollar el pensamiento crítico mediante la retroalimentación entre pares.</p>
           <p><strong>Dinámica:</strong> Los equipos <strong>evalúan al resto</strong> (no se autoevalúan) usando una <strong>rúbrica simple</strong> con 4 criterios:</p>
@@ -117,6 +127,7 @@ emprendimiento</li>
     duration: "5 minutos",
     skill: "Reflexión y proyección",
     rule: "No aplica tokens nuevos (muestra ranking).",
+    illustration: null,
     body: `
           <p><strong>Objetivo:</strong> Reflexión y cierre del juego.</p>
           <p><strong>Mensaje pedagógico:</strong> se explica la importancia de las habilidades emprendedoras trabajadas: equipo, empatía, creatividad, comunicación y feedback.</p>
@@ -132,13 +143,13 @@ emprendimiento</li>
   }
 ];
 
-
 export default function InstructionsModal({ isOpen, onClose, initialPhase = 1 }) {
   const [currentStage, setCurrentStage] = useState(0);
   const audioRef = useRef(null);
   const touchStartXRef = useRef(0);
   const contentRef = useRef(null);
   const stg = stages[currentStage];
+  const illustration = stg?.illustration ?? null;
 
   useEffect(() => {
     if (isOpen) {
@@ -263,10 +274,23 @@ export default function InstructionsModal({ isOpen, onClose, initialPhase = 1 })
                 </span>
               </div>
               {/* Usamos dangerouslySetInnerHTML porque el 'body' es HTML */}
-              <div 
-                className="space-y-2 text-sm leading-relaxed text-slate-800"
-                dangerouslySetInnerHTML={{ __html: stg.body }}
-              ></div>
+              <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+                <div className="space-y-2 text-sm leading-relaxed text-slate-800 lg:col-span-2"
+                  dangerouslySetInnerHTML={{ __html: stg.body }}
+                ></div>
+                {illustration && (
+                  <div className="flex justify-center lg:justify-end">
+                    <div className="w-full max-w-[220px] aspect-square bg-slate-50 border border-slate-100 rounded-2xl shadow-inner flex items-center justify-center p-3">
+                      <img
+                        src={illustration.src}
+                        alt={illustration.alt}
+                        className="max-h-full max-w-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
               <p className="text-xs text-slate-400 border-t border-slate-100 pt-4 mt-4">
                 Puedes deslizar hacia la izquierda o derecha (en tablet/celular) para cambiar de etapa.
               </p>
