@@ -51,8 +51,6 @@ export default function StudentApp() {
       chatbaseSelectors.forEach(selector => {
         document.querySelectorAll(selector).forEach(element => {
           if (element?.dataset?.chatbaseHidden === '1') {
-            element.style.removeProperty('display');
-            element.style.removeProperty('visibility');
             element.style.removeProperty('opacity');
             element.style.removeProperty('pointer-events');
             delete element.dataset.chatbaseHidden;
@@ -75,8 +73,6 @@ export default function StudentApp() {
                 element.hasAttribute?.('data-chatbase'))
             ) {
               element.dataset.chatbaseHidden = '1';
-              element.style.setProperty('display', 'none', 'important');
-              element.style.setProperty('visibility', 'hidden', 'important');
               element.style.setProperty('opacity', '0', 'important');
               element.style.setProperty('pointer-events', 'none', 'important');
             }
