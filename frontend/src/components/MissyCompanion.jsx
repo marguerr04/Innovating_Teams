@@ -53,6 +53,7 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isChatVisible, setChatVisible] = useState(false);
+  const chatEnabled = !showTokens;
 
   const HIGHLIGHT_CONTAINER_SELECTOR = '[data-innovating-chatbot]';
 
@@ -78,8 +79,9 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
 
   // Limpiar chat al cambiar de fase
   useEffect(() => {
+    if (!chatEnabled) return;
     hideChatInterface(true);
-  }, [phase]);
+  }, [phase, chatEnabled]);
 
   // Inyectar estilos CSS en el head
   useEffect(() => {
@@ -93,6 +95,8 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
 
   // Cargar script oficial de Chatbase UNA SOLA VEZ al montar
   useEffect(() => {
+    if (!chatEnabled) return () => {};
+
     if (!scriptInjectedRef.current) {
       console.log('🚀 Cargando script OFICIAL de Chatbase...');
       loadOfficialChatbaseScript();
@@ -101,11 +105,28 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
     return () => {
       hideChatInterface(true);
     };
-  }, []);
+  }, [chatEnabled]);
+
+  useEffect(() => {
+    if (chatEnabled) return;
+    hideChatInterface(true);
+  }, [chatEnabled]);
 
   const loadOfficialChatbaseScript = () => {
     if (scriptInjectedRef.current) return;
     scriptInjectedRef.current = true;
+
+    if (typeof window !== 'undefined') {
+      if (window.__innovatingChatbaseLoaded) {
+        console.log('ℹ️ Script de Chatbase ya estaba disponible');
+        return;
+      }
+      if (document.getElementById('NDIGyY6LjlULvnmM9GEOX')) {
+        console.log('ℹ️ Detectado script existente de Chatbase');
+        window.__innovatingChatbaseLoaded = true;
+        return;
+      }
+    }
 
     window.embeddedChatbotConfig = {
       chatbotId: 'NDIGyY6LjlULvnmM9GEOX',
@@ -134,6 +155,7 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
         script.onload = () => console.log('✅ Script de Chatbase cargado');
         script.onerror = () => console.error('❌ Error cargando Chatbase oficial');
         document.body.appendChild(script);
+        window.__innovatingChatbaseLoaded = true;
       };
       if(document.readyState==='complete'){
         onLoad();
@@ -219,6 +241,8 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
   const handleChatbotClick = () => {
     console.log('\n🖱️ ========== CLICK EN ROBOT ==========');
 
+    if (!chatEnabled) return;
+
     if (isChatVisible) {
       hideChatInterface();
       console.log('✅ Chatbot cerrado desde el contenedor personalizado');
@@ -229,6 +253,8 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
   };
 
   const showChatInterface = () => {
+    if (!chatEnabled) return;
+
     const existing = document.querySelector(HIGHLIGHT_CONTAINER_SELECTOR);
     if (existing) {
       existing.style.display = 'flex';
