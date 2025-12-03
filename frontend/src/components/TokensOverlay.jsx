@@ -1,7 +1,7 @@
 // src/components/TokensOverlay.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import MissyCompanion from './MissyCompanion';
+import MissyCompanion from './MissyCompanion.jsx';
 
 function getRewardForPhase(n) {
   if (n === 1) return { amount: 4, reason: "¡Primeros en terminar!" };

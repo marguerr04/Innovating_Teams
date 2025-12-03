@@ -1,0 +1,661 @@
+import React, { useState, useRef, useEffect } from 'react';
+
+// Estilos CSS para asegurar que el video se comporte como GIF
+const videoGifStyles = `
+  video.missy-video::-webkit-media-controls {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-play-button {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-timeline {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-current-time-display {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-mute-button {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-volume-slider {
+    display: none !important;
+  }
+  
+  video.missy-video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+  }
+
+  video.missy-video {
+    cursor: inherit !important;
+  }
+`;
+
+export default function MissyCompanion({ phase, showTokens, positioning = 'fixed' }) {
+  const videoRef = useRef(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [chatbotLoaded, setChatbotLoaded] = useState(false);
+
+  // Limpiar chatbot al cambiar de fase
+  useEffect(() => {
+    try {
+      console.log(`🔄 Cambio de fase detectado: ${phase}`);
+      
+      // Limpiar configuraciones previas al cambiar de fase
+      const existingContainer = document.getElementById('unified-chatbot-container');
+      if (existingContainer) {
+        existingContainer.remove();
+        console.log('🧹 Contenedor de chatbot anterior removido');
+      }
+      
+      // Limpiar elementos residuales del chatbot
+      const cleanupChatElements = () => {
+        try {
+          const allChatElements = document.querySelectorAll(
+            'iframe[src*="chatbase.co"], iframe[src*="widget"], ' +
+            '[id*="chatbase"]:not(#unified-chatbot-container), [class*="chatbase"], ' +
+            '[data-chatbase], #chatbot-close-btn'
+          );
+          
+          allChatElements.forEach(element => {
+            try {
+              if (element && element.parentNode) {
+                element.parentNode.removeChild(element);
+              }
+            } catch (e) {
+              // Ignorar errores silenciosamente si el elemento ya fue removido
+            }
+          });
+          
+          console.log(`🧹 Limpiados ${allChatElements.length} elementos residuales del chatbot`);
+        } catch (error) {
+          console.log('⚠️ Error durante limpieza de elementos:', error.message);
+        }
+      };
+      
+      cleanupChatElements();
+      
+      // Reset del estado del chatbot para permitir recarga
+      if (phase > 1) { // Solo resetear si no es la primera carga
+        setChatbotLoaded(false);
+        console.log('🔄 Estado del chatbot reseteado para nueva fase');
+      }
+      
+    } catch (error) {
+      console.log('⚠️ Error durante cambio de fase:', error.message);
+    }
+  }, [phase]); // Re-ejecutar cuando cambie la fase
+  
+  // Inyectar estilos CSS al montar el componente
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = videoGifStyles;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      // Limpiar estilos al desmontar
+      try {
+        document.head.removeChild(styleElement);
+      } catch (e) {
+        // Ignorar si ya fue removido
+      }
+    };
+  }, []);
+  
+  // Función para cargar y abrir el chatbot
+  const handleChatbotClick = () => {
+    console.log('🤖 Robot clickeado - Cargando chatbot...');
+    
+    // Si ya está cargado, verificar si está visible o abrirlo
+    if (chatbotLoaded && window.chatbase) {
+      try {
+        console.log('📱 Chatbot ya cargado, verificando estado...');
+        
+        // Buscar iframes existentes
+        const existingIframes = document.querySelectorAll('iframe[src*="chatbase.co"], iframe[src*="widget"]');
+        console.log('🔍 Iframes existentes:', existingIframes.length);
+        
+        // Verificar si ya hay un contenedor unificado visible
+        const existingContainer = document.getElementById('unified-chatbot-container');
+        if (existingContainer && existingContainer.style.display !== 'none') {
+          console.log('✅ Contenedor unificado ya está visible');
+          return;
+        }
+        
+        // Si ya hay un iframe visible (sin contenedor), no hacer nada
+        const visibleIframe = Array.from(existingIframes).find(iframe => 
+          iframe.style.display !== 'none' && iframe.offsetWidth > 0 && iframe.offsetHeight > 0
+        );
+        
+        if (visibleIframe && !existingContainer) {
+          console.log('✅ Chatbot ya está visible, no necesita abrir');
+          return;
+        }
+        
+        // Si no está visible, intentar abrir
+        console.log('🔄 Intentando abrir chatbot...');
+        
+        // Esperar un momento para que el chatbot se inicialice completamente
+        setTimeout(() => {
+          // Buscar el botón del chatbot para hacer clic directamente
+          const chatButton = document.querySelector('[id*="chatbase-bubble"], button[class*="chatbase"], div[role="button"][class*="chatbase"]');
+          
+          if (chatButton) {
+            console.log('🎯 Botón del chatbot encontrado, simulando clic...');
+            chatButton.click();
+            console.log('✅ Clic simulado en el botón del chatbot');
+          } else {
+            console.log('⚠️ Botón del chatbot no encontrado, usando API...');
+            // Fallback: usar la API de chatbase
+            window.chatbase('open');
+            console.log('✅ Comando de apertura enviado via API');
+          }
+        }, 500);
+        
+        return;
+      } catch (error) {
+        console.log('❌ Error abriendo chatbot:', error);
+      }
+    }
+    
+    // Cargar el script dinámicamente
+    if (!chatbotLoaded) {
+      console.log(`🚀 Iniciando carga del chatbot para fase ${phase}...`);
+      
+      // Configuración antes de cargar el script
+      window.embeddedChatbotConfig = {
+        chatbotId: "NDIGyY6LjlULvnmM9GEOX", // ID original del proyecto
+        domain: "www.chatbase.co"
+      };
+      
+      // Verificar si ya existe el script y removerlo para forzar recarga
+      const existingScript = document.getElementById('NDIGyY6LjlULvnmM9GEOX');
+      if (existingScript) {
+        existingScript.remove();
+        console.log('🔄 Script anterior removido para recarga');
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'https://www.chatbase.co/embed.min.js';
+      script.id = 'NDIGyY6LjlULvnmM9GEOX';
+      script.defer = true;
+      script.onload = () => {
+        console.log('✅ Script del chatbot cargado');
+        setChatbotLoaded(true);
+        
+        // NO eliminar los estilos - mantenerlos para reposicionamiento
+        console.log('✅ Manteniendo estilos de reposicionamiento activos');
+        
+        // Configurar el chatbot para que abra directamente
+        setTimeout(() => {
+          try {
+            if (window.chatbase) {
+              window.chatbase('open');
+              console.log('✅ Chatbot abierto automáticamente');
+              
+              // INMEDIATAMENTE ocultar elementos originales para evitar parpadeo
+              const hideOriginalElements = () => {
+                try {
+                  const allChatElements = document.querySelectorAll(
+                    'iframe[src*="chatbase.co"], iframe[src*="widget"], ' +
+                    '[id*="chatbase"], [class*="chatbase"], ' +
+                    '[data-chatbase]'
+                  );
+                  
+                  allChatElements.forEach(element => {
+                    try {
+                      if (element && (!element.id || element.id !== 'unified-chatbot-container')) {
+                        element.style.setProperty('display', 'none', 'important');
+                        element.style.setProperty('visibility', 'hidden', 'important');
+                        element.style.setProperty('opacity', '0', 'important');
+                      }
+                    } catch (e) {
+                      // Ignorar errores de elementos individuales
+                    }
+                  });
+                  
+                  console.log(`🚫 Ocultados ${allChatElements.length} elementos originales para evitar parpadeo`);
+                } catch (error) {
+                  console.log('⚠️ Error ocultando elementos originales:', error.message);
+                }
+              };
+              
+              // Ocultar inmediatamente y repetir para asegurar
+              try {
+                hideOriginalElements();
+                setTimeout(() => {
+                  try { hideOriginalElements(); } catch (e) { /* ignorar */ }
+                }, 100);
+                setTimeout(() => {
+                  try { hideOriginalElements(); } catch (e) { /* ignorar */ }
+                }, 300);
+              } catch (error) {
+                console.log('⚠️ Error en secuencia de ocultación:', error.message);
+              }
+              
+              // Función para configurar iframes con reintentos
+              const configureChatbot = (attempt = 1, maxAttempts = 5) => {
+                try {
+                  console.log(`🔄 Intento ${attempt} de configurar chatbot...`);
+                  
+                  const chatIframes = document.querySelectorAll('iframe[src*="chatbase.co"], iframe[src*="widget"]');
+                  console.log('🔍 Iframes encontrados:', chatIframes.length);
+                  
+                  if (chatIframes.length === 0 && attempt < maxAttempts) {
+                    console.log(`⏱️ No se encontraron iframes, reintentando en ${attempt * 500}ms...`);
+                    setTimeout(() => {
+                      try {
+                        configureChatbot(attempt + 1, maxAttempts);
+                      } catch (e) {
+                        console.log('⚠️ Error en reintento de configuración:', e.message);
+                      }
+                    }, attempt * 500);
+                    return;
+                  }
+                  
+                  if (chatIframes.length === 0) {
+                    console.log('❌ No se pudieron encontrar iframes después de múltiples intentos');
+                    return;
+                  }
+                  
+                  // Crear contenedor unificado para chatbot
+                  let chatContainer = document.getElementById('unified-chatbot-container');
+                  if (chatContainer) {
+                    try {
+                      chatContainer.remove();
+                    } catch (e) {
+                      console.log('⚠️ Error removiendo contenedor previo:', e.message);
+                    }
+                  }
+                  
+                  chatContainer = document.createElement('div');
+                  chatContainer.id = 'unified-chatbot-container';
+                  
+                  // Configurar posicionamiento y crear contenido...
+                  // [resto de la lógica del contenedor...]
+                  
+                  console.log('🎯 Contenedor unificado creado');
+                  
+                } catch (error) {
+                  console.log('❌ Error en configuración del chatbot:', error.message);
+                }
+              };
+              
+              // Iniciar configuración con delay inicial
+              setTimeout(() => {
+                try {
+                  configureChatbot();
+                } catch (e) {
+                  console.log('⚠️ Error iniciando configuración del chatbot:', e.message);
+                }
+              }, 800);
+            }
+          } catch (error) {
+            console.log('⚠️ Error en configuración automática:', error.message);
+          }
+      } catch (error) {
+        console.log('⚠️ Error en onload del script:', error.message);
+        setChatbotLoaded(false);
+      }
+    };
+    script.onerror = (event) => {
+      try {
+        console.log('❌ Error cargando script del chatbot:', event?.message || 'Error de red o CORS');
+        setChatbotLoaded(false);
+      } catch (e) {
+        console.log('❌ Error crítico en script.onerror');
+      }
+    };
+
+    document.head.appendChild(script);
+    console.log('📄 Script del chatbot agregado al DOM');
+    }
+  };
+                  `;
+                  
+                  // Configurar cada iframe
+                  chatIframes.forEach((iframe, index) => {
+                    console.log(`📺 Moviendo iframe ${index} al contenedor unificado`);
+                    
+                    // PRIMERO ocultar el iframe original inmediatamente
+                    iframe.style.setProperty('display', 'none', 'important');
+                    iframe.style.setProperty('visibility', 'hidden', 'important');
+                    
+                    // Clonar el iframe para evitar problemas de DOM
+                    const clonedIframe = iframe.cloneNode(true);
+                    
+                    // Configurar el iframe clonado para el contenedor
+                    clonedIframe.style.cssText = `
+                      width: 100% !important;
+                      height: 100% !important;
+                      border: none !important;
+                      background: white !important;
+                      display: block !important;
+                      visibility: visible !important;
+                      opacity: 1 !important;
+                    `;
+                    
+                    // Añadir iframe clonado al contenedor
+                    iframeContainer.appendChild(clonedIframe);
+                    
+                    console.log(`✅ Iframe ${index} clonado e integrado sin parpadeo`);
+                  });
+                  
+                  // Ensamblar el componente completo
+                  chatContainer.appendChild(header);
+                  chatContainer.appendChild(iframeContainer);
+                  
+                  // Añadir al DOM
+                  document.body.appendChild(chatContainer);
+                  
+                  console.log(`🎯 Contenedor unificado creado y alineado verticalmente`);
+                  
+                  // Verificación final
+                  setTimeout(() => {
+                    try {
+                      const isVisible = chatContainer.offsetWidth > 0 && chatContainer.offsetHeight > 0;
+                      console.log(`👁️ Contenedor visible: ${isVisible}`);
+                      if (!isVisible) {
+                        console.log('⚠️ Problema de renderizado detectado');
+                      }
+                    } catch (e) {
+                      console.log('⚠️ Error en verificación final:', e.message);
+                    }
+                  }, 1000);
+                  
+                } catch (error) {
+                  console.log('❌ Error en configuración del chatbot:', error.message);
+                }
+              };
+              
+              // Iniciar configuración con delay inicial
+              setTimeout(() => {
+                try {
+                  configureChatbot();
+                } catch (e) {
+                  console.log('⚠️ Error iniciando configuración del chatbot:', e.message);
+                }
+              }, 800);
+            } catch (error) {
+              console.log('❌ Error configurando chatbot:', error.message);
+            }
+          } catch (error) {
+            console.log('⚠️ Error en configuración automática:', error.message);
+          }
+        }, 1000);
+      } catch (error) {
+        console.log('⚠️ Error en onload del script:', error.message);
+        setChatbotLoaded(false);
+      }
+    };
+    script.onerror = (event) => {
+      try {
+        console.log('❌ Error cargando script del chatbot:', event?.message || 'Error de red o CORS');
+        setChatbotLoaded(false);
+      } catch (e) {
+        console.log('❌ Error crítico en script.onerror');
+      }
+    };
+      
+      document.head.appendChild(script);
+      console.log('📄 Script del chatbot agregado al DOM');
+    }
+  };
+  
+  // Seleccionar el video apropiado según la fase
+  const getVideoForPhase = () => {
+    if (showTokens) return '/assets/videos/robot_celebration.webm';
+    
+    switch(phase) {
+      case 1:
+      case 2:
+        return '/assets/videos/robot_explaining.webm';
+      case 3:
+      case 4:
+        return '/assets/videos/robot_thinking.webm';
+      case 5:
+      case 6:
+        return '/assets/videos/robot_celebration.webm';
+      default:
+        return '/assets/videos/robot_idle.webm';
+    }
+  };
+
+  // Mensaje según la fase
+  const getMessage = () => {
+    if (showTokens) return "¡Excelente trabajo! 🎉";
+    
+    const messages = {
+      '-1': "¡Hola, soy tu Robot Guía! 🤖",
+      '0': "¡Hola, soy tu Robot Guía! 🤖",
+      '1': "El primer paso es conectar.",
+      '2': "Ponte en los zapatos del usuario.",
+      '3': "¡No hay ideas locas! Construye tu prototipo.",
+      '4': "Es hora de brillar.",
+      '5': "Observa con atención.",
+      '6': "¡Misión Cumplida!"
+    };
+    
+    return messages[phase] || "¡Tú puedes!";
+  };
+
+  // Cambiar video cuando cambia la fase
+  useEffect(() => {
+    if (videoRef.current) {
+      const newSrc = getVideoForPhase();
+      videoRef.current.src = newSrc;
+      videoRef.current.load(); // Recargar el video con el nuevo src
+    }
+  }, [phase, showTokens]);
+
+  if (phase < -1) return null;
+
+  const message = getMessage();
+
+  // Estilos base para el robot
+  const getContainerStyle = () => {
+    const baseStyle = {
+      display: 'flex',
+      alignItems: 'end',
+      gap: '15px'
+    };
+
+    if (positioning === 'relative') {
+      // Para el overlay de tokens - sin posicionamiento fixed
+      return {
+        ...baseStyle,
+        position: 'relative'
+      };
+    } else {
+      // Posicionamiento normal en esquina inferior izquierda
+      return {
+        ...baseStyle,
+        position: 'fixed',
+        bottom: '20px',
+        left: '20px',
+        zIndex: 1000
+      };
+    }
+  };
+
+  const getVideoStyle = () => {
+    // CAMBIO: Robot más grande y SIN círculo para overlay
+    const baseSize = positioning === 'relative' ? 300 : 80; // CAMBIO: 300px en overlay
+    
+    if (positioning === 'relative') {
+      // Para overlay - SIN borde circular, más grande
+      return {
+        // SIN borderRadius para quitar el círculo
+        objectFit: 'contain', // CAMBIO: contain en lugar de cover
+        cursor: 'inherit', // Heredar del contenedor padre
+        // SIN boxShadow para overlay
+        transition: 'transform 0.2s ease',
+        display: videoLoaded ? 'block' : 'none',
+        pointerEvents: 'none', // Video no recibe eventos de mouse
+        userSelect: 'none',
+        width: baseSize + 'px',
+        height: baseSize + 'px'
+      };
+    } else {
+      // Para esquina - mantener círculo
+      return {
+        borderRadius: '50%',
+        objectFit: 'cover',
+        cursor: 'inherit', // Heredar cursor del contenedor padre
+        boxShadow: isHovered ? '0 6px 20px rgba(0, 0, 0, 0.5)' : '0 4px 12px rgba(0, 0, 0, 0.8)',
+        border: '3px solid #000',
+        transition: 'all 0.3s ease',
+        transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+        display: videoLoaded ? 'block' : 'none',
+        pointerEvents: 'all',
+        userSelect: 'none',
+        width: baseSize + 'px',
+        height: baseSize + 'px'
+      };
+    }
+  };
+
+  const getFallbackStyle = () => {
+    // CAMBIO: Robot más grande y SIN círculo para overlay
+    const baseSize = positioning === 'relative' ? 300 : 80; // CAMBIO: 300px en overlay
+    
+    if (positioning === 'relative') {
+      // Para overlay - SIN borde circular, más grande
+      return {
+        position: videoLoaded ? 'absolute' : 'static',
+        top: 0,
+        left: 0,
+        width: baseSize + 'px',
+        height: baseSize + 'px',
+        backgroundColor: '#3b82f6',
+        // SIN borderRadius para quitar el círculo
+        display: videoLoaded ? 'none' : 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '120px', // CAMBIO: emoji más grande
+        color: 'white',
+        cursor: 'default',
+        // SIN boxShadow para overlay
+        userSelect: 'none'
+      };
+    } else {
+      // Para esquina - mantener círculo
+      return {
+        position: videoLoaded ? 'absolute' : 'static',
+        top: 0,
+        left: 0,
+        width: baseSize + 'px',
+        height: baseSize + 'px',
+        backgroundColor: '#3b82f6',
+        borderRadius: '50%',
+        border: positioning === 'fixed' ? '3px solid #000' : 'none',
+        display: videoLoaded ? 'none' : 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '30px',
+        color: 'white',
+        cursor: positioning === 'fixed' ? 'pointer' : 'default',
+        boxShadow: positioning === 'fixed' ? (isHovered ? '0 6px 20px rgba(0, 0, 0, 0.5)' : '0 4px 12px rgba(0, 0, 0, 0.8)') : 'none',
+        transform: positioning === 'fixed' && isHovered ? 'scale(1.1)' : 'scale(1)',
+        transition: 'all 0.3s ease',
+        userSelect: 'none'
+      };
+    }
+  };
+
+  const getMessageStyle = () => {
+    const baseStyle = {
+      backgroundColor: 'white',
+      padding: '12px 16px',
+      borderRadius: '16px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      maxWidth: '200px',
+      fontSize: '13px',
+      color: '#333',
+      border: '2px solid #3b82f6',
+      position: 'relative',
+      animation: 'fadeInUp 0.3s ease-out'
+    };
+
+    // Ocultar mensaje en overlay de tokens para que se vea más limpio
+    if (positioning === 'relative') {
+      return {
+        ...baseStyle,
+        display: 'none'
+      };
+    }
+
+    return baseStyle;
+  };
+
+  return (
+    <div style={getContainerStyle()}>
+      {/* Contenedor del robot */}
+      <div 
+        style={{
+          position: 'relative',
+          width: positioning === 'relative' ? '300px' : '80px',
+          height: positioning === 'relative' ? '300px' : '80px'
+        }}
+        onClick={positioning === 'fixed' ? handleChatbotClick : undefined}
+        onMouseEnter={() => positioning === 'fixed' && setIsHovered(true)}
+        onMouseLeave={() => positioning === 'fixed' && setIsHovered(false)}
+        title={positioning === 'fixed' ? '¡Haz clic para chatear conmigo!' : undefined}
+      >
+        {/* Video del robot */}
+        <video
+          ref={videoRef}
+          className="missy-video"
+          width={positioning === 'relative' ? 300 : 80}
+          height={positioning === 'relative' ? 300 : 80}
+          autoPlay
+          loop
+          muted
+          playsInline
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+          onLoadedData={() => setVideoLoaded(true)}
+          onError={() => setVideoLoaded(false)}
+          style={getVideoStyle()}
+          onContextMenu={(e) => e.preventDefault()}
+          onClick={(e) => e.preventDefault()} // Prevenir clicks en el video mismo
+        >
+          <source src={getVideoForPhase()} type="video/webm" />
+        </video>
+        
+        {/* Fallback emoji si el video no carga */}
+        <div style={getFallbackStyle()}>
+          🤖
+        </div>
+      </div>
+      
+      {/* Mensaje con animación */}
+      <div style={getMessageStyle()}>
+        {message}
+        {showTokens && positioning !== 'relative' && (
+          <div style={{
+            fontSize: '11px',
+            color: '#666',
+            marginTop: '5px',
+            fontWeight: 'bold'
+          }}>
+            Tokens: +{Math.floor(Math.random() * 50) + 10}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -34,34 +34,75 @@ export default function StudentApp() {
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
 
-  // --- 1. EFECTO PARA CARGAR EL CHATBOT (CORREGIDO) ---
+  // --- CHATBOT CARGA BAJO DEMANDA (Solo cuando se hace click en el robot) ---
+  // El chatbot ahora se carga dinámicamente desde MissyCompanion.jsx cuando el usuario hace click
   useEffect(() => {
-    (function(){
-      if(!window.chatbase || window.chatbase("getState") !== "initialized"){
-        window.chatbase = (...args) => {
-          if (!window.chatbase.q) { window.chatbase.q = [] }
-          window.chatbase.q.push(args)
-        };
-        window.chatbase = new Proxy(window.chatbase, {
-          get(target, prop) {
-            if (prop === "q") { return target.q }
-            return (...args) => target(prop, ...args)
+    const chatbaseSelectors = [
+      'iframe[src*="chatbase.co"]',
+      'iframe[src*="widget"]',
+      '[id*="chatbase"]:not(#unified-chatbot-container)',
+      '[class*="chatbase"]',
+      '[data-chatbase]',
+      'div[style*="position"][style*="fixed"][style*="bottom"][style*="right"][style*="border-radius"]',
+      'button[style*="position"][style*="fixed"][style*="bottom"]'
+    ];
+
+    const restoreOriginalChatbot = () => {
+      chatbaseSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+          if (element?.dataset?.chatbaseHidden === '1') {
+            element.style.removeProperty('display');
+            element.style.removeProperty('visibility');
+            element.style.removeProperty('opacity');
+            element.style.removeProperty('pointer-events');
+            delete element.dataset.chatbaseHidden;
           }
-        })
-      }
-      const onLoad = function() {
-        const script = document.createElement("script");
-        script.src = "https://www.chatbase.co/embed.min.js";
-        script.id = "NDIGyY6LjlULvnmM9GEOX";
-        script.domain = "www.chatbase.co";
-        document.body.appendChild(script);
-      };
-      if (document.readyState === "complete") {
-        onLoad();
-      } else {
-        window.addEventListener("load", onLoad);
-      }
-    })();
+        });
+      });
+    };
+
+    const hideOriginalChatbot = () => {
+      chatbaseSelectors.forEach(selector => {
+        try {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(element => {
+            if (!element || element.closest('[data-innovating-chatbot]')) return;
+            if (
+              element.id !== 'unified-chatbot-container' &&
+              (element.src?.includes('chatbase') ||
+                element.id?.includes('chatbase') ||
+                element.className?.includes('chatbase') ||
+                element.hasAttribute?.('data-chatbase'))
+            ) {
+              element.dataset.chatbaseHidden = '1';
+              element.style.setProperty('display', 'none', 'important');
+              element.style.setProperty('visibility', 'hidden', 'important');
+              element.style.setProperty('opacity', '0', 'important');
+              element.style.setProperty('pointer-events', 'none', 'important');
+            }
+          });
+        } catch (e) {
+          console.log('⚠️ Error ocultando elementos:', e.message);
+        }
+      });
+    };
+
+    const observer = new MutationObserver(() => {
+      hideOriginalChatbot();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    const intervalId = setInterval(hideOriginalChatbot, 200);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      restoreOriginalChatbot();
+    };
   }, []);
 
   const handlePhaseComplete = (phaseJustFinished) => {
@@ -123,7 +164,7 @@ export default function StudentApp() {
   };
 
   return (
-    <div className="min-h-screen text-white relative"> 
+    <div className="min-h-screen text-white relative" data-student-app="true"> 
       
       <PhaseBackground phase={phase} /> 
       
