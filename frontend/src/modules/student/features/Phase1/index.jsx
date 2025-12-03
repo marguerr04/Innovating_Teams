@@ -5,6 +5,9 @@ import { load, save } from '../../../../utils/helpers.js';
 import ActivityModal from '../../components/ActivityModal.jsx';
 import Timer from '../../../../components/Timer';
 import PhaseBackground from '../../../../components/PhaseBackground.jsx';
+import sopaImg from '../../../../assets/images/icons/sopaLetras.png';
+import anagramaImg from '../../../../assets/images/icons/anagrama.png';
+import iceImg from '../../../../assets/images/icons/romperHielo.png';
 // ...existing code...
 
 // Importamos los juegos
@@ -13,6 +16,24 @@ import RompeHielosGame from './components/RompeHielosGame';
 import SopaLetrasGame from './components/SopaLetrasGame';
 
 const PHASE_1_DURATION = 300; // 5 minutos
+
+const ACTIVITY_MEDIA = {
+  sopa: {
+    image: sopaImg,
+    alt: 'Ilustración Sopa de letras',
+    description: 'Encuentra palabras ocultas antes que el resto del equipo.',
+  },
+  anagrama: {
+    image: anagramaImg,
+    alt: 'Ilustración Armar palabras con letras',
+    description: 'Reordena letras y coordina pistas para formar palabras nuevas.',
+  },
+  ice: {
+    image: iceImg,
+    alt: 'Ilustración actividad rompehielos',
+    description: 'Dinámica express para conocerse y entrar en confianza.',
+  },
+};
 
 // --- COMPONENTE PARA RENDERIZAR EL JUEGO GANADOR ---
 const ActividadGanadora = ({ winner, onComplete }) => {
@@ -178,6 +199,7 @@ function Phase1({ role, onNext, isProf }) {
     : null;
     
   const selectedOption = (poll.options.find(o => o.id === poll.myVote) || winner);
+  const selectedMedia = selectedOption ? ACTIVITY_MEDIA[selectedOption.id] : null;
 
   // Estados para el Modal de Actividad
   const [activityDone, setActivityDone] = useState(false);
@@ -370,10 +392,27 @@ function Phase1({ role, onNext, isProf }) {
         <div className="card p-6 flex flex-col h-full justify-between">
           <div>
             <b className="text-lg text-slate-800">Tu Actividad:</b>
-            <h2 className="text-2xl font-extrabold text-mint-600 mt-1 mb-2">
+            <h2 className="text-2xl font-extrabold text-mint-600 mt-1">
               {selectedOption?.label || 'Selecciona una opción...'}
             </h2>
-            <p className="text-sm text-slate-500 leading-relaxed">
+
+            {selectedMedia?.image && (
+              <div className="mt-6 flex justify-center">
+                <img 
+                  src={selectedMedia.image} 
+                  alt={selectedMedia.alt}
+                  className="w-28 h-28 md:w-32 md:h-32 object-contain"
+                />
+              </div>
+            )}
+
+            {selectedMedia?.description && (
+              <p className="text-sm text-slate-500 leading-relaxed mt-4 text-center">
+                {selectedMedia.description}
+              </p>
+            )}
+
+            <p className="text-sm text-slate-500 leading-relaxed mt-4">
               Completa la actividad con tu equipo para desbloquear la siguiente fase. 
               ¡Recuerden trabajar juntos!
             </p>
