@@ -4,6 +4,20 @@ import React, { useState, useEffect } from 'react';
 // Eliminamos la dependencia de axios ya que usaremos mock data
 import { FaPlay, FaTrophy, FaGraduationCap, FaStar, FaCamera } from 'react-icons/fa'; 
 
+const createPlaceholderSvg = (bgColor, textColor, label) => {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'>` +
+        `<rect width='150' height='150' fill='${bgColor}'/>` +
+        `<text x='50%' y='50%' font-family='Arial, sans-serif' font-size='20' fill='${textColor}' text-anchor='middle' dominant-baseline='central'>${label}</text>` +
+        '</svg>';
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const legoPlaceholders = [
+    createPlaceholderSvg('#2563eb', '#ffffff', 'Lego 1'),
+    createPlaceholderSvg('#dc2626', '#ffffff', 'Lego 2'),
+    createPlaceholderSvg('#16a34a', '#ffffff', 'Lego 3')
+];
+
 // --- MOCK DATA SIMULADA PARA TESTING DE FRONTEND ---
 const mockStats = {
     total_partidas: 58,
@@ -17,11 +31,7 @@ const mockStats = {
         { carrera_nombre: 'Humanidades', count: 9 },
     ],
     // Métrica adicional que se podría pedir:
-    fotos_lego_url: [
-        'https://via.placeholder.com/150/0000FF/808080?text=Lego+1',
-        'https://via.placeholder.com/150/FF0000/FFFFFF?text=Lego+2',
-        'https://via.placeholder.com/150/00FF00/000000?text=Lego+3',
-    ]
+    fotos_lego_url: legoPlaceholders
 };
 // ----------------------------------------------------
 
