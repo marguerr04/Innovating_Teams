@@ -11,11 +11,15 @@ const HomeView = () => {
     estudiantesActivos: 0,
     ultimaActividad: null
   });
+  const [activeGame, setActiveGame] = useState(null);
+  const [lastCreatedGame, setLastCreatedGame] = useState(null);
 
   useEffect(() => {
     // Calcular estadísticas basadas en los juegos
     const totalJuegos = juegos.length;
     const juegosPendientes = juegos.filter(juego => juego.estado === 'pendiente').length;
+    const runningGame = juegos.find(juego => juego.estado === 'activo') || null;
+    const latestGame = juegos.length ? juegos[juegos.length - 1] : null;
     
     setStats({
       totalJuegos,
@@ -23,7 +27,42 @@ const HomeView = () => {
       estudiantesActivos: Math.floor(Math.random() * 50) + 20, // Placeholder
       ultimaActividad: new Date().toLocaleDateString()
     });
+    setActiveGame(runningGame);
+    setLastCreatedGame(latestGame);
   }, [juegos]);
+
+  const handleNavigateToGame = (juego) => {
+    if (!juego) {
+      navigate('/profesor/grupos');
+      return;
+    }
+
+    if (juego.pin) {
+      const path = juego.estado === 'playing'
+        ? `/profesor/game-active/${juego.pin}`
+        : `/profesor/waiting-room/${juego.pin}`;
+
+      navigate(path, {
+        state: {
+          gameData: juego,
+          grupos: juego.grupos || []
+        }
+      });
+      return;
+    }
+
+    if (juego.rutaAcceso) {
+      navigate(juego.rutaAcceso);
+      return;
+    }
+
+    if (juego.id) {
+      navigate(`/profesor/juegos/${juego.id}`);
+      return;
+    }
+
+    navigate('/profesor/grupos');
+  };
 
   const quickActions = [
     {
@@ -153,6 +192,27 @@ const HomeView = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Acceso directo al último juego configurado */}
+      <div className="bg-gradient-to-r from-[#2E5E8C] to-[#00B8A9] rounded-2xl p-6 text-white shadow-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div>
+          <p className="uppercase tracking-wide text-sm opacity-80 mb-1">Continuidad operativa</p>
+          <h3 className="text-2xl font-bold mb-2">Regresa al último flujo configurado</h3>
+          {lastCreatedGame ? (
+            <p className="text-white/90">
+              {lastCreatedGame.nombre || 'Juego sin título'} · Fase próxima: {lastCreatedGame.faseActual || 'Pendiente de asignar'}
+            </p>
+          ) : (
+            <p className="text-white/90">Todavía no has configurado ningún juego. Crea uno para habilitar el acceso rápido.</p>
+          )}
+        </div>
+        <button
+          onClick={() => handleNavigateToGame(lastCreatedGame)}
+          className="bg-white text-[#2E5E8C] font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-xl transition"
+        >
+          {lastCreatedGame ? 'Ir al flujo actual' : 'Crear juego'}
+        </button>
       </div>
 
       {/* Sección de Gráficos y Analytics */}
@@ -318,8 +378,8 @@ const HomeView = () => {
         </div>
       </div>
 
-      {/* Segunda fila de gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Métricas relevantes para profesores */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Nivel de Satisfacción */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
@@ -364,75 +424,80 @@ const HomeView = () => {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Tiempo Promedio */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold" style={{ color: '#2E5E8C' }}>
-              Tiempo Promedio
-            </h3>
-            <svg className="w-5 h-5" style={{ color: '#FDC328' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      {/* Panel de monitoreo en vivo */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <p className="text-sm uppercase tracking-wide text-slate-400">Panel de Monitoreo de Partidas Activas</p>
+            <h3 className="text-2xl font-bold text-[#2E5E8C] mt-1">{activeGame ? (activeGame.nombre || 'Partida en curso') : 'Sin partida activa'}</h3>
+            <p className="text-slate-500">Fase activa: <span className="font-semibold text-[#00B8A9]">{activeGame?.faseActual || 'En espera'}</span></p>
           </div>
-
-          <div className="text-center mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#FDC328' }}>45</p>
-            <p className="text-lg" style={{ color: '#2E5E8C' }}>minutos</p>
-          </div>
-
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div 
-              className="h-2 rounded-full" 
-              style={{ backgroundColor: '#FDC328', width: '75%' }}
-            ></div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              <strong style={{ color: '#2E5E8C' }}>Descripción:</strong> Duración promedio por sesión de juego.
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              <strong>Métrica:</strong> Dentro del rango óptimo (30-60 min)
-            </p>
+          <div className="flex flex-wrap gap-3">
+            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${activeGame ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+              {activeGame ? 'En vivo' : 'Inactivo'}
+            </span>
+            <button
+              onClick={() => handleNavigateToGame(activeGame)}
+              className="bg-[#2E5E8C] text-white px-5 py-2 rounded-xl shadow hover:bg-[#254869] transition"
+            >
+              {activeGame ? 'Abrir panel en vivo' : 'Configurar partida'}
+            </button>
           </div>
         </div>
 
-        {/* Tasa de Finalización */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold" style={{ color: '#2E5E8C' }}>
-              Tasa de Finalización
-            </h3>
-            <svg className="w-5 h-5" style={{ color: '#E24872' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-slate-50 rounded-xl p-4">
+            <p className="text-xs uppercase text-slate-400">Equipos conectados</p>
+            <p className="text-3xl font-bold text-[#2E5E8C]">{activeGame?.equipos?.length || 0}</p>
           </div>
+          <div className="bg-slate-50 rounded-xl p-4">
+            <p className="text-xs uppercase text-slate-400">Tiempo restante</p>
+            <p className="text-3xl font-bold text-[#FDC328]">{activeGame?.tiempoRestante || '08:00'}</p>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-4">
+            <p className="text-xs uppercase text-slate-400">Fase siguiente</p>
+            <p className="text-3xl font-bold text-[#00B8A9]">{activeGame?.siguienteFase || 'Definir'}</p>
+          </div>
+        </div>
 
-          <div className="text-center mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#E24872' }}>87%</p>
-            <p className="text-sm text-gray-500">estudiantes completan</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs mb-4">
-            <div className="text-center p-2 rounded" style={{ backgroundColor: '#fef2f2', color: '#E24872' }}>
-              <p className="font-bold">156</p>
-              <p>Completados</p>
-            </div>
-            <div className="text-center p-2 rounded bg-gray-50 text-gray-600">
-              <p className="font-bold">23</p>
-              <p>Abandonados</p>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              <strong style={{ color: '#2E5E8C' }}>Descripción:</strong> Porcentaje de estudiantes que finalizan los juegos.
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              <strong>Métrica:</strong> +5% respecto al trimestre anterior
-            </p>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead>
+              <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                <th className="px-4 py-3 text-left">Equipo</th>
+                <th className="px-4 py-3 text-left">Fase</th>
+                <th className="px-4 py-3 text-left">Progreso</th>
+                <th className="px-4 py-3 text-left">Estado</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {(activeGame?.equipos && activeGame.equipos.length > 0 ? activeGame.equipos : [
+                { nombre: 'Equipo Alfa', faseActual: 'Ideación', progreso: 72, estado: 'Construyendo' },
+                { nombre: 'Equipo Beta', faseActual: 'Prototipo', progreso: 54, estado: 'Solicita ayuda' },
+                { nombre: 'Equipo Gamma', faseActual: 'Pitch', progreso: 88, estado: 'Listos para presentar' }
+              ]).map((equipo, idx) => (
+                <tr key={idx} className="hover:bg-slate-50/60">
+                  <td className="px-4 py-3 text-sm font-semibold text-[#2E5E8C]">{equipo.nombre || `Equipo ${idx + 1}`}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{equipo.faseActual || activeGame?.faseActual || 'En progreso'}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="h-2 rounded-full" style={{ width: `${equipo.progreso || 0}%`, backgroundColor: '#00B8A9' }}></div>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-500" style={{ minWidth: '3rem' }}>{equipo.progreso || 0}%</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${equipo.estado === 'Solicita ayuda' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {equipo.estado || 'En progreso'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
