@@ -1,28 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import Swal from 'sweetalert2';
-import { FaTrash, FaEdit, FaPlus, FaSave, FaTimes, FaUser, FaBuilding } from 'react-icons/fa';
+import {
+    FaTrash,
+    FaEdit,
+    FaSave,
+    FaBuilding,
+    FaLayerGroup,
+    FaClipboardList,
+    FaUserTie,
+    FaBullseye,
+    FaPlusCircle
+} from 'react-icons/fa';
+import { BsPersonSquare } from 'react-icons/bs';
 
-// Configuración de la API
 const API_BASE_URL = 'http://localhost:8000/api';
+const ITEMS_PER_PAGE = 5;
 
-// Función helper para hacer peticiones HTTP
 const apiRequest = async (endpoint, options = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
     const config = {
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
-        ...options,
+        ...options
     };
-    
+
     try {
         const response = await fetch(url, config);
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.error || `HTTP error! status: ${response.status}`);
         }
-        
+
         return data;
     } catch (error) {
         console.error(`API Error (${endpoint}):`, error);
@@ -30,30 +40,23 @@ const apiRequest = async (endpoint, options = {}) => {
     }
 };
 
-const defaultAvatars = [
-    { name: 'Andrés', url: '/avatars/andres.png' },
-    { name: 'Camila', url: '/avatars/camila.png' },
-    { name: 'Francisco', url: '/avatars/francisco.png' },
-    { name: 'Martina', url: '/avatars/martina.png' },
-];
+// Lazy-load the modal to avoid increasing initial bundle/parse time
+const ChallengeFormModal = lazy(() => import('../../admin/components/ChallengeFormModal'));
 
 const ChallengeAdmin = () => {
-    // Estados principales para la data de la tabla
     const [challenges, setChallenges] = useState([]);
     const [themes, setThemes] = useState([]);
     const [people, setPeople] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    
-    // Estados para la gestión de formularios
+
     const [isCreatingChallenge, setIsCreatingChallenge] = useState(false);
     const [isCreatingTheme, setIsCreatingTheme] = useState(false);
     const [newThemeName, setNewThemeName] = useState('');
-    
-    // Estados para la funcionalidad de Edición
+
     const [isEditing, setIsEditing] = useState(false);
     const [editingChallengeId, setEditingChallengeId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // Estado para manejar los datos del formulario (creación y edición)
     const [challengeFormData, setChallengeFormData] = useState({
         titulo: '',
         descripcion: '',
@@ -61,55 +64,73 @@ const ChallengeAdmin = () => {
         tema_desafio: '',
         nombrepersona: '',
         edadpersona: '',
-        persona_id: null, 
-        avatar_url: '/avatars/default.png', 
+        persona_id: null,
+        avatar_url: '/avatars/default.png'
     });
-    
-    // --- LÓGICA DE CARGA Y ESTADO ---
 
-    const fetchAllData = async () => {
+    const fetchAllData = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Cargar todas las datos en paralelo
             const [challengesResponse, themesResponse, peopleResponse] = await Promise.all([
                 apiRequest('/admin/desafios/'),
                 apiRequest('/admin/temas/'),
                 apiRequest('/admin/personas/')
             ]);
-            
-            // Los desafíos vienen en data.desafios debido a la paginación
+
             setChallenges(challengesResponse.data.desafios || []);
             setThemes(themesResponse.data || []);
             setPeople(peopleResponse.data || []);
-            
+            setCurrentPage(1);
         } catch (error) {
-            console.error('Error cargando datos:', error);
-            Swal.fire('Error', 'No se pudieron cargar los datos. Verifique la conexión con el servidor.', 'error');
+            Swal.fire('Error', 'No se pudieron cargar los datos. Verifica la conexion con el servidor.', 'error');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchAllData();
+    }, [fetchAllData]);
+
+    const handleChallengeChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setChallengeFormData((prev) => ({ ...prev, [name]: value }));
     }, []);
 
-    // --- LÓGICA DE FORMULARIO COMÚN ---
+    const handlePersonaSelect = useCallback((value) => {
+        if (!value) {
+            setChallengeFormData((prev) => ({
+                ...prev,
+                persona_id: null,
+                nombrepersona: '',
+                edadpersona: '',
+                avatar_url: '/avatars/default.png'
+            }));
+            return;
+        }
 
-    const handleChallengeChange = (e) => {
-        const { name, value } = e.target;
-        setChallengeFormData(prev => ({ ...prev, [name]: value }));
-    };
+        const personaId = parseInt(value, 10);
+        const persona = people.find((p) => p.id === personaId);
+        if (persona) {
+            setChallengeFormData((prev) => ({
+                ...prev,
+                persona_id: persona.id,
+                nombrepersona: persona.nombre,
+                edadpersona: persona.edad,
+                avatar_url: persona.imagenurl || '/avatars/default.png'
+            }));
+        }
+    }, [people]);
 
-    const handleAvatarSelect = (url) => {
-        setChallengeFormData(p => ({ 
-            ...p, 
-            avatar_url: url, 
-            persona_id: null, // Si se elige un avatar, asumimos que es una nueva persona
+    const handleAvatarSelect = useCallback((url) => {
+        setChallengeFormData((prev) => ({
+            ...prev,
+            avatar_url: url,
+            persona_id: null
         }));
-    };
-    
-    const resetForm = () => {
+    }, []);
+
+    const resetForm = useCallback(() => {
         setChallengeFormData({
             titulo: '',
             descripcion: '',
@@ -117,409 +138,387 @@ const ChallengeAdmin = () => {
             tema_desafio: '',
             nombrepersona: '',
             edadpersona: '',
-            persona_id: null, 
-            avatar_url: '/avatars/default.png', 
+            persona_id: null,
+            avatar_url: '/avatars/default.png'
         });
         setIsCreatingChallenge(false);
         setIsEditing(false);
         setEditingChallengeId(null);
-    };
+    }, []);
 
-
-    // --- LÓGICA DE CREACIÓN ---
-
-    const handleCreatePersonaAndChallenge = async (e) => {
+    const handleCreatePersonaAndChallenge = useCallback(async (e) => {
         e.preventDefault();
-        
+
         if (!challengeFormData.tema_desafio) {
-            Swal.fire('Error', 'Debe seleccionar un área de desafío.', 'error');
+            Swal.fire('Error', 'Debes seleccionar un area para el desafio.', 'error');
             return;
         }
 
         try {
-            // Buscar la persona seleccionada o usar datos del formulario
-            const personaData = challengeFormData.persona_id 
-                ? people.find(p => p.id === challengeFormData.persona_id)
+            const personaData = challengeFormData.persona_id
+                ? people.find((p) => p.id === challengeFormData.persona_id)
                 : null;
 
-            const desafioData = {
+            const payload = {
                 titulo: challengeFormData.titulo,
                 descripcion: challengeFormData.descripcion,
                 contexto: challengeFormData.contexto,
-                tema_desafio_id: parseInt(challengeFormData.tema_desafio),
+                tema_desafio_id: parseInt(challengeFormData.tema_desafio, 10),
                 persona_id: personaData ? personaData.id : null,
                 nombrepersona: challengeFormData.nombrepersona,
-                edadpersona: parseInt(challengeFormData.edadpersona)
+                edadpersona: challengeFormData.edadpersona ? parseInt(challengeFormData.edadpersona, 10) : null
             };
 
-            const response = await apiRequest('/admin/desafios/', {
+            await apiRequest('/admin/desafios/', {
                 method: 'POST',
-                body: JSON.stringify(desafioData)
+                body: JSON.stringify(payload)
             });
-            
-            Swal.fire('¡Éxito!', 'Desafío creado correctamente.', 'success');
+
+            Swal.fire('Listo', 'Desafio creado correctamente.', 'success');
             resetForm();
             fetchAllData();
-            
         } catch (error) {
-            console.error('Error creando desafío:', error);
-            Swal.fire('Error', `No se pudo crear el desafío: ${error.message}`, 'error');
+            Swal.fire('Error', `No se pudo crear el desafio: ${error.message}`, 'error');
         }
-    };
+    }, [challengeFormData, people]);
 
-    // --- LÓGICA DE EDICIÓN (CARGAR DATOS) ---
+    const handleEdit = useCallback((challenge) => {
+        const personData = people.find((p) => p.id === challenge.persona_id);
 
-    const handleEdit = (challenge) => {
-        const personData = people.find(p => p.id === challenge.persona_id);
-
-        // Cargar todos los datos al formulario usando los nombres correctos del backend
         setChallengeFormData({
             titulo: challenge.titulo,
             descripcion: challenge.descripcion,
             contexto: challenge.contexto || '',
             tema_desafio: challenge.tema_desafio_id,
             nombrepersona: challenge.nombrepersona || challenge.persona_nombre || '',
-            edadpersona: challenge.edadpersona || '',
+            edadpersona: challenge.edadpersona || personData?.edad || '',
             persona_id: challenge.persona_id,
-            avatar_url: personData ? personData.imagenurl : '/avatars/default.png',
+            avatar_url: personData?.imagenurl || '/avatars/default.png'
         });
-        
-        setIsCreatingChallenge(true); // Abrir el formulario
-        setIsEditing(true);           // Activar modo edición
+
+        setIsCreatingChallenge(true);
+        setIsEditing(true);
         setEditingChallengeId(challenge.id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    }, [people]);
 
-    // --- LÓGICA DE ACTUALIZACIÓN ---
-
-    const handleUpdateChallenge = async (e) => {
+    const handleUpdateChallenge = useCallback(async (e) => {
         e.preventDefault();
-        
+
         if (!challengeFormData.tema_desafio) {
-            Swal.fire('Error', 'Debe seleccionar un área de desafío.', 'error');
+            Swal.fire('Error', 'Debes seleccionar un area para el desafio.', 'error');
             return;
         }
 
         try {
-            const personaData = challengeFormData.persona_id 
-                ? people.find(p => p.id === challengeFormData.persona_id)
+            const personaData = challengeFormData.persona_id
+                ? people.find((p) => p.id === challengeFormData.persona_id)
                 : null;
 
-            const desafioData = {
+            const payload = {
                 titulo: challengeFormData.titulo,
                 descripcion: challengeFormData.descripcion,
                 contexto: challengeFormData.contexto,
-                tema_desafio_id: parseInt(challengeFormData.tema_desafio),
+                tema_desafio_id: parseInt(challengeFormData.tema_desafio, 10),
                 persona_id: personaData ? personaData.id : null,
                 nombrepersona: challengeFormData.nombrepersona,
-                edadpersona: parseInt(challengeFormData.edadpersona)
+                edadpersona: challengeFormData.edadpersona ? parseInt(challengeFormData.edadpersona, 10) : null
             };
 
-            const response = await apiRequest(`/admin/desafios/${editingChallengeId}/`, {
+            await apiRequest(`/admin/desafios/${editingChallengeId}/`, {
                 method: 'PUT',
-                body: JSON.stringify(desafioData)
+                body: JSON.stringify(payload)
             });
-            
-            Swal.fire('¡Éxito!', 'Desafío actualizado correctamente.', 'success');
+
+            Swal.fire('Listo', 'Desafio actualizado correctamente.', 'success');
             resetForm();
             fetchAllData();
-            
         } catch (error) {
-            console.error('Error actualizando desafío:', error);
-            Swal.fire('Error', `No se pudo actualizar el desafío: ${error.message}`, 'error');
+            Swal.fire('Error', `No se pudo actualizar el desafio: ${error.message}`, 'error');
         }
-    };
+    }, [challengeFormData, people, editingChallengeId]);
 
-    // --- DISPATCHER DE FORMULARIO ---
     const handleSubmit = isEditing ? handleUpdateChallenge : handleCreatePersonaAndChallenge;
 
-    // --- LÓGICA DE ELIMINACIÓN ---
-    
-    const handleDelete = (id, type) => {
+    const handleDelete = useCallback((id, type) => {
         Swal.fire({
-            title: `¿Estás seguro de eliminar el ${type}?`,
-            text: "Esta acción no se puede deshacer.",
+            title: `Eliminar ${type}?`,
+            text: 'Esta accion no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Si, eliminar',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     const endpoint = type === 'Tema' ? `/admin/temas/${id}/` : `/admin/desafios/${id}/`;
-                    
-                    await apiRequest(endpoint, {
-                        method: 'DELETE'
-                    });
-                    
-                    Swal.fire('Eliminado!', `${type} ha sido eliminado correctamente.`, 'success');
+                    await apiRequest(endpoint, { method: 'DELETE' });
+                    Swal.fire('Eliminado', `${type} eliminado correctamente.`, 'success');
                     fetchAllData();
-                    
                 } catch (error) {
-                    console.error(`Error eliminando ${type}:`, error);
-                    Swal.fire('Error', `No se pudo eliminar el ${type}: ${error.message}`, 'error');
+                    Swal.fire('Error', `No se pudo eliminar el ${type.toLowerCase()}: ${error.message}`, 'error');
                 }
             }
         });
-    };
+    }, [fetchAllData]);
 
-    // --- LÓGICA DE TEMAS ---
-
-    const handleCreateTheme = async () => {
+    const handleCreateTheme = useCallback(async () => {
         if (!newThemeName.trim()) {
-            Swal.fire('Advertencia', 'El nombre del área no puede estar vacío.', 'warning');
+            Swal.fire('Advertencia', 'El nombre del area no puede estar vacio.', 'warning');
             return;
         }
-        
+
         try {
-            const temaData = {
-                nombretema: newThemeName.trim(),
-                descripcion: 'Nueva área creada por el administrador'
-            };
-            
             await apiRequest('/admin/temas/', {
                 method: 'POST',
-                body: JSON.stringify(temaData)
+                body: JSON.stringify({
+                    nombretema: newThemeName.trim(),
+                    descripcion: 'Area creada desde el panel de administracion'
+                })
             });
-            
-            Swal.fire('¡Éxito!', `Área "${newThemeName}" creada correctamente.`, 'success');
+
+            Swal.fire('Listo', `Area "${newThemeName}" creada.`, 'success');
             setNewThemeName('');
             setIsCreatingTheme(false);
             fetchAllData();
-            
         } catch (error) {
-            console.error('Error creando tema:', error);
-            Swal.fire('Error', `No se pudo crear el área: ${error.message}`, 'error');
+            Swal.fire('Error', `No se pudo crear el area: ${error.message}`, 'error');
         }
-    };
-    
-    // --- RENDERIZADO ---
+    }, [newThemeName]);
 
-    if (isLoading) return <div className="text-center p-8 text-xl font-semibold text-indigo-500">Cargando gestión de desafíos...</div>;
+    const { totalPages, paginatedChallenges } = useMemo(() => {
+        const t = Math.max(1, Math.ceil(challenges.length / ITEMS_PER_PAGE));
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return { totalPages: t, paginatedChallenges: challenges.slice(start, start + ITEMS_PER_PAGE) };
+    }, [challenges, currentPage]);
+
+    const goToPage = useCallback((page) => {
+        if (page < 1 || page > totalPages) return;
+        setCurrentPage(page);
+    }, [totalPages]);
+
+    const getVisiblePages = useCallback(() => {
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+        if (pages.length <= 5) return pages;
+        if (currentPage <= 3) return pages.slice(0, 5);
+        if (currentPage >= totalPages - 2) return pages.slice(totalPages - 5);
+        return pages.slice(currentPage - 3, currentPage + 2);
+    }, [totalPages, currentPage]);
+
+    if (isLoading) {
+        return (
+            <div className="text-center p-8 text-xl font-semibold text-indigo-500">
+                Cargando gestion de desafios...
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Gestión de Desafíos</h1>
-            <p className="text-sm text-green-600 mb-4">✅ Sistema CRUD completo - Gestión de desafíos y temas conectada con la base de datos PostgreSQL.</p>
-
-            {/* SECCIÓN DE CREACIÓN/EDICIÓN */}
-            <div className="bg-white p-6 rounded-lg shadow-md mb-8 border border-green-200">
-                <h2 className="text-xl font-semibold mb-3 flex items-center text-green-600">
-                    <FaPlus className="mr-2" />
-                    {isEditing ? `Editando Desafío ID: ${editingChallengeId}` : 'Crear Nuevo Desafío'}
-                </h2>
-                
-                {/* Botón para alternar formulario */}
-                <button 
-                    onClick={() => {
-                        if (isEditing) { resetForm(); }
-                        setIsCreatingChallenge(!isCreatingChallenge);
-                    }}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg text-sm mb-4 transition duration-200"
-                >
-                    {isEditing ? 'Cancelar Edición' : (isCreatingChallenge ? 'Ocultar Formulario' : 'Mostrar Formulario de Creación')}
-                </button>
-
-                {isCreatingChallenge && (
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-gray-50">
-                        {/* Columna 1: Desafío Básico */}
-                        <div className="col-span-1 border-r pr-4">
-                            <h3 className="font-bold mb-3">Detalle del Desafío</h3>
-                            <select 
-                                name="tema_desafio" 
-                                onChange={handleChallengeChange} 
-                                value={challengeFormData.tema_desafio || ''} 
-                                className="w-full p-2 border rounded mb-3 bg-white" 
-                                required
-                            >
-                                <option value="">Seleccionar Área/Tema *</option>
-                                {themes.map(t => (
-                                    <option key={t.id} value={t.id}>{t.nombretema}</option>
-                                ))}
-                            </select>
-                            <input type="text" name="titulo" placeholder="Título del Desafío *" value={challengeFormData.titulo} onChange={handleChallengeChange} className="w-full p-2 border rounded mb-3" required />
-                            <textarea name="descripcion" placeholder="Descripción del Problema (Breve) *" value={challengeFormData.descripcion} onChange={handleChallengeChange} className="w-full p-2 border rounded mb-3 h-20" required />
-                            <textarea name="contexto" placeholder="Contexto (Detalle del Problema) *" value={challengeFormData.contexto} onChange={handleChallengeChange} className="w-full p-2 border rounded mb-3 h-24" required />
-                        </div>
-                        
-                        {/* Columna 2: Perfil de la Persona */}
-                        <div className="col-span-1 border-r pr-4">
-                            <h3 className="font-bold mb-3 flex items-center"><FaUser className="mr-1" /> Perfil de Persona</h3>
-                            
-                            {/* Selector de persona existente */}
-                            <select 
-                                name="persona_id" 
-                                onChange={(e) => {
-                                    const personaId = parseInt(e.target.value) || null;
-                                    const persona = people.find(p => p.id === personaId);
-                                    if (persona) {
-                                        setChallengeFormData(prev => ({
-                                            ...prev,
-                                            persona_id: persona.id,
-                                            nombrepersona: persona.nombre,
-                                            edadpersona: persona.edad,
-                                            avatar_url: persona.imagenurl || '/avatars/default.png'
-                                        }));
-                                    } else {
-                                        setChallengeFormData(prev => ({
-                                            ...prev,
-                                            persona_id: null,
-                                            nombrepersona: '',
-                                            edadpersona: '',
-                                            avatar_url: '/avatars/default.png'
-                                        }));
-                                    }
-                                }}
-                                value={challengeFormData.persona_id || ''} 
-                                className="w-full p-2 border rounded mb-3 bg-white"
-                            >
-                                <option value="">Crear nueva persona...</option>
-                                {people.map(p => (
-                                    <option key={p.id} value={p.id}>{p.nombre} ({p.edad} años)</option>
-                                ))}
-                            </select>
-                            
-                            <input 
-                                type="text" 
-                                name="nombrepersona" 
-                                placeholder="Nombre de la Persona *" 
-                                value={challengeFormData.nombrepersona} 
-                                onChange={handleChallengeChange} 
-                                className="w-full p-2 border rounded mb-3" 
-                                required 
-                                disabled={challengeFormData.persona_id !== null}
-                            />
-                            <input 
-                                type="number" 
-                                name="edadpersona" 
-                                placeholder="Edad de la Persona *" 
-                                value={challengeFormData.edadpersona} 
-                                onChange={handleChallengeChange} 
-                                className="w-full p-2 border rounded mb-3" 
-                                required 
-                                disabled={challengeFormData.persona_id !== null}
-                            />
-                            
-                            <h4 className="font-semibold mt-4 mb-2">Seleccionar Avatar</h4>
-                            <div className="flex space-x-2 overflow-x-auto pb-2">
-                                {defaultAvatars.map(avatar => (
-                                    <div 
-                                        key={avatar.name} 
-                                        onClick={() => handleAvatarSelect(avatar.url)}
-                                        className={`p-1 border-2 rounded-full cursor-pointer transition ${challengeFormData.avatar_url === avatar.url ? 'border-blue-500 ring-2 ring-blue-500' : 'border-transparent hover:border-gray-300'}`}
-                                    >
-                                        <img src={avatar.url} alt={avatar.name} className="w-12 h-12 rounded-full object-cover" />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Columna 3: Acciones */}
-                        <div className="col-span-1">
-                            <button 
-                                type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition duration-200"
-                            >
-                                <FaSave className="mr-2" /> {isEditing ? 'GUARDAR CAMBIOS' : 'FINALIZAR CREACIÓN'}
-                            </button>
-                            <p className="text-sm text-gray-500 mt-2">
-                                {isEditing ? 'Actualiza el desafío en la base de datos.' : 'Crea un nuevo desafío y persona en la base de datos.'}
-                            </p>
-                        </div>
-                    </form>
-                )}
+            <div className="flex items-center gap-3 mb-2 text-indigo-900">
+                <FaLayerGroup className="text-3xl" />
+                <h1 className="text-3xl font-bold">Gestion de areas y desafios</h1>
             </div>
+            <p className="text-sm text-slate-500 mb-6">
+                Panel centralizado para administrar areas tematicas, perfiles y desafios conectados a la base de datos.
+            </p>
 
-            {/* Listado de Desafíos Existentes */}
-            <div className="bg-white p-6 rounded-lg shadow-xl">
-                <h2 className="text-2xl font-bold mb-4 text-gray-700">Desafíos Activos ({challenges.length})</h2>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {challenges.map((challenge) => (
-                                <tr key={challenge.id} className={challenge.id === editingChallengeId ? 'bg-yellow-50' : ''}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{challenge.titulo}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{challenge.tema_nombre}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {challenge.nombrepersona || challenge.persona_nombre} 
-                                        {challenge.edadpersona ? ` (${challenge.edadpersona})` : ''}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button 
-                                            onClick={() => handleEdit(challenge)} 
-                                            className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
-                                            title="Editar Desafío"
-                                            disabled={isEditing} // Deshabilita si ya estamos editando otro
+            <div className="bg-white border border-purple-300 rounded-2xl shadow-lg overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-700 to-indigo-700 text-white px-6 py-4 flex flex-col gap-1">
+                    <p className="text-xs uppercase tracking-widest text-purple-100">Areas tematicas</p>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <h2 className="text-2xl font-semibold flex items-center gap-2">
+                            <FaBuilding /> Gestion de areas o temas
+                        </h2>
+                        <button
+                            onClick={() => setIsCreatingTheme(!isCreatingTheme)}
+                            className="bg-white text-purple-700 font-semibold py-2 px-4 rounded-xl shadow hover:bg-purple-50 inline-flex items-center gap-2"
+                        >
+                            <FaPlusCircle className="text-purple-500" />
+                            {isCreatingTheme ? 'Cancelar' : 'Crear nueva area'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    {isCreatingTheme && (
+                        <div className="flex flex-col md:flex-row gap-3 mb-5">
+                            <input
+                                type="text"
+                                placeholder="Nombre del area (ej: Energia)"
+                                value={newThemeName}
+                                onChange={(e) => setNewThemeName(e.target.value)}
+                                className="flex-grow p-3 rounded-xl border border-slate-200"
+                            />
+                            <button
+                                onClick={handleCreateTheme}
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-2"
+                            >
+                                <FaSave /> Guardar
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50 p-4">
+                        <div className="flex items-center justify-between text-slate-700 text-xs uppercase tracking-widest font-semibold mb-3 bg-white/70 rounded-xl px-4 py-2">
+                            <span>Areas activas ({themes.length})</span>
+                            <span>Acciones</span>
+                        </div>
+                        <div className="max-h-56 overflow-auto pr-2 divide-y divide-purple-200">
+                            {themes.map((theme) => (
+                                <div key={theme.id} className="flex items-center justify-between py-2 text-slate-700 text-sm">
+                                    <span>{theme.nombretema}</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            className="text-purple-600 hover:text-purple-800 cursor-not-allowed"
+                                            title="Editar (pronto)"
+                                            disabled
                                         >
                                             <FaEdit />
                                         </button>
-                                        <button 
-                                            onClick={() => handleDelete(challenge.id, 'Desafío')} 
-                                            className="text-red-600 hover:text-red-900"
-                                            title="Eliminar Desafío"
+                                        <button
+                                            onClick={() => handleDelete(theme.id, 'Tema')}
+                                            className="text-red-500 hover:text-red-700"
+                                            title="Eliminar"
                                         >
                                             <FaTrash />
                                         </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl mt-8 border border-emerald-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-4 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p className="text-xs uppercase tracking-widest text-emerald-100">Desafios</p>
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <FaBullseye /> Desafios activos ({challenges.length})
+                        </h2>
+                        <p className="text-sm text-emerald-100/80">Administra los retos vigentes y su informacion asociada.</p>
+                    </div>
+                    <button
+                        onClick={() => setIsCreatingChallenge(true)}
+                        className="inline-flex items-center gap-2 bg-white text-emerald-600 border border-emerald-200 font-semibold px-5 py-2 rounded-xl shadow hover:bg-emerald-50"
+                    >
+                        <BsPersonSquare className="text-lg" /> Registrar nuevo desafio
+                    </button>
+                </div>
+
+                <div className="p-6">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-200">
+                        <thead className="bg-indigo-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                                    <span className="flex items-center gap-2"><FaClipboardList /> Titulo</span>
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                                    <span className="flex items-center gap-2"><FaLayerGroup /> Area</span>
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                                    <span className="flex items-center gap-2"><FaUserTie /> Persona</span>
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                                    <span className="flex items-center gap-2"><FaEdit /> Acciones</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-200">
+                            {paginatedChallenges.map((challenge) => (
+                                <tr key={challenge.id} className={challenge.id === editingChallengeId ? 'bg-yellow-50' : ''}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                        {challenge.titulo}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                        {challenge.tema_nombre}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                        {challenge.nombrepersona || challenge.persona_nombre}
+                                        {challenge.edadpersona ? ` (${challenge.edadpersona})` : ''}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => handleEdit(challenge)}
+                                                className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                                                title="Editar"
+                                                disabled={isEditing}
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(challenge.id, 'Desafio')}
+                                                className="text-red-600 hover:text-red-900"
+                                                title="Eliminar"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-6 text-sm text-slate-600">
+                        <div>
+                            Mostrando {paginatedChallenges.length} de {challenges.length} registros
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                                onClick={() => goToPage(currentPage - 1)}
+                                className="px-3 py-1 rounded-full border border-emerald-200 hover:bg-emerald-50 disabled:opacity-40"
+                                disabled={currentPage === 1}
+                            >
+                                Anterior
+                            </button>
+                            {getVisiblePages().map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => goToPage(page)}
+                                    className={`px-3 py-1 rounded-full border ${
+                                        page === currentPage
+                                            ? 'bg-emerald-500 text-white border-emerald-500'
+                                            : 'border-emerald-200 hover:bg-emerald-50'
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => goToPage(currentPage + 1)}
+                                className="px-3 py-1 rounded-full border border-emerald-200 hover:bg-emerald-50 disabled:opacity-40"
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Sección de Gestión de Áreas/Temas */}
-            <div className="bg-white p-6 rounded-lg shadow-md mt-8 border border-indigo-200">
-                <h2 className="text-xl font-semibold mb-3 flex items-center text-indigo-600">
-                    <FaBuilding className="mr-2" />
-                    Gestión de Áreas/Temas
-                </h2>
-                <button 
-                    onClick={() => setIsCreatingTheme(!isCreatingTheme)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg text-sm mb-4 transition duration-200"
-                >
-                    {isCreatingTheme ? 'Cancelar' : 'Crear Nueva Área'}
-                </button>
-                {isCreatingTheme && (
-                    <div className="flex space-x-2">
-                        <input 
-                            type="text" 
-                            placeholder="Nombre del Área (ej: Energía)" 
-                            value={newThemeName}
-                            onChange={(e) => setNewThemeName(e.target.value)}
-                            className="flex-grow p-2 border rounded"
-                        />
-                        <button 
-                            onClick={handleCreateTheme}
-                            className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-                        >
-                            <FaSave />
-                        </button>
-                    </div>
-                )}
-                
-                <ul className="space-y-1 mt-4">
-                    <li className="font-bold text-gray-700 border-b pb-1">Áreas Activas ({themes.length}):</li>
-                    {themes.map((theme) => (
-                        <li key={theme.id} className="flex justify-between items-center text-sm">
-                            <span>{theme.nombretema}</span>
-                            <button onClick={() => handleDelete(theme.id, 'Tema')} className="text-red-500 hover:text-red-700 ml-4">
-                                <FaTimes />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <Suspense fallback={null}>
+                <ChallengeFormModal
+                    open={isCreatingChallenge}
+                    onClose={resetForm}
+                    onSubmit={handleSubmit}
+                    isEditing={isEditing}
+                    editingId={editingChallengeId}
+                    challengeFormData={challengeFormData}
+                    handleChallengeChange={handleChallengeChange}
+                    handlePersonaSelect={handlePersonaSelect}
+                    handleAvatarSelect={handleAvatarSelect}
+                    themes={themes}
+                    people={people}
+                />
+            </Suspense>
         </div>
     );
 };
