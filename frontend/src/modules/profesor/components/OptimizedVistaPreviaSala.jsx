@@ -18,7 +18,7 @@ const UnassignedStudentsZone = ({ students }) => {
       `}
     >
       <h3 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
-        📋 Estudiantes sin asignar ({students.length})
+         Estudiantes sin asignar ({students.length})
         {isOver && <span className="ml-2 text-blue-600 animate-pulse text-sm">← Soltar aquí</span>}
       </h3>
       
@@ -149,7 +149,7 @@ const OptimizedVistaPreviaSala = ({
                       </div>
                       <div className="p-3 flex items-center justify-center h-20">
                         <div className="text-center">
-                          <div className="text-2xl mb-1">🎯</div>
+                          <div className="text-2xl mb-1"></div>
                           <div className="text-xs font-medium">Presiona 'Redistribuir'</div>
                           <div className="text-xs text-gray-500 mt-0.5">para distribuir estudiantes</div>
                         </div>
@@ -168,28 +168,28 @@ const OptimizedVistaPreviaSala = ({
                 {groups.length > 0 ? (
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <span className="font-semibold text-green-600 text-xs">✅ Asignados:</span>
+                      <span className="font-semibold text-green-600 text-xs"> Asignados:</span>
                       <span className="ml-1 text-xs">{groups.reduce((total, group) => total + group.students.length, 0)}</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-orange-600 text-xs">📋 Sin asignar:</span>
+                      <span className="font-semibold text-orange-600 text-xs"> Sin asignar:</span>
                       <span className="ml-1 text-xs">{containers.unassigned?.length || 0}</span>
                     </div>
                     <div>
-                      <span className="font-semibold text-blue-600 text-xs">📊 Distribución:</span>
+                      <span className="font-semibold text-blue-600 text-xs"> Distribución:</span>
                       <span className="ml-1 text-xs">{groups.map(g => g.students.length).join('-')}</span>
                     </div>
                   </div>
                 ) : (
                   <span className="flex items-center gap-2">
-                    ⏳ <span className="font-medium">Genera grupos para comenzar la asignación optimizada</span>
+                     <span className="font-medium">Genera grupos para comenzar la asignación optimizada</span>
                   </span>
                 )}
               </div>
               
               {groups.length > 0 && (
                 <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                  🔄 Arrastra chips entre grupos
+                   Arrastra chips entre grupos
                 </div>
               )}
             </div>
@@ -209,18 +209,18 @@ const OptimizedVistaPreviaSala = ({
                 </span>
               ) : groups.length === 0 ? (
                 <span className="flex items-center gap-2">
-                  🎯 <span>GENERA GRUPOS PRIMERO</span>
+                   <span>GENERA GRUPOS PRIMERO</span>
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  🚀 <span>CONFIRMAR Y LANZAR JUEGO</span>
+                   <span>CONFIRMAR Y LANZAR JUEGO</span>
                 </span>
               )}
             </button>
             
             {groups.length > 0 && !isGenerating && (
               <p className="mt-3 text-sm text-gray-600 bg-green-50 border border-green-200 rounded-lg p-2">
-                ✅ <span className="font-semibold">{groups.reduce((total, group) => total + group.students.length, 0)} estudiantes</span> distribuidos en <span className="font-semibold">{groups.length} equipos</span> usando tecnología optimizada
+                 <span className="font-semibold">{groups.reduce((total, group) => total + group.students.length, 0)} estudiantes</span> distribuidos en <span className="font-semibold">{groups.length} equipos</span> usando tecnología optimizada
               </p>
             )}
           </div>

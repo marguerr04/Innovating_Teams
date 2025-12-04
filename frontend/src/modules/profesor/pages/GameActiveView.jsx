@@ -116,7 +116,7 @@ const GameActiveView = () => {
 
             {/* Card: Progreso de Equipos Unificado - Más conciso */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 mb-6">
-              <h3 className="text-lg font-bold mb-4 text-white">📊 Progreso de Equipos</h3>
+              <h3 className="text-lg font-bold mb-4 text-white"> Progreso de Equipos</h3>
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white/20 rounded-lg p-3 text-center text-white">
@@ -144,11 +144,8 @@ const GameActiveView = () => {
             {/* Vista de grupos en tiempo real - ENFOQUE PRINCIPAL */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-white">👥 Estado de los Equipos en Tiempo Real</h3>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
-                  <span className="text-sm text-white/70">Actualizando en vivo</span>
-                </div>
+                <h3 className="text-xl font-semibold text-white"> Estado de los Equipos en Tiempo Real</h3>
+                
               </div>
               
               <div className="bg-white rounded-lg p-6">
@@ -179,22 +176,14 @@ const GameActiveView = () => {
                 />
               </div>
               
-              {/* Alertas de atención */}
-              <div className="mt-4 space-y-2">
-                <div className="bg-yellow-600/20 border border-yellow-500/30 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-yellow-200">
-                    <span className="text-lg">⚠️</span>
-                    <span className="text-sm font-medium">Equipo 3 lleva 5 minutos sin actividad - Considera brindar apoyo</span>
-                  </div>
-                </div>
-              </div>
+              
             </div>
 
             {/* Panel de Información Adicional */}
             <div className="mb-8">
               {/* Próximas Fases */}
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <h4 className="text-lg font-semibold text-white mb-4">🗓️ Próximas Fases del Juego</h4>
+                <h4 className="text-lg font-semibold text-white mb-4"> Próximas Fases del Juego</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex items-center gap-3 text-white/70 bg-white/5 rounded-lg p-3">
                     <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
@@ -221,18 +210,7 @@ const GameActiveView = () => {
               </div>
             </div>
 
-            {/* Información de desarrollo actualizada */}
-            <div className="bg-black/20 rounded-lg p-4 text-xs text-white opacity-60">
-              <h4 className="font-semibold mb-2">ℹ️ Información de desarrollo:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div>• Fase actual: Fase 1 - Formación de equipos</div>
-                <div>• PIN del juego: {gamePin}</div>
-                <div>• Monitoreo en tiempo real activo</div>
-                <div>• Sistema de fases centralizado</div>
-                <div>• Enfoque en seguimiento del profesor</div>
-                <div>• WebSocket preparado para métricas en vivo</div>
-              </div>
-            </div>
+            
           </div>
         </div>
 

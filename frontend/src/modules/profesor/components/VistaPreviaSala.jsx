@@ -27,17 +27,17 @@ const VistaPreviaSala = ({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-4">
               <span className="font-medium text-blue-800">
-                📊 {students.length} estudiantes total
+                 {students.length} estudiantes total
               </span>
               <span className="font-medium text-blue-800">
-                🎯 {groupSettings.groupCount} grupos configurados
+                 {groupSettings.groupCount} grupos configurados
               </span>
               <span className="text-blue-600">
-                👥 ~{Math.ceil(students.length / groupSettings.groupCount)} por grupo
+                 ~{Math.ceil(students.length / groupSettings.groupCount)} por grupo
               </span>
             </div>
             <div className="text-blue-600 text-xs">
-              💡 Arrastra estudiantes entre grupos
+               Arrastra estudiantes entre grupos
             </div>
           </div>
         </div>
@@ -99,8 +99,8 @@ const VistaPreviaSala = ({
             <div className="text-sm text-gray-600">
               {groups.length > 0 ? (
                 <div className="flex gap-4">
-                  <span>✅ Estudiantes asignados: {groups.reduce((total, group) => total + group.students.length, 0)}</span>
-                  <span>📋 Estudiantes sin asignar: {students.length - groups.reduce((total, group) => total + group.students.length, 0)}</span>
+                  <span> Estudiantes asignados: {groups.reduce((total, group) => total + group.students.length, 0)}</span>
+                  <span> Estudiantes sin asignar: {students.length - groups.reduce((total, group) => total + group.students.length, 0)}</span>
                 </div>
               ) : (
                 <span>⏳ Genera grupos para comenzar la asignación</span>
@@ -109,7 +109,7 @@ const VistaPreviaSala = ({
             
             {groups.length > 0 && (
               <div className="text-xs text-blue-600">
-                🔄 Reorganiza arrastrando chips entre grupos
+                 Reorganiza arrastrando chips entre grupos
               </div>
             )}
           </div>
@@ -126,7 +126,7 @@ const VistaPreviaSala = ({
           
           {groups.length > 0 && !isGenerating && (
             <p className="mt-2 text-sm text-gray-600">
-              ✅ {groups.reduce((total, group) => total + group.students.length, 0)} estudiantes distribuidos en {groups.length} equipos
+               {groups.reduce((total, group) => total + group.students.length, 0)} estudiantes distribuidos en {groups.length} equipos
             </p>
           )}
         </div>

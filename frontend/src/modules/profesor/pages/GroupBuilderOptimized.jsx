@@ -35,7 +35,7 @@ const GroupBuilderOptimized = () => {
       setIsCreatingGame(true);
       setGameError(null);
       
-      console.log('🎮 Iniciando proceso de creación del juego...');
+      console.log(' Iniciando proceso de creación del juego...');
       
       // Validar que haya grupos con estudiantes
       const gruposConEstudiantes = groups.filter(g => g.students && g.students.length > 0);
@@ -58,14 +58,14 @@ const GroupBuilderOptimized = () => {
         }))
       }));
       
-      console.log('📋 Grupos preparados para backend:', gruposParaBackend);
+      console.log(' Grupos preparados para backend:', gruposParaBackend);
       
       // Crear la partida con grupos en el backend
       const partidaCreada = await gameService.crearPartidaConGrupos(gruposParaBackend, {
         estado: 'CONFIGURACION'
       });
       
-      console.log('✅ Partida creada exitosamente:', partidaCreada);
+      console.log(' Partida creada exitosamente:', partidaCreada);
       
       // Navegar a la sala de espera con el PIN generado por el backend
       navigate(`/profesor/waiting-room/${partidaCreada.pin}`, {
@@ -78,7 +78,7 @@ const GroupBuilderOptimized = () => {
       });
       
     } catch (error) {
-      console.error('❌ Error al crear el juego:', error);
+      console.error(' Error al crear el juego:', error);
       setGameError('Error al crear el juego: ' + error.message);
       setIsCreatingGame(false);
     }
@@ -93,11 +93,8 @@ const GroupBuilderOptimized = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-white mb-1">
-                  🚀 Constructor de Grupos
+                  Constructor de Grupos
                 </h1>
-                <p className="text-blue-100 text-sm">
-                  Organiza estudiantes con drag & drop
-                </p>
               </div>
             </div>
           </div>
@@ -109,7 +106,7 @@ const GroupBuilderOptimized = () => {
                 {/* Metadatos de la Sesión - PRIMERO */}
                 <div className="bg-white rounded-lg p-4 shadow-sm border">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    🎮 Contexto del Juego
+                     Contexto del Juego
                   </h3>
                   
                   <div className="space-y-3">
@@ -123,9 +120,8 @@ const GroupBuilderOptimized = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Campus</label>
                       <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Campus Principal</option>
-                        <option>Campus Norte</option>
-                        <option>Campus Sur</option>
+                        <option>Campus Santiago</option>
+                        <option>Campus Concepción</option>
                       </select>
                     </div>
                     <div>
@@ -142,7 +138,7 @@ const GroupBuilderOptimized = () => {
                 {/* Configuración de CSV - SEGUNDO */}
                 <div className="bg-white rounded-lg p-3 shadow-sm border">
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center text-sm">
-                    📄 Estudiantes
+                     Estudiantes
                   </h3>
                   
                   <div className="space-y-2">
@@ -170,7 +166,7 @@ const GroupBuilderOptimized = () => {
                     {uploadResult && (
                       <div className="bg-green-50 border border-green-200 rounded p-2">
                         <p className="text-xs text-green-700">
-                          ✅ {uploadResult.procesados || uploadResult.total} estudiantes
+                           {uploadResult.procesados || uploadResult.total} estudiantes
                           {uploadResult.backend && ` (${uploadResult.nuevos} nuevos)`}
                         </p>
                       </div>
@@ -191,7 +187,7 @@ const GroupBuilderOptimized = () => {
                 {/* Configuración de Grupos */}
                 <div className="bg-white rounded-lg p-3 shadow-sm border">
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center text-sm">
-                    ⚙️ Agrupación
+                     Agrupación
                   </h3>
                   
                   <div className="space-y-3">
@@ -218,38 +214,7 @@ const GroupBuilderOptimized = () => {
                       <p className="text-xs text-gray-500 mt-1">Máximo 4 grupos por sesión</p>
                     </div>
                     
-                    {/* Información de distribución equitativa */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-blue-700">Distribución esperada:</span>
-                        <span className="font-semibold text-blue-900">
-                          {(() => {
-                            const total = students.length;
-                            const groups = groupSettings.groupCount;
-                            if (total === 0) return '0 por grupo';
-                            
-                            const base = Math.floor(total / groups);
-                            const remainder = total % groups;
-                            
-                            if (remainder === 0) {
-                              return `${base} por grupo`;
-                            } else {
-                              return `${remainder} grupos de ${base + 1}, ${groups - remainder} grupos de ${base}`;
-                            }
-                          })()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs text-blue-600 mt-1">
-                        <span>Total estudiantes: {students.length}</span>
-                        <span>En {groupSettings.groupCount} grupo{groupSettings.groupCount !== 1 ? 's' : ''}</span>
-                      </div>
-                      {isGenerating && (
-                        <div className="mt-2 text-xs text-purple-600 font-medium flex items-center gap-1">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
-                          Redistribuyendo estudiantes...
-                        </div>
-                      )}
-                    </div>
+                    
                     
                     {/* Opciones de asignación */}
                     <div className="space-y-2">
@@ -301,7 +266,7 @@ const GroupBuilderOptimized = () => {
                         </span>
                       ) : (
                         <span className="flex items-center justify-center gap-1">
-                          🔄 Redistribuir
+                           Redistribuir
                         </span>
                       )}
                     </button>
@@ -311,7 +276,7 @@ const GroupBuilderOptimized = () => {
                 {/* Estado de estudiantes */}
                 <div className="bg-white rounded-lg p-4 shadow-sm border">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    📊 Estado Actual
+                     Estado Actual
                   </h3>
                   
                   <div className="space-y-2">
@@ -321,7 +286,7 @@ const GroupBuilderOptimized = () => {
                     </div>
                     
                     {uploadResult && (
-                      <p className="text-green-600 text-xs">✅ CSV cargado: {uploadResult.total} estudiantes</p>
+                      <p className="text-green-600 text-xs"> CSV cargado: {uploadResult.total} estudiantes</p>
                     )}
                     
                     {/* Vista previa de estudiantes */}
@@ -356,7 +321,7 @@ const GroupBuilderOptimized = () => {
               {gameError && (
                 <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start">
-                    <span className="text-2xl mr-3">❌</span>
+                    <span className="text-2xl mr-3"></span>
                     <div>
                       <h3 className="text-red-800 font-semibold mb-1">Error al crear el juego</h3>
                       <p className="text-red-600 text-sm">{gameError}</p>
@@ -394,28 +359,7 @@ const GroupBuilderOptimized = () => {
           </div>
           
           {/* Footer con información de optimización */}
-          <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="w-3 h-3 bg-green-400 rounded-full"></span>
-                  <span>Drag & Drop Nativo Optimizado</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="w-3 h-3 bg-blue-400 rounded-full"></span>
-                  <span>API Simplificada con @dnd-kit</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="w-3 h-3 bg-purple-400 rounded-full"></span>
-                  <span>Menos Código, Mejor UX</span>
-                </div>
-              </div>
-              
-              <div className="text-xs text-gray-500">
-                💡 Optimizado con React Hooks modernos y @dnd-kit
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

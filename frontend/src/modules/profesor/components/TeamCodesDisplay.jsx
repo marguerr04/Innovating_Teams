@@ -9,7 +9,7 @@ const TeamCodesDisplay = ({ grupos }) => {
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 border-2 border-blue-200">
       <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
-        🔑 Códigos de Equipo
+         Códigos de Equipo
       </h3>
       <p className="text-sm text-gray-600 mb-4">
         Comparte estos códigos con tus estudiantes. Cada equipo debe ingresar su código de 7 dígitos.
@@ -42,7 +42,7 @@ const TeamCodesDisplay = ({ grupos }) => {
                 className="ml-3 p-2 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Copiar código"
               >
-                📋
+                
               </button>
             </div>
           </div>
@@ -51,7 +51,7 @@ const TeamCodesDisplay = ({ grupos }) => {
       
       <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-sm text-yellow-800">
-          💡 <strong>Tip:</strong> Los estudiantes deben ir a la pantalla de inicio e ingresar el código de su equipo.
+           <strong>Tip:</strong> Los estudiantes deben ir a la pantalla de inicio e ingresar el código de su equipo.
         </p>
       </div>
     </div>
