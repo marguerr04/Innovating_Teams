@@ -146,6 +146,48 @@ const ChallengeAdmin = () => {
         setEditingChallengeId(null);
     }, []);
 
+    const createPersonaIfNeeded = useCallback(async () => {
+        if (challengeFormData.persona_id) {
+            return challengeFormData.persona_id;
+        }
+
+        const nombre = challengeFormData.nombrepersona.trim();
+        if (!nombre) {
+            throw new Error('Debes ingresar el nombre del perfil asociado o seleccionar uno existente.');
+        }
+
+        const edad = challengeFormData.edadpersona ? parseInt(challengeFormData.edadpersona, 10) : null;
+
+        const personaResponse = await apiRequest('/admin/personas/', {
+            method: 'POST',
+            body: JSON.stringify({
+                nombre,
+                edad,
+                imagenurl: challengeFormData.avatar_url,
+                contexto: challengeFormData.contexto
+            })
+        });
+
+        const nuevaPersona = personaResponse?.data;
+        if (!nuevaPersona?.id) {
+            throw new Error('No se pudo registrar el perfil asociado.');
+        }
+
+        setPeople((prev) => (
+            prev.some((p) => p.id === nuevaPersona.id)
+                ? prev
+                : [...prev, {
+                      id: nuevaPersona.id,
+                      nombre: nuevaPersona.nombre,
+                      imagenurl: nuevaPersona.imagenurl,
+                      edad: nuevaPersona.edad
+                  }]
+        ));
+
+        setChallengeFormData((prev) => ({ ...prev, persona_id: nuevaPersona.id }));
+        return nuevaPersona.id;
+    }, [challengeFormData, setPeople, setChallengeFormData]);
+
     const handleCreatePersonaAndChallenge = useCallback(async (e) => {
         e.preventDefault();
 
@@ -155,16 +197,17 @@ const ChallengeAdmin = () => {
         }
 
         try {
-            const personaData = challengeFormData.persona_id
-                ? people.find((p) => p.id === challengeFormData.persona_id)
-                : null;
+            let personaId = challengeFormData.persona_id;
+            if (!personaId) {
+                personaId = await createPersonaIfNeeded();
+            }
 
             const payload = {
                 titulo: challengeFormData.titulo,
                 descripcion: challengeFormData.descripcion,
                 contexto: challengeFormData.contexto,
                 tema_desafio_id: parseInt(challengeFormData.tema_desafio, 10),
-                persona_id: personaData ? personaData.id : null,
+                persona_id: personaId,
                 nombrepersona: challengeFormData.nombrepersona,
                 edadpersona: challengeFormData.edadpersona ? parseInt(challengeFormData.edadpersona, 10) : null
             };
@@ -180,7 +223,7 @@ const ChallengeAdmin = () => {
         } catch (error) {
             Swal.fire('Error', `No se pudo crear el desafio: ${error.message}`, 'error');
         }
-    }, [challengeFormData, people]);
+    }, [challengeFormData, createPersonaIfNeeded]);
 
     const handleEdit = useCallback((challenge) => {
         const personData = people.find((p) => p.id === challenge.persona_id);
@@ -210,16 +253,17 @@ const ChallengeAdmin = () => {
         }
 
         try {
-            const personaData = challengeFormData.persona_id
-                ? people.find((p) => p.id === challengeFormData.persona_id)
-                : null;
+            let personaId = challengeFormData.persona_id;
+            if (!personaId) {
+                personaId = await createPersonaIfNeeded();
+            }
 
             const payload = {
                 titulo: challengeFormData.titulo,
                 descripcion: challengeFormData.descripcion,
                 contexto: challengeFormData.contexto,
                 tema_desafio_id: parseInt(challengeFormData.tema_desafio, 10),
-                persona_id: personaData ? personaData.id : null,
+                persona_id: personaId,
                 nombrepersona: challengeFormData.nombrepersona,
                 edadpersona: challengeFormData.edadpersona ? parseInt(challengeFormData.edadpersona, 10) : null
             };
@@ -235,7 +279,7 @@ const ChallengeAdmin = () => {
         } catch (error) {
             Swal.fire('Error', `No se pudo actualizar el desafio: ${error.message}`, 'error');
         }
-    }, [challengeFormData, people, editingChallengeId]);
+    }, [challengeFormData, editingChallengeId, createPersonaIfNeeded]);
 
     const handleSubmit = isEditing ? handleUpdateChallenge : handleCreatePersonaAndChallenge;
 
