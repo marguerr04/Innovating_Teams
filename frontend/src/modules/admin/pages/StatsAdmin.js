@@ -98,7 +98,7 @@ const StatsAdmin = () => {
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Dashboard de Administración (MOCK)</h1>
+            <h1 className="text-3xl font-bold mb-6 text-indigo-700">Dashboard de Administración </h1>
             <p className="text-gray-600 mb-8">Resumen de métricas clave del sistema.</p>
             
             {/* Tarjetas de Métricas Clave */}
