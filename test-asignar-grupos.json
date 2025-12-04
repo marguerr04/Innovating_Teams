@@ -1,0 +1,20 @@
+{
+  "grupos": [
+    {
+      "nombre": "Equipo Innovadores",
+      "alumnos": []
+    },
+    {
+      "nombre": "Equipo Emprendedores",
+      "alumnos": []
+    },
+    {
+      "nombre": "Equipo Creativos",
+      "alumnos": []
+    },
+    {
+      "nombre": "Equipo Lideres",
+      "alumnos": []
+    }
+  ]
+}

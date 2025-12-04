@@ -70,7 +70,9 @@ const OptimizedVistaPreviaSala = ({
   roomCode, 
   isGenerating,
   containers,
-  handleDragEnd
+  handleDragEnd,
+  onLaunchGame,
+  isCreatingGame = false
 }) => {
   // Configurar sensores para mejor UX
   const sensors = useSensors(
@@ -196,10 +198,16 @@ const OptimizedVistaPreviaSala = ({
           {/* Botón Confirmar compacto */}
           <div className="text-center">
             <button 
-              disabled={groups.length === 0 || isGenerating}
+              disabled={groups.length === 0 || isGenerating || isCreatingGame}
+              onClick={onLaunchGame}
               className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-yellow-900 font-bold px-6 py-3 rounded-lg transition-all duration-200 disabled:from-gray-300 disabled:to-gray-400 disabled:text-gray-500 text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
             >
-              {groups.length === 0 ? (
+              {isCreatingGame ? (
+                <span className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-900"></div>
+                  <span>CREANDO JUEGO...</span>
+                </span>
+              ) : groups.length === 0 ? (
                 <span className="flex items-center gap-2">
                   🎯 <span>GENERA GRUPOS PRIMERO</span>
                 </span>

@@ -74,6 +74,7 @@ export const useOptimizedGroupBuilder = () => {
   const processStudentsFromCsv = (csvData) => {
     const processedStudents = csvData.map((student, index) => ({
       id: `csv-${index + 1}`,
+      originalIndex: index, // Para debugging
       correo: student.correo,
       rut: student.rut,
       nombre: student.nombre,
@@ -99,7 +100,12 @@ export const useOptimizedGroupBuilder = () => {
     } else {
       console.log('✅ Validación de IDs: Todos son únicos', {
         totalStudents: processedStudents.length,
-        sampleIds: ids.slice(0, 5)
+        sampleIds: ids.slice(0, 5),
+        sampleStudents: processedStudents.slice(0, 3).map(s => ({
+          id: s.id,
+          originalIndex: s.originalIndex,
+          name: s.displayName
+        }))
       });
     }
     
@@ -393,10 +399,8 @@ export const useOptimizedGroupBuilder = () => {
     console.log('🔧 Drag End Debug:', {
       studentId,
       targetContainerId,
-      containers: Object.keys(containers).reduce((acc, key) => ({
-        ...acc,
-        [key]: containers[key].map(s => ({ id: s.id, name: s.displayName || s.name }))
-      }), {})
+      sourceStudentName: containers[Object.keys(containers).find(key => 
+        containers[key].some(s => s.id === studentId))]?.find(s => s.id === studentId)?.displayName
     });
 
     // Encontrar contenedor origen
@@ -445,13 +449,60 @@ export const useOptimizedGroupBuilder = () => {
 
     // Actualizar contenedores
     setContainers(prevContainers => {
+      console.log('📝 Estado previo completo:', {
+        prevContainers: Object.keys(prevContainers).reduce((acc, key) => ({
+          ...acc,
+          [key]: prevContainers[key].map(s => ({ 
+            id: s.id, 
+            name: s.displayName || s.name,
+            originalIndex: s.originalIndex || 'no-index'
+          }))
+        }), {}),
+        studentToMove: { 
+          id: studentObj.id, 
+          name: studentObj.displayName || studentObj.name,
+          originalIndex: studentObj.originalIndex || 'no-index'
+        }
+      });
+
       // Crear copias profundas para evitar problemas de referencia
-      const newSourceList = [...prevContainers[sourceContainerId]].filter(s => s.id !== studentId);
-      const newTargetList = [...prevContainers[targetContainerId], { ...studentObj }]; // Copia profunda
+      const sourceContainer = prevContainers[sourceContainerId];
+      const targetContainer = prevContainers[targetContainerId];
       
-      console.log('🔄 Después de filtrar/agregar:', {
-        newSourceList: newSourceList.map(s => ({ id: s.id, name: s.displayName || s.name })),
-        newTargetList: newTargetList.map(s => ({ id: s.id, name: s.displayName || s.name }))
+      // Encontrar el índice exacto del estudiante para asegurar que se remueve el correcto
+      const studentIndex = sourceContainer.findIndex(s => s.id === studentId);
+      console.log('🔍 Índice del estudiante encontrado:', studentIndex);
+      
+      if (studentIndex === -1) {
+        console.error('🚨 ERROR: Estudiante no encontrado en contenedor origen!');
+        return prevContainers; // No hacer cambios si hay error
+      }
+
+      // Crear nueva lista origen SIN el estudiante (usando el índice exacto)
+      const newSourceList = [
+        ...sourceContainer.slice(0, studentIndex),
+        ...sourceContainer.slice(studentIndex + 1)
+      ];
+      
+      // Crear nueva lista destino CON el estudiante (copia profunda)
+      const studentCopy = { 
+        ...studentObj,
+        // Agregar timestamp para tracking
+        movedAt: Date.now()
+      };
+      const newTargetList = [...targetContainer, studentCopy];
+      
+      console.log('🔄 Después de filtrar/agregar (con índices):', {
+        newSourceList: newSourceList.map((s, idx) => ({ 
+          index: idx, 
+          id: s.id, 
+          name: s.displayName || s.name 
+        })),
+        newTargetList: newTargetList.map((s, idx) => ({ 
+          index: idx, 
+          id: s.id, 
+          name: s.displayName || s.name 
+        }))
       });
       
       const newContainers = {
@@ -462,7 +513,11 @@ export const useOptimizedGroupBuilder = () => {
 
       console.log('🎯 Estado final de containers:', Object.keys(newContainers).reduce((acc, key) => ({
         ...acc,
-        [key]: newContainers[key].map(s => ({ id: s.id, name: s.displayName || s.name }))
+        [key]: newContainers[key].map((s, idx) => ({ 
+          index: idx, 
+          id: s.id, 
+          name: s.displayName || s.name 
+        }))
       }), {}));
       
       return newContainers;

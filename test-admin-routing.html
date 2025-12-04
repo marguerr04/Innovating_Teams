@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Routing - Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        button { margin: 5px; padding: 8px 12px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug Admin Panel - MisionEmprende</h1>
+    
+    <div class="test-section">
+        <h2>Test Links - Frontend en localhost:3000</h2>
+        <button onclick="testRoute('/admin')">Test /admin</button>
+        <button onclick="testRoute('/admin/stats')">Test /admin/stats</button>
+        <button onclick="testRoute('/admin/challenges')">Test /admin/challenges</button>
+        <button onclick="testRoute('/admin/profile')">Test /admin/profile</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Login Test</h2>
+        <button onclick="testLogin()">Test Admin Login (Mock)</button>
+    </div>
+    
+    <div id="results" class="test-section">
+        <h3>Resultados:</h3>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function testRoute(route) {
+            const output = document.getElementById('output');
+            const fullUrl = `http://localhost:3000${route}`;
+            
+            output.innerHTML += `<p>Testing route: <a href="${fullUrl}" target="_blank">${route}</a></p>`;
+            
+            // Abrir en nueva ventana para inspeccionar
+            window.open(fullUrl, '_blank');
+        }
+        
+        function testLogin() {
+            const output = document.getElementById('output');
+            output.innerHTML += `<p>Opening admin login: <a href="http://localhost:3000/login/administrador" target="_blank">Login Page</a></p>`;
+            window.open('http://localhost:3000/login/administrador', '_blank');
+        }
+    </script>
+</body>
+</html>

@@ -15,10 +15,10 @@ const AdminApp = () => {
         // *** CAMBIO CLAVE: Se elimina el componente <BrowserRouter> para evitar el error de anidamiento. ***
         <AdminLayout>
             <Routes>
-                {/* Redirige la ruta raíz ('/') inmediatamente a /stats. */}
-                <Route path="/" element={<Navigate replace to="/stats" />} /> 
+                {/* Redirige la ruta raíz ('/') inmediatamente a stats. */}
+                <Route path="/" element={<Navigate replace to="/admin/stats" />} /> 
                 
-                {/* Rutas limpias internas */}
+                {/* Rutas limpias internas (absolutas para evitar acumulación) */}
                 <Route path="/stats" element={<StatsAdmin />} /> 
                 <Route path="/challenges" element={<ChallengeAdmin />} />
                 <Route path="/profile" element={<ProfileAdmin />} /> 

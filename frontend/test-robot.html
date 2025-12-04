@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Robot Component</title>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function MissyCompanion({ phase, showTokens }) {
+            // Simple static component to test
+            if (phase < -1) return null;
+
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    bottom: '20px',
+                    left: '20px',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'end',
+                    gap: '10px'
+                }
+            }, [
+                // Robot emoji
+                React.createElement('div', {
+                    key: 'robot',
+                    style: {
+                        width: '60px',
+                        height: '60px',
+                        backgroundColor: '#3b82f6',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        color: 'white',
+                        cursor: 'pointer'
+                    }
+                }, '🤖'),
+                
+                // Simple message
+                React.createElement('div', {
+                    key: 'message',
+                    style: {
+                        backgroundColor: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        maxWidth: '180px',
+                        fontSize: '12px',
+                        color: '#333',
+                        border: '1px solid #3b82f6'
+                    }
+                }, '¡Hola! Soy tu Robot Guía 🤖')
+            ]);
+        }
+
+        function TestApp() {
+            const [phase, setPhase] = useState(1);
+            
+            return React.createElement('div', {
+                style: {
+                    minHeight: '100vh',
+                    backgroundColor: '#f0f9ff',
+                    padding: '20px'
+                }
+            }, [
+                React.createElement('h1', { key: 'title' }, 'Test Robot Component'),
+                React.createElement('button', {
+                    key: 'btn',
+                    onClick: () => setPhase(phase + 1),
+                    style: {
+                        padding: '10px 20px',
+                        backgroundColor: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }
+                }, `Cambiar Fase (Actual: ${phase})`),
+                React.createElement(MissyCompanion, { key: 'robot', phase: phase })
+            ]);
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(TestApp));
+    </script>
+</body>
+</html>

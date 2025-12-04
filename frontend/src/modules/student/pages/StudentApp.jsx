@@ -17,12 +17,7 @@ import Phase2 from "../features/Phase2";
 import Phase3 from '../features/Phase3';
 import Phase4 from '../features/Phase4';
 import Phase5 from '../features/Phase5';
-import Phase1Interstitial from '../features/Phase1/Phase1Interstitial';
-import Phase2Interstitial from '../features/Phase2/Phase2Interstitial';
-import Phase3Interstitial from '../features/Phase3/Phase3Interstitial';
-import Phase4Interstitial from '../features/Phase4/Phase4Interstitial';
-import Phase5Interstitial from '../features/Phase5/Phase5Interstitial';
-import Phase7Interstitial from '../features/Phase7/Phase7Interstitial';
+
 import Phase6 from '../features/Phase6';
 import Phase7 from '../features/Phase7';
 import MissyCompanion from '../../../components/MissyCompanion.jsx';
@@ -34,40 +29,76 @@ export default function StudentApp() {
   const [showIntro, setShowIntro] = useState(true);
   const [showPhaseVideo, setShowPhaseVideo] = useState(false);
   const [phaseVideoShown, setPhaseVideoShown] = useState({});
-  const [showPhaseInterstitial, setShowPhaseInterstitial] = useState(false);
-  const [phaseInterstitialShown, setPhaseInterstitialShown] = useState({});
+
   const [imgError, setImgError] = useState(false);
   const [showTokens, setShowTokens] = useState(false);
   const [phaseToShowTokensFor, setPhaseToShowTokensFor] = useState(0);
 
-  // --- 1. EFECTO PARA CARGAR EL CHATBOT (CORREGIDO) ---
+  // --- CHATBOT CARGA BAJO DEMANDA (Solo cuando se hace click en el robot) ---
+  // El chatbot ahora se carga dinámicamente desde MissyCompanion.jsx cuando el usuario hace click
   useEffect(() => {
-    (function(){
-      if(!window.chatbase || window.chatbase("getState") !== "initialized"){
-        window.chatbase = (...args) => {
-          if (!window.chatbase.q) { window.chatbase.q = [] }
-          window.chatbase.q.push(args)
-        };
-        window.chatbase = new Proxy(window.chatbase, {
-          get(target, prop) {
-            if (prop === "q") { return target.q }
-            return (...args) => target(prop, ...args)
+    const chatbaseSelectors = [
+      'iframe[src*="chatbase.co"]',
+      'iframe[src*="widget"]',
+      '[id*="chatbase"]:not(#unified-chatbot-container)',
+      '[class*="chatbase"]',
+      '[data-chatbase]',
+      'div[style*="position"][style*="fixed"][style*="bottom"][style*="right"][style*="border-radius"]',
+      'button[style*="position"][style*="fixed"][style*="bottom"]'
+    ];
+
+    const restoreOriginalChatbot = () => {
+      chatbaseSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+          if (element?.dataset?.chatbaseHidden === '1') {
+            element.style.removeProperty('opacity');
+            element.style.removeProperty('pointer-events');
+            delete element.dataset.chatbaseHidden;
           }
-        })
-      }
-      const onLoad = function() {
-        const script = document.createElement("script");
-        script.src = "https://www.chatbase.co/embed.min.js";
-        script.id = "NDIGyY6LjlULvnmM9GEOX";
-        script.domain = "www.chatbase.co";
-        document.body.appendChild(script);
-      };
-      if (document.readyState === "complete") {
-        onLoad();
-      } else {
-        window.addEventListener("load", onLoad);
-      }
-    })();
+        });
+      });
+    };
+
+    const hideOriginalChatbot = () => {
+      chatbaseSelectors.forEach(selector => {
+        try {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(element => {
+            if (!element || element.closest('[data-innovating-chatbot]')) return;
+            if (
+              element.id !== 'unified-chatbot-container' &&
+              (element.src?.includes('chatbase') ||
+                element.id?.includes('chatbase') ||
+                element.className?.includes('chatbase') ||
+                element.hasAttribute?.('data-chatbase'))
+            ) {
+              element.dataset.chatbaseHidden = '1';
+              element.style.setProperty('opacity', '0', 'important');
+              element.style.setProperty('pointer-events', 'none', 'important');
+            }
+          });
+        } catch (e) {
+          console.log('⚠️ Error ocultando elementos:', e.message);
+        }
+      });
+    };
+
+    const observer = new MutationObserver(() => {
+      hideOriginalChatbot();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    const intervalId = setInterval(hideOriginalChatbot, 200);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      restoreOriginalChatbot();
+    };
   }, []);
 
   const handlePhaseComplete = (phaseJustFinished) => {
@@ -76,7 +107,7 @@ export default function StudentApp() {
     setPhase(7);
 
     // disparar video manualmente
-    setPhaseVideoShown(prev => ({ ...prev, [7]: false }));
+    setPhaseVideoShown(prev => ({ ...prev, '7': false }));
     setShowPhaseVideo(true);
 
     return;
@@ -115,15 +146,8 @@ export default function StudentApp() {
     7: 20  // Video de cierre antes de QR (fase 7)
   };
 
-  const INTERSTITIAL_BY_PHASE = {
-    1: true,
-    2: true,
-    3: true,
-    4: true
-  };
-
   const handleIntroDone = () => {
-    // Show video interstitial if mapped, then phase interstitial if mapped, then continue
+    // Show video interstitial if mapped, then continue directly to phase
     const vid = VIDEO_BY_PHASE[phase];
     if (vid && !phaseVideoShown[phase]) {
       setPhaseVideoShown(prev => ({ ...prev, [phase]: true }));
@@ -131,17 +155,12 @@ export default function StudentApp() {
       setShowIntro(false);
       return;
     }
-    if (INTERSTITIAL_BY_PHASE[phase] && !phaseInterstitialShown[phase]) {
-      setPhaseInterstitialShown(prev => ({ ...prev, [phase]: true }));
-      setShowPhaseInterstitial(true);
-      setShowIntro(false);
-      return;
-    }
+    // No more phase interstitials - go directly to the phase content
     setShowIntro(false);
   };
 
   return (
-    <div className="min-h-screen text-white relative"> 
+    <div className="min-h-screen text-white relative" data-student-app="true"> 
       
       <PhaseBackground phase={phase} /> 
       
@@ -241,57 +260,34 @@ export default function StudentApp() {
                     size={phase === 0 ? 'large' : 'medium'}
                     onClose={() => {
                       setShowPhaseVideo(false);
-
-                      // Si la fase tiene interstitial (Fases 1–4)
-                      if (INTERSTITIAL_BY_PHASE[phase] && !phaseInterstitialShown[phase]) {
-                        setPhaseInterstitialShown(prev => ({ ...prev, [phase]: true }));
-                        setShowPhaseInterstitial(true);
-                        return;
-                      }
-
-                      // Para fase 7 NO hay interstitial → se debe mostrar directo Phase7
                       setShowIntro(false);
                     }}
                   />
                 )}
-                
-                {/* Phase-specific interstitials */}
-                {showPhaseInterstitial && phase === 1 && (
-                  <Phase1Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
-                )}
-                {showPhaseInterstitial && phase === 2 && (
-                  <Phase2Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
-                )}
-                {showPhaseInterstitial && phase === 3 && (
-                  <Phase3Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
-                )}
-                {showPhaseInterstitial && phase === 4 && (
-                  <Phase4Interstitial onNext={() => { setShowPhaseInterstitial(false); setShowIntro(false); }} />
-                )}
-               
+
 
                 {/* Renderizado de fases principales */}
-                {phase === 1 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 1 && !showPhaseVideo && (
                   <Phase1 role={role} isProf={isProf} onNext={() => handlePhaseComplete(1)} />
                 )}
-                {phase === 2 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 2 && !showPhaseVideo && (
                   <Phase2 role={role} isProf={isProf} onNext={() => handlePhaseComplete(2)} />
                 )}
-                {phase === 3 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 3 && !showPhaseVideo && (
                   <Phase3 role={role} isProf={isProf} onBack={() => go(2)} onNext={() => handlePhaseComplete(3)} />
                 )}
-                {phase === 4 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 4 && !showPhaseVideo && (
                   <Phase4 role={role} isProf={isProf} onBack={() => go(3)} onNext={() => handlePhaseComplete(4)} />
                 )}
-                {phase === 5 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 5 && !showPhaseVideo && (
                   <Phase5 role={role} isProf={isProf} onBack={() => go(4)} onNext={() => handlePhaseComplete(5)} />
                 )}
-                {phase === 6 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 6 && !showPhaseVideo && (
                   <Phase6 role={role} isProf={isProf} onBack={() => go(5)} onNext={() => handlePhaseComplete(6)} />
                 )}
                 
                 {/* Fase 7 - Solo se muestra cuando no hay intro, video o interstitial activos */}
-                {phase === 7 && !showPhaseVideo && !showPhaseInterstitial && (
+                {phase === 7 && !showPhaseVideo && (
                   <Phase7 role={role} isProf={isProf} onBack={() => go(6)} />
                 )}
               </>
@@ -300,10 +296,13 @@ export default function StudentApp() {
         )}
       </div>
       {/* Le pasamos la fase actual y si se están mostrando tokens para que reaccione */}
-      <MissyCompanion 
-        phase={phase} 
-        showTokens={showTokens} 
-      />
+      {/* Solo mostrar el robot normal cuando NO se están mostrando tokens */}
+      {!showTokens && (
+        <MissyCompanion 
+          phase={phase} 
+          showTokens={showTokens} 
+        />
+      )}
     </div>
   );
 }

@@ -202,25 +202,7 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
             (Test) Saltar Presentación
           </button>
         )}
-        
-        {/* --- 2. MOSTRAR FOTO GRANDE --- */}
-        <div className="mt-6">
-          {currentTeamPhoto ? (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Prototipo del {currentTeam.name}:</h3>
-              {/* Se muestra grande (max-w-lg) */}
-              <img src={currentTeamPhoto} alt={`Prototipo ${currentTeam.name}`} className="w-full max-w-lg mx-auto rounded-lg shadow-md mt-2 border" />
-            </div>
-          ) : (
-            <div className="mt-6 p-4 bg-slate-50 rounded-lg text-slate-500 text-sm">
-              {isMyTeamPresenting ? 
-                "Tu equipo no subió una foto en la Fase 3." :
-                `(No se puede mostrar la foto del ${currentTeam.name} - (lógica de backend pendiente))`
-              }
-            </div>
-          )}
-        </div>
-        
+
         {/* CAMBIO: Texto de rol más grande */}
         <div className="mt-6 p-4 bg-slate-50 rounded-xl">
             {isMyTeamPresenting ? (

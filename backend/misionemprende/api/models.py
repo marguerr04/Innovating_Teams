@@ -116,6 +116,7 @@ class Desafio(models.Model):
 class Equipo(models.Model):
     nombreequipo = models.CharField(max_length=100)
     tamanoequipo = models.IntegerField(blank=True, null=True)
+    codigo_equipo = models.CharField(max_length=10, unique=True, null=True, blank=True, help_text="Código único partida-equipo para acceso del dispositivo")
 
     class Meta:
         app_label = 'api'
@@ -425,3 +426,89 @@ class ProgresoEtapa(models.Model):
     class Meta:
         app_label = 'api'
         unique_together = ('equipo', 'etapa') # Un equipo solo pasa una vez por etapa
+
+
+class ConexionPartida(models.Model):
+    """
+    Trackea las conexiones activas de EQUIPOS (no estudiantes individuales) a una partida.
+    Se crea cuando alguien del equipo ingresa su código de 7 dígitos.
+    Permite mostrar los estudiantes del equipo solo cuando el equipo está conectado.
+    """
+    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='conexiones')
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='conexiones')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='conexiones_partida', null=True, blank=True)
+    codigo_ingresado = models.CharField(max_length=7, help_text='Código de 7 dígitos ingresado')
+    timestamp_conexion = models.DateTimeField(auto_now_add=True, help_text='Momento en que el equipo se conectó')
+    activo = models.BooleanField(default=True, help_text='Si el equipo está actualmente conectado')
+    
+    class Meta:
+        app_label = 'api'
+        db_table = 'conexion_partida'
+        unique_together = ('partida', 'equipo')  # Un equipo solo puede estar conectado una vez por partida
+        ordering = ['timestamp_conexion']
+        
+    def __str__(self):
+        return f"{self.equipo.nombreequipo} (Partida {self.partida.id}) - {'Activo' if self.activo else 'Inactivo'}"
+
+
+class EstadoPartida(models.Model):
+    """
+    Trackea cambios de estado/fase de una partida en tiempo real.
+    Optimizado para consultas rápidas sin modificar tabla Partida constantemente.
+    Permite historial completo de transiciones de estado.
+    
+    Estados válidos:
+    - CONFIGURACION: Profesor configurando equipos
+    - EN_ESPERA: Sala de espera, esperando que todos se conecten
+    - INICIADA: Juego iniciado por profesor
+    - FASE_VIDEO: Reproduciendo video introductorio
+    - FASE_1 a FASE_7: Fases del juego
+    - FINALIZADA: Partida terminada
+    """
+    partida = models.ForeignKey(Partida, on_delete=models.CASCADE, related_name='estados_historial')
+    estado_actual = models.CharField(
+        max_length=50,
+        help_text='Estado actual de la partida (CONFIGURACION, EN_ESPERA, INICIADA, FASE_VIDEO, FASE_1-7, FINALIZADA)'
+    )
+    fase_actual = models.IntegerField(
+        default=0,
+        help_text='Número de fase actual: 0=espera, 1=video, 2-8=fases 1-7'
+    )
+    timestamp = models.DateTimeField(auto_now_add=True, help_text='Momento del cambio de estado')
+    activo = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text='Solo el registro activo=True representa el estado actual'
+    )
+    mensaje = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Mensaje opcional para contexto del cambio'
+    )
+    
+    class Meta:
+        app_label = 'api'
+        db_table = 'estado_partida'
+        indexes = [
+            models.Index(fields=['partida', 'activo'], name='idx_partida_activo'),
+            models.Index(fields=['timestamp'], name='idx_timestamp'),
+            models.Index(fields=['estado_actual'], name='idx_estado'),
+        ]
+        ordering = ['-timestamp']
+        
+    def __str__(self):
+        return f"Partida {self.partida.id} - {self.estado_actual} (Fase {self.fase_actual})"
+    
+    def save(self, *args, **kwargs):
+        """
+        Al guardar un nuevo estado activo, desactiva los anteriores automáticamente.
+        Esto garantiza que solo haya un estado activo por partida.
+        """
+        if self.activo:
+            # Desactivar estados anteriores de esta partida
+            EstadoPartida.objects.filter(
+                partida=self.partida,
+                activo=True
+            ).update(activo=False)
+        super().save(*args, **kwargs)

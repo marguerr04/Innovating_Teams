@@ -871,7 +871,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "build:css": "tailwindcss build styles.css -o output.css",
-    "test": "react-scripts test",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-i9#hgunt*zdj*t18&=a!i4w^(9zr4q#wznx0(ze=dndtovl72_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'kubernetes.docker.internal',  # ← AGREGAR ESTA LÍNEA
+]
 
 
 # Application definition
@@ -117,11 +122,11 @@ WSGI_APPLICATION = 'misionemprende.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'InnovatingTeamsv6',  # El nombre EXACTO de tu base de datos en PostgreSQL
-        'USER': 'postgres',       # Tu usuario de PostgreSQL
-        'PASSWORD': '123456',   # Tu contraseña de PostgreSQL
-        'HOST': 'localhost',                   # O la IP del servidor de BD (usualmente localhost)
-        'PORT': '5432',                      # Puerto por defecto de PostgreSQL
+        'NAME': 'InnovatingTeamsv5',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

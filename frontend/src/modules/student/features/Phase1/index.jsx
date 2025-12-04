@@ -4,6 +4,10 @@ import './Phase1.css'; // Asegúrate de que este archivo exista o elimina la lí
 import { load, save } from '../../../../utils/helpers.js';
 import ActivityModal from '../../components/ActivityModal.jsx';
 import Timer from '../../../../components/Timer';
+import PhaseBackground from '../../../../components/PhaseBackground.jsx';
+import sopaImg from '../../../../assets/images/icons/sopaLetras.png';
+import anagramaImg from '../../../../assets/images/icons/anagrama.png';
+import iceImg from '../../../../assets/images/icons/romperHielo.png';
 // ...existing code...
 
 // Importamos los juegos
@@ -12,6 +16,24 @@ import RompeHielosGame from './components/RompeHielosGame';
 import SopaLetrasGame from './components/SopaLetrasGame';
 
 const PHASE_1_DURATION = 300; // 5 minutos
+
+const ACTIVITY_MEDIA = {
+  sopa: {
+    image: sopaImg,
+    alt: 'Ilustración Sopa de letras',
+    description: 'Encuentra palabras ocultas antes que el resto del equipo.',
+  },
+  anagrama: {
+    image: anagramaImg,
+    alt: 'Ilustración Armar palabras con letras',
+    description: 'Reordena letras y coordina pistas para formar palabras nuevas.',
+  },
+  ice: {
+    image: iceImg,
+    alt: 'Ilustración actividad rompehielos',
+    description: 'Dinámica express para conocerse y entrar en confianza.',
+  },
+};
 
 // --- COMPONENTE PARA RENDERIZAR EL JUEGO GANADOR ---
 const ActividadGanadora = ({ winner, onComplete }) => {
@@ -98,29 +120,45 @@ function Phase1({ role, onNext, isProf }) {
   useEffect(() => save('it_poll', poll), [poll]);
   useEffect(() => save('it_p1_knowledge', knowledgeMode), [knowledgeMode]);
 
-  // Helper para obtener opciones
+  // Helper para obtener opciones con iconos
   const getOptionsForMode = (mode) => {
     if (mode === 'known') {
       return [
-        { id: 'sopa', label: 'Sopa de letras' },
-        { id: 'anagrama', label: 'Armar palabras con letras' }
+        { id: 'sopa', label: 'Sopa de letras', icon: '🔤', description: 'Encuentra palabras ocultas' },
+        { id: 'anagrama', label: 'Armar palabras con letras', icon: '🧩', description: 'Reorganiza las letras' }
       ];
     }
     if (mode === 'unknown') {
       return [
-        { id: 'ice', label: 'Romper el hielo con el grupo' }
+        { id: 'ice', label: 'Romper el hielo con el grupo', icon: '❄️', description: 'Actividad para conocerse' }
       ];
     }
     return [];
   };
 
-  // Efecto: Inicializar opciones si ya hay modo pero no opciones
+  // Efecto: Inicializar opciones y saltar votación si solo hay una opción
   useEffect(() => {
     if (knowledgeMode && poll.options.length === 0) {
+      const options = getOptionsForMode(knowledgeMode);
       setPoll(prev => ({
         ...prev,
-        options: getOptionsForMode(knowledgeMode)
+        options: options
       }));
+      
+      // Si solo hay una opción, votar automáticamente y saltar la votación
+      if (options.length === 1) {
+        setTimeout(() => {
+          setPoll(prev => ({
+            ...prev,
+            myVote: options[0].id,
+            votes: { [options[0].id]: 1 }
+          }));
+          // Saltar directamente al juego después de un breve delay para UX
+          setTimeout(() => {
+            setShowActivity(true);
+          }, 1000);
+        }, 500);
+      }
     }
   }, [knowledgeMode, poll.options.length]);
 
@@ -161,6 +199,7 @@ function Phase1({ role, onNext, isProf }) {
     : null;
     
   const selectedOption = (poll.options.find(o => o.id === poll.myVote) || winner);
+  const selectedMedia = selectedOption ? ACTIVITY_MEDIA[selectedOption.id] : null;
 
   // Estados para el Modal de Actividad
   const [activityDone, setActivityDone] = useState(false);
@@ -180,14 +219,27 @@ function Phase1({ role, onNext, isProf }) {
   if (!knowledgeMode) {
     return (
       <>
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Fase 1 · Configuración inicial</h1>
-          {/* Timer decorativo o de espera */}
-          <div className="card p-4 scale-90 origin-right">
-             <Timer initialSeconds={PHASE_1_DURATION} isProf={isProf} autoStart={false} />
+        {/* Fondo específico de Fase 1 */}
+        <PhaseBackground phase={1} />
+        
+        {/* Contenido principal con z-index alto */}
+        <div className="relative z-10">
+          <div className="flex justify-between items-center mb-4">
+            {/* Título enmarcado con mejor jerarquía visual */}
+            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-xl px-6 py-3 shadow-lg backdrop-blur-sm">
+              <h1 className="text-2xl font-bold text-yellow-900 flex items-center gap-2">
+                <span className="text-2xl">⚙️</span>
+                Fase 1 · Configuración inicial
+              </h1>
+              <p className="text-sm text-yellow-700 mt-1">Selecciona el modo de equipo para comenzar</p>
+            </div>
+            {/* Timer decorativo o de espera */}
+            <div className="card p-4 scale-90 origin-right">
+               <Timer initialSeconds={PHASE_1_DURATION} isProf={isProf} autoStart={false} />
+            </div>
           </div>
+          <KnowledgeSelector onSelect={handleModeSelect} />
         </div>
-        <KnowledgeSelector onSelect={handleModeSelect} />
       </>
     );
   }
@@ -195,12 +247,19 @@ function Phase1({ role, onNext, isProf }) {
   // VISTA 2: Pantalla de Votación
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-4xl font-bold">Trabajo en Equipo</h1>
-            
+      {/* Fondo específico de Fase 1 */}
+      <PhaseBackground phase={1} />
+      
+      {/* Contenido principal con z-index alto */}
+      <div className="relative z-10">
+        <div className="flex justify-between items-center mb-6">
+          
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              {/* Título enmarcado para mejor jerarquía */}
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 rounded-lg px-4 py-2 shadow-md backdrop-blur-sm">
+                <h1 className="text-3xl font-bold text-yellow-900">Trabajo en Equipo</h1>
+              </div>
             {/* BOTÓN DE PROFESOR PARA CAMBIAR MODO */}
             {isProf && (
               <button 
@@ -211,21 +270,21 @@ function Phase1({ role, onNext, isProf }) {
                 <span>⚙️</span> Cambiar Modo
               </button>
             )}
+            </div>
+            <p className="text-white/60 text-sm">
+              Modo actual: <strong className="text-mint-400">{knowledgeMode === 'known' ? 'Ya se conocen' : 'No se conocen'}</strong>
+            </p>
           </div>
-          <p className="text-white/60 text-sm">
-            Modo actual: <strong className="text-mint-400">{knowledgeMode === 'known' ? 'Ya se conocen' : 'No se conocen'}</strong>
-          </p>
-        </div>
 
-        <div className="card p-4">
-          <Timer
-            initialSeconds={PHASE_1_DURATION}
-            isProf={isProf}
-            autoStart={true}
-            onComplete={onNext}
-          />
+          <div className="card p-4">
+            <Timer
+              initialSeconds={PHASE_1_DURATION}
+              isProf={isProf}
+              autoStart={true}
+              onComplete={onNext}
+            />
+          </div>
         </div>
-      </div>
 
       {/* CAMBIO: Texto instructivo más grande (text-xl a 2xl) y con mejor interlineado */}
       <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl leading-relaxed font-medium">
@@ -240,22 +299,44 @@ function Phase1({ role, onNext, isProf }) {
         
         {/* Card Izquierda: Lista de Opciones */}
         <div className="card p-6">
-          <b className="text-lg text-slate-800">Votación de actividades</b>
+          {/* Título enmarcado con mejor contexto */}
+          <div className="bg-gradient-to-r from-mint-50 to-sky-50 border-2 border-mint-200 rounded-lg px-4 py-3 mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🗳️</span>
+              <div>
+                <b className="text-lg text-slate-800">Votación de actividades</b>
+                <p className="text-sm text-slate-600 mt-1">
+                  {poll.options.length === 1 
+                    ? "Actividad seleccionada automáticamente" 
+                    : "Cada integrante vota por su actividad favorita"}
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="mt-4 flex flex-col gap-3">
             {poll.options.length > 0 ? (
               poll.options.map(o => (
                 <label 
                   key={o.id} 
                   className={`
-                    flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer
+                    flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer
                     ${poll.myVote === o.id 
-                      ? 'border-mint-500 bg-mint-50 shadow-md' 
-                      : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-mint-500 bg-mint-50 shadow-md transform scale-[1.02]' 
+                      : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:scale-[1.01]'
                     }
                   `}
                 >
+                  {/* Icono de la actividad */}
+                  <div className={`text-3xl flex-shrink-0 transition-transform ${
+                    poll.myVote === o.id ? 'scale-110' : 'group-hover:scale-105'
+                  }`}>
+                    {o.icon || '🎯'}
+                  </div>
+                  
                   {/* Radio Button Custom */}
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${poll.myVote === o.id ? 'border-mint-500' : 'border-slate-300'}`}>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    poll.myVote === o.id ? 'border-mint-500' : 'border-slate-300'
+                  }`}>
                     {poll.myVote === o.id && <div className="w-3 h-3 rounded-full bg-mint-500" />}
                   </div>
                   
@@ -268,12 +349,21 @@ function Phase1({ role, onNext, isProf }) {
                     onChange={() => castVote(o.id)} 
                   />
                   
-                  <span className={`font-bold text-lg ${poll.myVote === o.id ? 'text-mint-700' : 'text-slate-700'}`}>
-                    {o.label}
-                  </span>
+                  <div className="flex-1">
+                    <span className={`font-bold text-lg block ${
+                      poll.myVote === o.id ? 'text-mint-700' : 'text-slate-700'
+                    }`}>
+                      {o.label}
+                    </span>
+                    {o.description && (
+                      <span className="text-sm text-slate-500 mt-1 block">
+                        {o.description}
+                      </span>
+                    )}
+                  </div>
                   
                   {/* Contador de Votos */}
-                  <span className="ml-auto text-xs font-bold bg-slate-200 text-slate-600 rounded-full px-3 py-1">
+                  <span className="text-xs font-bold bg-slate-200 text-slate-600 rounded-full px-3 py-1">
                     {tally[o.id] || 0}
                   </span>
                 </label>
@@ -302,10 +392,27 @@ function Phase1({ role, onNext, isProf }) {
         <div className="card p-6 flex flex-col h-full justify-between">
           <div>
             <b className="text-lg text-slate-800">Tu Actividad:</b>
-            <h2 className="text-2xl font-extrabold text-mint-600 mt-1 mb-2">
+            <h2 className="text-2xl font-extrabold text-mint-600 mt-1">
               {selectedOption?.label || 'Selecciona una opción...'}
             </h2>
-            <p className="text-sm text-slate-500 leading-relaxed">
+
+            {selectedMedia?.image && (
+              <div className="mt-6 flex justify-center">
+                <img 
+                  src={selectedMedia.image} 
+                  alt={selectedMedia.alt}
+                  className="w-28 h-28 md:w-32 md:h-32 object-contain"
+                />
+              </div>
+            )}
+
+            {selectedMedia?.description && (
+              <p className="text-sm text-slate-500 leading-relaxed mt-4 text-center">
+                {selectedMedia.description}
+              </p>
+            )}
+
+            <p className="text-sm text-slate-500 leading-relaxed mt-4">
               Completa la actividad con tu equipo para desbloquear la siguiente fase. 
               ¡Recuerden trabajar juntos!
             </p>
@@ -354,6 +461,7 @@ function Phase1({ role, onNext, isProf }) {
           selectedOption && <ActividadGanadora winner={selectedOption} onComplete={handleOnComplete} />
         )}
       </ActivityModal>
+      </div>
     </>
   );
 }
