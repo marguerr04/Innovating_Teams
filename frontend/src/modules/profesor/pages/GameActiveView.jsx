@@ -83,75 +83,82 @@ const GameActiveView = () => {
     >
       <div 
         className="min-h-screen flex flex-col"
-        style={{ background: 'linear-gradient(135deg, #1E5AA8, #183f72)' }}
+        style={{ background: 'linear-gradient(135deg, #2E5E8C 0%, #1A3A59 100%)' }}
       >
         {/* Contenido principal del juego */}
         <div className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             
-            {/* Card: Fase Actual con Instrucciones */}
-            <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 backdrop-blur-sm rounded-xl p-6 mb-6 border-2 border-purple-400/30">
+            {/* 1. TARJETA FASE ACTUAL (Blanca con borde azul) */}
+            <div className="bg-white rounded-xl p-6 mb-6 border-2 border-[#2E5E8C] shadow-xl">
               <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-md" 
+                     style={{ background: 'linear-gradient(135deg, #00B8A9 0%, #2E5E8C 100%)', color: 'white' }}>
                   🎯
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-2xl font-bold text-white">Fase 1: Formación de Equipos</h3>
-                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">En Progreso</span>
+                    <h3 className="text-2xl font-bold text-[#2E5E8C]">Fase 1: Formación de Equipos</h3>
+                    <span className="text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm" 
+                          style={{ backgroundColor: '#00B8A9' }}>
+                      En Progreso
+                    </span>
                   </div>
-                  <p className="text-white/90 text-base mb-4">
-                    En esta fase, los estudiantes se conocen, establecen roles y definen objetivos comunes para su proyecto emprendedor. Monitorea que todos los equipos completen las tres actividades principales.
+                  <p className="text-slate-600 text-base mb-4">
+                    En esta fase, los estudiantes se conocen, establecen roles y definen objetivos comunes. Monitorea que todos los equipos completen las tres actividades.
                   </p>
                   
-                  {/* Barra de progreso de fase */}
-                  <div className="bg-white/20 rounded-full h-3 mb-2">
-                    <div className="bg-gradient-to-r from-green-400 to-blue-500 h-full rounded-full transition-all duration-500" 
-                         style={{ width: '75%' }}></div>
+                  {/* Barra de progreso (Fondo gris claro para contraste) */}
+                  <div className="bg-slate-100 rounded-full h-3 mb-2 overflow-hidden border border-slate-200">
+                    <div className="h-full rounded-full transition-all duration-500" 
+                         style={{ width: '75%', background: 'linear-gradient(90deg, #00B8A9 0%, #FDC328 100%)' }}></div>
                   </div>
-                  <div className="text-white/70 text-sm">Progreso: 75% - Los equipos están completando la formación inicial</div>
+                  <div className="text-slate-500 text-sm font-medium">Progreso: 75% - Los equipos están completando la formación inicial</div>
                 </div>
               </div>
             </div>
 
-            {/* Card: Progreso de Equipos Unificado - Más conciso */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 mb-6">
-              <h3 className="text-lg font-bold mb-4 text-white"> Progreso de Equipos</h3>
+            {/* 2. TARJETA PROGRESO (Blanca con borde azul) */}
+            <div className="bg-white rounded-xl p-5 mb-6 border-2 border-[#2E5E8C] shadow-xl">
+              <h3 className="text-lg font-bold mb-4 text-[#2E5E8C]">📊 Progreso de Equipos</h3>
               
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/20 rounded-lg p-3 text-center text-white">
-                  <div className="text-2xl font-bold text-blue-300">
+                {/* Items internos con fondo suave */}
+                <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-100">
+                  <div className="text-2xl font-bold" style={{ color: '#2E5E8C' }}>
                     {currentGameData?.participantes || jugadores.length}
                   </div>
-                  <div className="text-xs opacity-80 mt-1">Estudiantes</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1">Estudiantes</div>
                 </div>
                 
-                <div className="bg-white/20 rounded-lg p-3 text-center text-white">
-                  <div className="text-2xl font-bold text-green-300">
+                <div className="bg-teal-50 rounded-lg p-3 text-center border border-teal-100">
+                  <div className="text-2xl font-bold" style={{ color: '#00B8A9' }}>
                     {currentGrupos.filter(g => g.miembros && g.miembros.length > 0).length}
                   </div>
-                  <div className="text-xs opacity-80 mt-1">Equipos</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1">Equipos</div>
                 </div>
 
-                <div className="bg-white/20 rounded-lg p-3 text-center text-white">
-                  <div className="text-2xl font-bold text-yellow-300">75%</div>
-                  <div className="text-xs opacity-80 mt-1">Completado</div>
+                <div className="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-100">
+                  <div className="text-2xl font-bold" style={{ color: '#E6B023' }}>75%</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1">Completado</div>
                 </div>
               </div>
             </div>
 
-
-            {/* Vista de grupos en tiempo real - ENFOQUE PRINCIPAL */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+            {/* 3. TARJETA ESTADO REAL TIME (Blanca con borde azul) */}
+            <div className="bg-white rounded-xl p-6 mb-8 border-2 border-[#2E5E8C] shadow-xl">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-white"> Estado de los Equipos en Tiempo Real</h3>
-                
+                <h3 className="text-xl font-semibold text-[#2E5E8C]">👥 Estado de los Equipos en Tiempo Real</h3>
+                <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                  <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#00B8A9' }}></div>
+                  <span className="text-sm font-medium text-[#00B8A9]">Actualizando en vivo</span>
+                </div>
               </div>
               
-              <div className="bg-white rounded-lg p-6">
+              {/* Contenedor de la tabla/grid de grupos */}
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                 <GroupsDisplay
                   grupos={currentGrupos.map(grupo => {
-                    // Transformar integrantes a miembros si es necesario
                     const miembros = grupo.miembros || (grupo.integrantes ? grupo.integrantes.map(int => ({
                       id: int.correo || int.email || int.id,
                       nombre: int.nombre || int.primer_nombre || 'Estudiante',
@@ -163,67 +170,67 @@ const GameActiveView = () => {
                       ...grupo,
                       miembros: miembros,
                       maxIntegrantes: grupo.maxIntegrantes || grupo.max_integrantes || 10,
-                      // Agregar datos de progreso simulado para cada grupo
                       progreso: Math.floor(Math.random() * 40 + 60),
                       actividadActual: "Definiendo roles del equipo",
                       estado: Math.random() > 0.3 ? 'activo' : 'necesita_atencion'
                     };
                   })}
-                  onUpdateGroupName={() => {}} // No editable durante juego
+                  onUpdateGroupName={() => {}} 
                   allowEdit={false}
                   showEditInput={false}
                   viewMode="playing"
                 />
               </div>
               
-              
+              {/* Alerta ejemplo */}
+              <div className="mt-4 space-y-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
+                   <span className="text-lg">⚠️</span>
+                   <span className="text-sm font-medium text-amber-700">Equipo 3 lleva 5 minutos sin actividad - Considera brindar apoyo</span>
+                </div>
+              </div>
             </div>
 
-            {/* Panel de Información Adicional */}
+            {/* 4. TARJETA PRÓXIMAS FASES (Blanca con borde azul) */}
             <div className="mb-8">
-              {/* Próximas Fases */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <h4 className="text-lg font-semibold text-white mb-4"> Próximas Fases del Juego</h4>
+              <div className="bg-white rounded-xl p-6 border-2 border-[#2E5E8C] shadow-xl">
+                <h4 className="text-lg font-semibold text-[#2E5E8C] mb-4">🗓️ Próximas Fases del Juego</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 text-white/70 bg-white/5 rounded-lg p-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
-                    <div>
-                      <div className="font-medium text-white">Lluvia de Ideas</div>
-                      <div className="text-xs opacity-75">Generación de propuestas innovadoras</div>
+                  {[
+                    { num: 2, title: 'Lluvia de Ideas', desc: 'Generación de propuestas' },
+                    { num: 3, title: 'Prototipo', desc: 'Materialización de la idea' },
+                    { num: 4, title: 'Presentación', desc: 'Pitch y evaluación' }
+                  ].map((fase) => (
+                    <div key={fase.num} className="flex items-center gap-3 bg-slate-50 rounded-lg p-3 border border-slate-100 hover:border-blue-200 transition-colors">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white" 
+                           style={{ backgroundColor: '#2E5E8C' }}>
+                        {fase.num}
+                      </div>
+                      <div>
+                        <div className="font-medium text-slate-700">{fase.title}</div>
+                        <div className="text-xs text-slate-500">{fase.desc}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/70 bg-white/5 rounded-lg p-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
-                    <div>
-                      <div className="font-medium text-white">Desarrollo de Prototipo</div>
-                      <div className="text-xs opacity-75">Materialización de la idea seleccionada</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/70 bg-white/5 rounded-lg p-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
-                    <div>
-                      <div className="font-medium text-white">Presentación Final</div>
-                      <div className="text-xs opacity-75">Pitch y evaluación de proyectos</div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             
+
           </div>
         </div>
 
-        {/* Footer mejorado con información de la sesión */}
-        <div className="bg-black/20 py-4">
+        {/* Footer */}
+        <div className="bg-black/20 py-4 border-t border-white/10">
           <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center justify-between text-white text-sm opacity-75">
+            <div className="flex flex-col md:flex-row items-center justify-between text-white text-sm opacity-90">
               <div>
                 Sesión iniciada: {currentGameData?.fechaInicio ? new Date(currentGameData.fechaInicio).toLocaleString() : 'N/A'} | 
-                PIN: <span className="font-mono font-bold">{gamePin}</span>
+                PIN: <span className="font-mono font-bold text-[#FDC328]">{gamePin}</span>
               </div>
               <div className="mt-2 md:mt-0">
-                Rol: Monitor del Profesor | Fase 1 de 4 | {jugadores.length} estudiantes activos
+                Rol: Monitor del Profesor | Fase 1 de 4
               </div>
             </div>
           </div>
