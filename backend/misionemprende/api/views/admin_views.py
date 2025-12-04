@@ -717,5 +717,55 @@ def admin_get_personas(request):
                 'success': False,
                 'error': str(e)
             }, status=500)
+    elif request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+
+            nombre = data.get('nombre', '').strip()
+            imagenurl = data.get('imagenurl', '').strip()
+            contexto = data.get('contexto', '').strip()
+            edad = data.get('edad')
+
+            if not nombre:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'El nombre de la persona es obligatorio'
+                }, status=400)
+
+            edad_valor = None
+            if edad not in (None, ''):
+                try:
+                    edad_valor = int(edad)
+                except (TypeError, ValueError):
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'La edad debe ser un número válido'
+                    }, status=400)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO persona (nombrepersona, imagenurl, contextopersona, edad)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id, nombrepersona, imagenurl, contextopersona, edad
+                """, [nombre, imagenurl, contexto, edad_valor])
+
+                result = cursor.fetchone()
+
+            return JsonResponse({
+                'success': True,
+                'data': {
+                    'id': result[0],
+                    'nombre': result[1],
+                    'imagenurl': result[2] or '',
+                    'contexto': result[3] or '',
+                    'edad': result[4]
+                }
+            }, status=201)
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
