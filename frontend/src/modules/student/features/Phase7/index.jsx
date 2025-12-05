@@ -2,11 +2,6 @@
 
 import React from 'react';
 
-// NOTA: Asegúrate de poner las imágenes QR
-// en tu carpeta /public/ para que se puedan encontrar.
-const FORM_QR_URL = '/encuestaQR.png';
-const INSTA_QR_URL = '/instagramQR.png';
-
 export default function Phase7({ onBack }) {
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -33,7 +28,7 @@ export default function Phase7({ onBack }) {
             Por favor, escaneen este código QR para contestar una breve encuesta de evaluación.
           </p>
           <img 
-            src={FORM_QR_URL} 
+            src='/assets/images/encuestaQR.png' 
             alt="QR Evaluación Preincubación"
             className="w-full max-w-[320px] h-auto rounded-lg shadow-md"
           />
@@ -48,7 +43,7 @@ export default function Phase7({ onBack }) {
             Entérate de todas las novedades, charlas y fondos concursables.
           </p>
           <img 
-            src={INSTA_QR_URL} 
+            src='/assets/images/instagramQR.png' 
             alt="QR Instagram Emprendimiento UDD"
             className="w-full max-w-[320px] h-auto rounded-lg shadow-md"
           />

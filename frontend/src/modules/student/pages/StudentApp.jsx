@@ -200,7 +200,7 @@ export default function StudentApp() {
                 <Link to="/" className="flex items-center gap-3 no-underline">
                   {!imgError ? (
                     <img
-                      src="/assets/mission_logo.png"
+                      src="/assets/images/mission_logo.png"
                       alt="Mision Emprende"
                       className="w-28 md:w-32 object-contain"
                       onError={() => setImgError(true)}

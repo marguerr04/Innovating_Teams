@@ -15,7 +15,6 @@ export const SOUNDS = {
   // Sonidos de UI
   ui: {
     click: '/assets/sounds/ui/click.mp3',
-    click_old: '/assets/sounds/ui/click_old.mp3',
     button_click: '/assets/sounds/ui/button_click.mp3',
     // Nuevo: sonidos de temporizador (agregar archivos en public/assets/sounds/ui/)
     tick: '/assets/sounds/ui/tick.mp3', // reproducido cada segundo en el último minuto

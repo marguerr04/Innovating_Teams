@@ -530,20 +530,20 @@ export default function MissyCompanion({ phase, showTokens, positioning = 'fixed
 
   // Seleccionar el video apropiado según la fase
   const getVideoForPhase = () => {
-    if (showTokens) return '/assets/videos/robot_celebration.webm';
+    if (showTokens) return '/assets/videos/robot/robot_celebration.webm';
     
     switch(phase) {
       case 1:
       case 2:
-        return '/assets/videos/robot_explaining.webm';
+        return '/assets/videos/robot/robot_explaining.webm';
       case 3:
       case 4:
-        return '/assets/videos/robot_thinking.webm';
+        return '/assets/videos/robot/robot_thinking.webm';
       case 5:
       case 6:
-        return '/assets/videos/robot_celebration.webm';
+        return '/assets/videos/robot/robot_celebration.webm';
       default:
-        return '/assets/videos/robot_idle.webm';
+        return '/assets/videos/robot/robot_idle.webm';
     }
   };
 

@@ -309,9 +309,8 @@ export default function InstructionsModal({ isOpen, onClose, initialPhase = 1 })
         </div>
       </div>
 
-      {/* Elemento de Audio */}
-      {/* La ruta '/turn-a-page-336933.mp3' funcionará porque el archivo está en /public */}
-      <audio ref={audioRef} src="/turn-a-page-336933.mp3" preload="auto"></audio>
+      {/* Elemento de Audio (ubicado en /public/assets/sounds/) */}
+      <audio ref={audioRef} src="/assets/sounds/turnPage.mp3" preload="auto"></audio>
     </>
   );
 }

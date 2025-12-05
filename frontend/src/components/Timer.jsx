@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { beep } from '../utils/helpers.js';
 
-const WARNING_TIME = 10; 
+const WARNING_TIME = 60; // Start ticking loop on last minute
 
 // Rutas de los GIFs (recuerda el ajuste que hicimos si estaban invertidos)
 const HOURGLASS_GIF = '/assets/gifs/bomb.gif'; // Ajustado según tu feedback anterior
 const BOMB_GIF = '/assets/gifs/hourglass.gif'; // Ajustado según tu feedback anterior
-const TICK_SOUND = '/assets/sounds/clock.mp3'; 
+const TICK_SOUND = '/assets/sounds/tictacClock.mp3'; 
 
 export default function Timer({ 
   initialSeconds = 300, 

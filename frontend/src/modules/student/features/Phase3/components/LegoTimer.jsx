@@ -17,7 +17,7 @@ export default function LegoTimer({ isProf, onNext, onBack, onShowMap }) {
     // Card de Tailwind (de index.html)
     <div className="card p-6 flex flex-col items-center">
       <img 
-        src="/lego.gif" 
+        src="/assets/images/lego.gif" 
         className="w-[280px] h-[158px] object-cover rounded-xl mb-4" 
         alt="gif lego"
       />

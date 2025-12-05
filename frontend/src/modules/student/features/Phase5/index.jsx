@@ -105,7 +105,7 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
       if (currentTeam.id === MY_TEAM_ID) {
         setCurrentTeamPhoto(null); // Mi equipo sin imagen
       } else {
-        setCurrentTeamPhoto('/lego.gif'); // Otros equipos - imagen de prueba
+        setCurrentTeamPhoto('/assets/images/lego.gif'); // Otros equipos - imagen de prueba
       }
       console.log(`❌ Sin imagen para ${currentTeam.name}`);
     }
@@ -325,7 +325,7 @@ export default function Phase5({ role, isProf, onNext, onBack }) {
           )}
         </div>
         
-        <audio ref={soundRef} src="/MA_BBRealSound_Push_Button_1_MP3.mp3" preload="auto" className="hidden"></audio>
+        <audio ref={soundRef} src="/assets/sounds/buttonClick.mp3" preload="auto" className="hidden"></audio>
       </div>
     );
   }

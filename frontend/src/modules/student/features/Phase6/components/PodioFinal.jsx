@@ -40,8 +40,8 @@ export default function PodioFinal({ baseTeams, onNext, onBack }) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* (Asegúrate de que 'crowd-cheer.mp3' esté en /public) */}
-      <audio ref={audioRef} src="/crowd-cheer.mp3" preload="auto" className="hidden"></audio>
+      {/* (Asegúrate de que 'crowd-cheer.mp3' esté en /public/assets/sounds) */}
+      <audio ref={audioRef} src="/assets/sounds/crowd-cheer.mp3" preload="auto" className="hidden"></audio>
       
       <h1 className="text-3xl font-extrabold mb-2">Ranking por Tokens</h1>
       <div className="card p-6 relative overflow-hidden">

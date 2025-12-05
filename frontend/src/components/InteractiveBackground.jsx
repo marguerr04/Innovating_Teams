@@ -148,9 +148,9 @@ export default function InteractiveBackground() {
         <div data-type="triangle" className="item triangle" data-w="70" data-h="60"></div>
         <div data-type="word" className="item word">Innovar</div>
         
-        {/* 5. CORRECCIÓN: Usa las imágenes .jpg que subiste (asumiendo que están en /public/) */}
-        <img data-type="icon-joy" className="item" src="/joystick.png" style={{width:'56px',height:'56px'}}/>
-        <img data-type="icon-pad" className="item" src="/gamepad.png" style={{width:'56px',height:'56px'}}/>
+        {/* 5. Imágenes movidas a /public/assets/images/ */}
+        <img data-type="icon-joy" className="item" src="/assets/images/joystick.png" style={{width:'56px',height:'56px'}}/>
+        <img data-type="icon-pad" className="item" src="/assets/images/gamepad.png" style={{width:'56px',height:'56px'}}/>
       </div>
     </>
   );

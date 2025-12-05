@@ -288,7 +288,7 @@ export default function TokensOverlay({ show, phase, onContinue }) {
           )}
           {robotProcessingFailed && (
             <video
-              src="/assets/videos/robot_celebration.webm"
+              src="/assets/videos/robot/robot_celebration.webm"
               autoPlay
               loop
               muted
@@ -299,7 +299,7 @@ export default function TokensOverlay({ show, phase, onContinue }) {
           )}
           <video
             ref={robotVideoRef}
-            src="/assets/videos/robot_celebration.webm"
+            src="/assets/videos/robot/robot_celebration.webm"
             autoPlay
             loop
             muted
