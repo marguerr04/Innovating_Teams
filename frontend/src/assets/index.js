@@ -9,7 +9,8 @@ export const SOUNDS = {
   games: {
     success: '/assets/sounds/games/success.mp3',
     incorrect: '/assets/sounds/games/incorrect.mp3', 
-    button_success: '/assets/sounds/games/button_success.mp3'
+    button_success: '/assets/sounds/games/button_success.mp3',
+    magic: '/assets/sounds/games/magic.mp3'
   },
   
   // Sonidos de UI

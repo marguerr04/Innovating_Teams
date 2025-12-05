@@ -1,11 +1,14 @@
 // Archivo: src/components/InstructionsModal.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import teamworkImg from '../assets/images/instructions/trabajo_equipo.png';
-import empathyImg from '../assets/images/instructions/empatia.png';
-import creativityImg from '../assets/images/instructions/creatividad.png';
-import communicationImg from '../assets/images/instructions/comunicacion.png';
-import feedbackImg from '../assets/images/instructions/feedback.png';
+
+const instructionImages = {
+  teamwork: '/assets/images/instructions/trabajo_equipo.png',
+  empathy: '/assets/images/instructions/empatia.png',
+  creativity: '/assets/images/instructions/creatividad.png',
+  communication: '/assets/images/instructions/comunicacion.png',
+  feedback: '/assets/images/instructions/feedback.png'
+};
 
 // 1. Pega el array 'stages' de tu index.html
 const stages = [
@@ -15,7 +18,7 @@ const stages = [
     duration: "5 minutos",
     skill: "Comunicación efectiva",
     rule: "Tokens por orden de finalización: 1° 4, 2° 3, 3° 2, 4° 1.",
-    illustration: { src: teamworkImg, alt: 'Ilustración trabajo en equipo' },
+    illustration: { src: instructionImages.teamwork, alt: 'Ilustración trabajo en equipo' },
     body: `
       <p><strong>Objetivo:</strong> Poner a prueba la capacidad de colaboración y comunicación del equipo.</p>
       <p><strong>Dinámica:</strong> El equipo elige cómo iniciará la dinámica:</p>
@@ -40,7 +43,7 @@ const stages = [
     duration: "8 minutos",
     skill: "Empatía",
     rule: "1 token si se completa dentro del tiempo.",
-    illustration: { src: empathyImg, alt: 'Ilustración empatía' },
+    illustration: { src: instructionImages.empathy, alt: 'Ilustración empatía' },
     body: `
       <p><strong>Objetivo:</strong> Seleccionar un problema y caracterizar a la persona que lo vive.</p>
       <p><strong>Dinámica:</strong></p>
@@ -61,7 +64,7 @@ const stages = [
         duration: "10 minutos",
         skill: "Pensamiento creativo y prototipado",
         rule: "1 token si se completa dentro del tiempo.",
-        illustration: { src: creativityImg, alt: 'Ilustración creatividad' },
+        illustration: { src: instructionImages.creativity, alt: 'Ilustración creatividad' },
         body: `
           <p><strong>Objetivo:</strong> Conceptualizar una solución mediante el prototipado.</p>
           <p><strong>Dinámica:</strong> Construir una solución usando <strong>LEGO físico</strong> a partir del problema elegido en la etapa anterior.</p>
@@ -77,7 +80,7 @@ const stages = [
         duration: "6 minutos + pitch 90s",
         skill: "Habilidad de comunicación",
         rule: "1 token si se completa dentro del tiempo.",
-        illustration: { src: communicationImg, alt: 'Ilustración comunicación' },
+        illustration: { src: instructionImages.communication, alt: 'Ilustración comunicación' },
         body: `
           <p><strong>Objetivo:</strong> Entrenar la habilidad de presentar la idea de forma clara y concisa (pitch).</p>
           <p><strong>Dinámica:</strong> Preparar un pitch de <strong>90 segundos</strong>. El sistema muestra una guía con la estructura del pitch:</p>
@@ -100,7 +103,7 @@ emprendimiento</li>
         duration: "Variable",
         skill: "Pensamiento crítico y feedback",
         rule: "1 token por participar + ranking (5, 4, 3, 2).",
-        illustration: { src: feedbackImg, alt: 'Ilustración feedback' },
+        illustration: { src: instructionImages.feedback, alt: 'Ilustración feedback' },
         body: `
           <p><strong>Objetivo:</strong> Desarrollar el pensamiento crítico mediante la retroalimentación entre pares.</p>
           <p><strong>Dinámica:</strong> Los equipos <strong>evalúan al resto</strong> (no se autoevalúan) usando una <strong>rúbrica simple</strong> con 4 criterios:</p>

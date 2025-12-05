@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useTimer } from '../WordSearch2/hooks/useTimer';
+import { useTimer } from '../../../../../../components/hooks/useTimer';
 import { SOUNDS, useAudio } from '../../../../../../assets/index.js';
 
 // Palabras del juego original (exactas)

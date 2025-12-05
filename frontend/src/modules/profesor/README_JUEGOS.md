@@ -11,8 +11,7 @@ Este módulo implementa el sistema de gestión de juegos para profesores, permit
 ├── pages/
 │   ├── WaitingRoomView.jsx     ← Sala de espera del profesor
 │   ├── GameActiveView.jsx      ← Juego en progreso 
-│   ├── HomeView.jsx           ← Vista principal del profesor
-│   ├── CrearJuegoView.jsx     ← Formulario para crear juegos
+│   ├── HomeView.jsx            ← Vista principal del profesor
 │   └── GroupBuilderOptimized.jsx ← Constructor de grupos optimizado
 ├── components/
 │   ├── GameLayout.jsx         ← Layout común para páginas de juego
@@ -140,9 +139,9 @@ const API_ENDPOINTS = {
 ## 🔄 Flujo de Navegación
 
 ```
-CrearJuegoView → [Crear Juego] → WaitingRoomView → [Comenzar] → GameActiveView
-       ↑                               ↓                           ↓
-   HomeView ← [Volver] ← [Volver/Terminar] ← [Volver] ← [Terminar]
+HomeView → [Ir a grupos] → GroupBuilderOptimized → [Entrar a sala] → WaitingRoomView → [Comenzar] → GameActiveView
+     ↑                                                                    ↓                          ↓
+   Volver a home                                              Volver a home / grupos       Volver a sala / home
 ```
 
 ## ⚙️ Configuraciones
@@ -191,16 +190,14 @@ Todas las configuraciones están centralizadas en `gameConfig.js`:
 
 ## 📝 Notas Importantes
 
-1. **No se eliminó código existente**: Todo el código anterior se mantiene intacto
-2. **Estructura modular**: Cada componente es independiente y reutilizable
-3. **Preparado para backend**: Todos los hooks y componentes están listos para conectar con API real
-4. **Responsive design**: Todas las vistas funcionan en móvil y desktop
-5. **Consistencia visual**: Mantiene el mismo diseño y colores del sistema existente
+1. **Estructura modular**: Cada componente es independiente y reutilizable
+2. **Preparado para backend**: Todos los hooks y componentes están listos para conectar con API real
+3. **Responsive design**: Todas las vistas funcionan en móvil y desktop
+4. **Consistencia visual**: Mantiene el mismo diseño y colores del sistema existente
 
 ## 🔍 Archivos Modificados
 
-- ✅ `CrearJuegoView.jsx` - Agregado navegación a sala de espera
-- ✅ `ProfessorApp.jsx` - Agregadas nuevas rutas
+- ✅ `ProfessorApp.jsx` - Agregadas rutas para sala de espera y juego
 - 🆕 `WaitingRoomView.jsx` - Nueva vista de sala de espera
 - 🆕 `GameActiveView.jsx` - Nueva vista de juego activo
 - 🆕 `GameLayout.jsx` - Layout común para juegos

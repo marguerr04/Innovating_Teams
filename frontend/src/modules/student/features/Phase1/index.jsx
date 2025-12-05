@@ -5,9 +5,6 @@ import { load, save } from '../../../../utils/helpers.js';
 import ActivityModal from '../../components/ActivityModal.jsx';
 import Timer from '../../../../components/Timer';
 import PhaseBackground from '../../../../components/PhaseBackground.jsx';
-import sopaImg from '../../../../assets/images/icons/sopaLetras.png';
-import anagramaImg from '../../../../assets/images/icons/anagrama.png';
-import iceImg from '../../../../assets/images/icons/romperHielo.png';
 // ...existing code...
 
 // Importamos los juegos
@@ -19,17 +16,17 @@ const PHASE_1_DURATION = 300; // 5 minutos
 
 const ACTIVITY_MEDIA = {
   sopa: {
-    image: sopaImg,
+    image: '/assets/images/icons/sopaLetras.png',
     alt: 'Ilustración Sopa de letras',
     description: 'Encuentra palabras ocultas antes que el resto del equipo.',
   },
   anagrama: {
-    image: anagramaImg,
+    image: '/assets/images/icons/anagrama.png',
     alt: 'Ilustración Armar palabras con letras',
     description: 'Reordena letras y coordina pistas para formar palabras nuevas.',
   },
   ice: {
-    image: iceImg,
+    image: '/assets/images/icons/romperHielo.png',
     alt: 'Ilustración actividad rompehielos',
     description: 'Dinámica express para conocerse y entrar en confianza.',
   },

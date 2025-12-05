@@ -12,10 +12,11 @@ src/modules/profesor/
 │   ├── ProfessorContext.jsx    # Contexto global del profesor
 │   └── ProfessorLayout.jsx     # Layout principal con navegación
 └── pages/
-    ├── HomeView.jsx            # Dashboard principal del profesor
-    ├── CrearJuegoView.jsx      # Creación de juegos
-    ├── PerfilView.jsx          # Perfil del profesor
-    └── GroupBuilder.jsx        # Constructor de grupos
+  ├── HomeView.jsx            # Dashboard principal del profesor
+  ├── PerfilView.jsx          # Perfil del profesor
+  ├── GroupBuilderOptimized.jsx # Constructor de grupos optimizado
+  ├── WaitingRoomView.jsx     # Sala de espera del juego
+  └── GameActiveView.jsx      # Juego en progreso
 ```
 
 ## Características Implementadas
@@ -37,36 +38,42 @@ src/modules/profesor/
 - Lista de juegos recientes
 - Diseño responsive con cards informativos
 
-### 4. **CrearJuegoView.jsx**
-- Wizard de 3 pasos para crear juegos
-- Validación de formularios
-- Configuración de fases del juego
-- Configuración avanzada (chat, tiempo, etc.)
-
-### 5. **PerfilView.jsx**
+### 4. **PerfilView.jsx**
 - Edición de perfil del profesor
 - Configuración de notificaciones
 - Estadísticas personales
 - Diseño con gradientes y toggles
 
-### 6. **GroupBuilder.jsx**
-- Gestión de estudiantes
-- Algoritmos de formación de grupos
+### 5. **GroupBuilderOptimized.jsx**
+- Gestión de estudiantes y arrastre optimizado
+- Algoritmos de formación de grupos con mejoras de rendimiento
 - Exportación de grupos a CSV
-- Visualización dinámica de grupos
+- Visualización dinámica de grupos y vista previa de sala
+
+### 6. **WaitingRoomView.jsx / GameActiveView.jsx**
+- Flujo de sala de espera y juego activo por PIN
+- Muestra y controla grupos durante la partida
+- Botones de navegación entre sala de espera y juego
 
 ## Rutas Configuradas
 
-Las rutas del módulo de profesor están configuradas en `App.js`:
+Las rutas del módulo de profesor están configuradas en `ProfessorApp.jsx`:
 
 ```javascript
-<Route path="/profesor" element={<ProfessorLayout />}>
-  <Route index element={<Navigate to="home" replace />} />
-  <Route path="home" element={<HomeView />} />
-  <Route path="crear" element={<CrearJuegoView />} />
-  <Route path="perfil" element={<PerfilView />} />
-  <Route path="grupos" element={<GroupBuilder />} />
-</Route>
+<Routes>
+  <Route path="/waiting-room/:gamePin" element={<WaitingRoomView />} />
+  <Route path="/game-active/:gamePin" element={<GameActiveView />} />
+  <Route path="/*" element={
+    <ProfessorLayout>
+      <Routes>
+        <Route path="/" element={<Navigate to="home" replace />} />
+        <Route path="/home" element={<HomeView />} />
+        <Route path="/perfil" element={<PerfilView />} />
+        <Route path="/grupos" element={<GroupBuilderOptimized />} />
+      </Routes>
+    </ProfessorLayout>
+  } />
+</Routes>
 ```
 
 ## Integración con el Sistema de Autenticación
@@ -93,29 +100,28 @@ El módulo está integrado con el sistema de login existente:
 - Lista de juegos recientes
 - Cards informativos
 
-### Creación de Juegos (CrearJuegoView)
-- Proceso guiado en 3 pasos
-- Validación de formularios
-- Configuración de fases
-- Configuración avanzada
-
 ### Perfil (PerfilView)
 - Edición de información personal
 - Configuración de notificaciones
 - Estadísticas del profesor
 
-### Constructor de Grupos (GroupBuilder)
-- Gestión de estudiantes
+### Constructor de Grupos (GroupBuilderOptimized)
+- Gestión de estudiantes con arrastre optimizado
 - Algoritmos de agrupación
 - Exportación a CSV
-- Visualización dinámica
+- Visualización dinámica y vista previa de sala
+
+### Sala de Espera / Juego Activo
+- Navegación por PIN a sala de espera y juego en curso
+- Control de estado del juego y grupos
+- Volver a `home` desde cualquiera de las vistas
 
 ## Uso
 
 1. **Acceso**: Navegar a `/profesor` o usar el botón en PreLogin
 2. **Navegación**: Usar la barra lateral para moverse entre secciones
-3. **Creación de Juegos**: Seguir el wizard de 3 pasos
-4. **Gestión de Grupos**: Agregar estudiantes y generar grupos automáticamente
+3. **Gestión de Grupos**: Agregar estudiantes y generar grupos automáticamente
+4. **Juegos**: Acceder a `/profesor/waiting-room/:pin` y `/profesor/game-active/:pin` para el flujo de sala/juego
 
 ## Notas Técnicas
 

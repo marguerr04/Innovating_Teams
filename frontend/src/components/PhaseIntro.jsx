@@ -1,18 +1,22 @@
 // src/components/PhaseIntro.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import teamworkImg from '../assets/images/instructions/trabajo_equipo.png';
-import empathyImg from '../assets/images/instructions/empatia.png';
-import creativityImg from '../assets/images/instructions/creatividad.png';
-import communicationImg from '../assets/images/instructions/comunicacion.png';
-import feedbackImg from '../assets/images/instructions/feedback.png';
+import { SOUNDS, useAudio } from '../assets/index.js';
+
+const PHASE_IMAGES = {
+  teamwork: '/assets/images/instructions/trabajo_equipo.png',
+  empathy: '/assets/images/instructions/empatia.png',
+  creativity: '/assets/images/instructions/creatividad.png',
+  communication: '/assets/images/instructions/comunicacion.png',
+  feedback: '/assets/images/instructions/feedback.png'
+};
 
 const PHASE_ILLUSTRATIONS = {
-  1: { src: teamworkImg, alt: 'Ilustración trabajo en equipo' },
-  2: { src: empathyImg, alt: 'Ilustración empatía' },
-  3: { src: creativityImg, alt: 'Ilustración creatividad' },
-  4: { src: communicationImg, alt: 'Ilustración comunicación' },
-  5: { src: feedbackImg, alt: 'Ilustración evaluación y feedback' },
+  1: { src: PHASE_IMAGES.teamwork, alt: 'Ilustración trabajo en equipo' },
+  2: { src: PHASE_IMAGES.empathy, alt: 'Ilustración empatía' },
+  3: { src: PHASE_IMAGES.creativity, alt: 'Ilustración creatividad' },
+  4: { src: PHASE_IMAGES.communication, alt: 'Ilustración comunicación' },
+  5: { src: PHASE_IMAGES.feedback, alt: 'Ilustración evaluación y feedback' },
 };
 
 const INTRO_DATA = {
@@ -53,8 +57,12 @@ export default function PhaseIntro({ phase, onDone }) {
   const data = INTRO_DATA[phase];
   const illustration = PHASE_ILLUSTRATIONS[phase];
   const notifiedRef = useRef(false);
+  const playMagic = useAudio(SOUNDS.games.magic);
 
   useEffect(() => {
+    // Sonido mágico una sola vez al mostrar la intro
+    playMagic();
+
     // Secuencia de entrada
     const bgTimer = setTimeout(() => setVisible(true), 10);
     const cardTimer = setTimeout(() => setShowContent(true), 240);
@@ -77,6 +85,8 @@ export default function PhaseIntro({ phase, onDone }) {
       clearTimeout(autoCloseTimer);
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
     };
+    // Nota: playMagic es estable para este uso; omitimos dependencia para evitar re-ejecuciones.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const notify = (reason) => {

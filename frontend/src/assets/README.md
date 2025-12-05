@@ -6,24 +6,24 @@ Esta es la nueva estructura organizacional para los assets multimedia del proyec
 
 ```
 src/assets/
-├── index.js              # 🎛️ Centralizador de rutas y hooks
-├── images/               # 🖼️ Imágenes
-│   ├── logos/           # 🏢 Logos (UDD, Mision Emprende, etc.)
-│   └── games/           # 🎮 Imágenes específicas de juegos
-├── sounds/              # 🔊 Audio
-│   ├── games/          # 🎵 Sonidos de juegos
-│   └── ui/             # 🎶 Sonidos de interfaz
-└── videos/             # 🎬 Videos
+├── index.js    # 🎛️ Centralizador de rutas (apuntan a /public/assets) y hook useAudio
+└── README.md   # Este archivo
 
 public/assets/
+├── images/
+│   ├── icons/
+│   ├── instructions/
+│   └── ...
 ├── sounds/
 │   ├── games/
-│   │   ├── success.mp3         # ✅ Sonido de éxito
-│   │   ├── incorrect.mp3       # ❌ Sonido de error
-│   │   └── button_success.mp3  # 🎉 Sonido de botón éxito
-│   └── ui/
-│       ├── click.mp3           # 🖱️ Sonido de clic
-│       └── button_click.mp3    # 🔘 Sonido de botón
+│   ├── rewards/
+│   ├── ui/
+│   └── ...
+├── videos/
+│   ├── robot/
+│   ├── coins/
+│   └── ...
+└── gifs/backgrounds/etc.
 ```
 
 ## 🛠️ Uso del Sistema
@@ -47,7 +47,7 @@ playClick();   // 🖱️ Reproducir sonido de clic
 
 #### Para sonidos:
 1. Agregar archivo a `public/assets/sounds/[categoria]/`
-2. Actualizar `src/assets/index.js`:
+2. (Opcional) Registrar la ruta en `src/assets/index.js` si quieres usarla centralizada:
 ```jsx
 export const SOUNDS = {
   games: {
@@ -58,8 +58,8 @@ export const SOUNDS = {
 ```
 
 #### Para imágenes:
-1. Agregar archivo a `src/assets/images/[categoria]/`  
-2. Actualizar `src/assets/index.js`:
+1. Agregar archivo a `public/assets/images/[categoria]/`  
+2. (Opcional) Registrar la ruta en `src/assets/index.js` si necesitas acceso centralizado:
 ```jsx
 export const IMAGES = {
   logos: {

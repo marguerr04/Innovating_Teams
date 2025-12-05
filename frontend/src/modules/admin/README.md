@@ -14,11 +14,9 @@ src/modules/admin/
 │   ├── DashboardCard.js           # Componente reutilizable para tarjetas
 │   └── SidebarAdmin.js            # Barra lateral de navegación
 └── pages/
-    ├── HomeAdmin.js               # Dashboard principal
-    ├── StatsAdmin.js              # Página de estadísticas
-    ├── ProfileAdmin.js            # Perfil del administrador
-    ├── AboutPage.js               # Información de la aplicación
-    └── PaginaTesteo.js            # Página de pruebas del sistema
+   ├── HomeAdmin.js               # Dashboard principal
+   ├── StatsAdmin.js              # Página de estadísticas
+   └── ProfileAdmin.js            # Perfil del administrador
 ```
 
 ## Características Implementadas
@@ -48,28 +46,12 @@ src/modules/admin/
 - Configuración de cuenta
 - Estadísticas del usuario
 
-### 5. Página de Información (AboutPage)
-- Misión, visión y valores
-- Información del equipo
-- Historia de la plataforma
-- Estadísticas de impacto
-- Información de contacto
-
-### 6. Página de Testeo (PaginaTesteo)
-- Pruebas del sistema en tiempo real
-- Suites de pruebas organizadas
-- Información del sistema
-- Estado de servicios
-- Monitoreo de rendimiento
-
 ## Rutas Configuradas
 
 - `/admin/` - Dashboard principal
 - `/admin/home` - Dashboard principal
 - `/admin/stats` - Estadísticas
 - `/admin/profile` - Perfil del administrador
-- `/admin/about` - Acerca de
-- `/admin/testeo` - Página de testeo
 
 ## Acceso al Módulo
 
