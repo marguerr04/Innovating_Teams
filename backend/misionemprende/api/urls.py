@@ -21,7 +21,6 @@ from .endpoints import iniciar_juego, estado_actual
 
 # Servicios externos
 from .storage_service import generate_signed_url
-from .database_test import test_database_connection
 
 # Router principal para los viewsets
 router = DefaultRouter()
@@ -62,9 +61,6 @@ urlpatterns = [
 # Endpoint para listar todos los equipos
     path('equipos/', listar_equipos, name='listar_equipos'),
     
-    # Endpoint de diagnóstico de base de datos
-    path('test-db/', test_database_connection, name='test_database_connection'),
-
 # ========== GESTIÓN DE ESTADOS Y JUEGO ==========
     # Profesor inicia el juego (cambia estado a INICIADA, fase 1)
     path('partida/<int:partida_id>/iniciar-juego/', iniciar_juego, name='iniciar_juego'),
