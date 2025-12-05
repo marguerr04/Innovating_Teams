@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import GameLayout from '../components/GameLayout';
+import ProfessorLayout from '../components/ProfessorLayout';
 import GroupsDisplay from '../components/GroupsDisplay';
 import { useGameData, useGameTimer } from '../hooks/useGameData';
 
@@ -21,17 +21,29 @@ const GameActiveView = () => {
     location.state?.grupos || []
   );
 
+  const [partidaId, setPartidaId] = useState(location.state?.partidaId || null);
+  const storageKey = gamePin ? `partida_${gamePin}_id` : null;
+
   const currentGameData = localGameData || gameData;
   // Priorizar grupos del location.state, sino usar del hook
   const currentGrupos = localGrupos.length > 0 ? localGrupos : grupos;
 
   // Guardar partidaId en localStorage si viene del state
   useEffect(() => {
-    if (location.state?.partidaId && gamePin) {
-      localStorage.setItem(`partida_${gamePin}_id`, location.state.partidaId);
-      console.log('✅ PartidaId guardado en localStorage:', location.state.partidaId);
+    if (location.state?.partidaId && storageKey) {
+      localStorage.setItem(storageKey, location.state.partidaId);
+      setPartidaId(location.state.partidaId);
     }
-  }, [location.state?.partidaId, gamePin]);
+  }, [location.state?.partidaId, storageKey]);
+
+  useEffect(() => {
+    if (!partidaId && storageKey) {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        setPartidaId(stored);
+      }
+    }
+  }, [partidaId, storageKey]);
 
   // Actualizar grupos locales cuando el hook traiga nuevos datos
   useEffect(() => {
@@ -41,10 +53,29 @@ const GameActiveView = () => {
     }
   }, [grupos, localGrupos.length]);
 
+  useEffect(() => {
+    if (!gamePin || typeof window === 'undefined') {
+      return;
+    }
+
+    const sessionPayload = {
+      pin: gamePin,
+      route: 'game-active',
+      gameName: currentGameData?.nombre || 'Juego de Emprendimiento',
+      phase: currentGameData?.faseActual || 'Juego activo',
+      estado: currentGameData?.estado || 'playing',
+      updatedAt: new Date().toISOString()
+    };
+
+    localStorage.setItem('last_profesor_session', JSON.stringify(sessionPayload));
+    localStorage.setItem('last_profesor_game_pin', gamePin);
+    window.dispatchEvent(new Event('last-profesor-session-updated'));
+  }, [gamePin, currentGameData?.nombre, currentGameData?.faseActual, currentGameData?.estado]);
+
   // Iniciar timer cuando se monta el componente
   useEffect(() => {
     timerActions.start();
-  }, []);
+  }, [timerActions]);
 
   // Manejar cuando se acaba el tiempo
   useEffect(() => {
@@ -73,21 +104,62 @@ const GameActiveView = () => {
     alert('Funcionalidad de monitoreo será implementada con backend real');
   };
 
+  const handleVolverInicio = () => {
+    const confirmacion = window.confirm('¿Deseas volver al inicio? Esto finalizará el monitoreo actual.');
+    if (confirmacion) {
+      navigate('/profesor/home');
+    }
+  };
+
+  const handleVolverSala = () => {
+    navigate(`/profesor/waiting-room/${gamePin}`);
+  };
+
+  const phaseSevenBackground = {
+    backgroundImage: "linear-gradient(135deg, rgba(9,25,64,0.92), rgba(13,46,105,0.88)), url('/assets/backgrounds/fase7.png')",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    borderRadius: '32px',
+    boxShadow: '0 35px 70px rgba(6,18,44,0.45)'
+  };
+
   return (
-    <GameLayout
-      gamePin={gamePin}
-      gameName={currentGameData?.nombre}
-      showTimer={true}
-      timeRemaining={timeRemaining}
-      currentView="playing"
-    >
-      <div 
-        className="min-h-screen flex flex-col"
-        style={{ background: 'linear-gradient(135deg, #2E5E8C 0%, #1A3A59 100%)' }}
-      >
-        {/* Contenido principal del juego */}
-        <div className="flex-1 p-8">
-          <div className="max-w-6xl mx-auto">
+    <ProfessorLayout>
+      <div className="min-h-[75vh]" style={{ padding: '1rem 0' }}>
+        <div className="max-w-6xl mx-auto px-4" style={phaseSevenBackground}>
+          <div className="px-6 py-8">
+            <div className="flex flex-col lg:flex-row items-center justify-between mb-8 text-white gap-4">
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={handleVolverInicio}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+                >
+                  🏠 Inicio
+                </button>
+                <button
+                  onClick={handleVolverSala}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+                >
+                  ← Volver a Sala
+                </button>
+              </div>
+              <div className="text-center">
+                <p className="text-sm uppercase tracking-wide text-blue-100">Juego activo</p>
+                <h1 className="text-2xl font-bold">{currentGameData?.nombre || 'Juego de Emprendimiento'}</h1>
+                <p className="font-mono text-yellow-300">PIN: {gamePin}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-blue-100 mb-1">Tiempo restante</p>
+                <div className={`text-2xl font-mono font-bold px-4 py-2 rounded-lg ${
+                  timeRemaining < 300 ? 'bg-red-500/80' : 'bg-green-500/80'
+                }`}>
+                  {formattedTime}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/95 rounded-3xl shadow-2xl p-8">
+              <div className="max-w-6xl mx-auto">
             
             {/* 1. TARJETA FASE ACTUAL (Blanca con borde azul) */}
             <div className="bg-white rounded-xl p-6 mb-6 border-2 border-[#2E5E8C] shadow-xl">
@@ -179,6 +251,11 @@ const GameActiveView = () => {
                   allowEdit={false}
                   showEditInput={false}
                   viewMode="playing"
+                  showGroupIdentifiers={!!gamePin}
+                  getGroupIdentifier={(_, index) => {
+                    const pin = gamePin || 'PIN';
+                    return `${pin}-${index + 1}`;
+                  }}
                 />
               </div>
               
@@ -219,24 +296,21 @@ const GameActiveView = () => {
             
 
           </div>
-        </div>
+            </div>
 
-        {/* Footer */}
-        <div className="bg-black/20 py-4 border-t border-white/10">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center justify-between text-white text-sm opacity-90">
+            {/* Footer */}
+            <div className="bg-black/10 rounded-2xl px-6 py-4 text-white text-sm flex flex-col gap-2 md:flex-row md:items-center md:justify-between mt-6">
               <div>
-                Sesión iniciada: {currentGameData?.fechaInicio ? new Date(currentGameData.fechaInicio).toLocaleString() : 'N/A'} | 
-                PIN: <span className="font-mono font-bold text-[#FDC328]">{gamePin}</span>
+                Sesión iniciada: {currentGameData?.fechaInicio ? new Date(currentGameData.fechaInicio).toLocaleString() : 'N/A'} | PIN: <span className="font-mono font-bold text-[#FDC328]">{gamePin}</span>
               </div>
-              <div className="mt-2 md:mt-0">
+              <div>
                 Rol: Monitor del Profesor | Fase 1 de 4
               </div>
             </div>
           </div>
         </div>
       </div>
-    </GameLayout>
+    </ProfessorLayout>
   );
 };
 

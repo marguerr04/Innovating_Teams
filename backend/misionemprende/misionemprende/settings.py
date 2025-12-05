@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,11 +126,10 @@ WSGI_APPLICATION = 'misionemprende.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),        # Lee del .env
-        'USER': os.environ.get('DB_USER'),        # Lee del .env
-        'PASSWORD': os.environ.get('DB_PASSWORD'),# Lee del .env
-        # CLAVE: Usa el nombre del servicio 'db' en lugar de 'localhost'
-        'HOST': os.environ.get('DB_HOST', 'db'),  
+        'NAME': os.environ.get('DB_NAME', 'InnovatingTeamsv5'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '123456'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),  
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }

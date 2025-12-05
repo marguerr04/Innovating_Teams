@@ -9,8 +9,17 @@ const GroupsDisplay = ({
   onUpdateGroupName,
   allowEdit = true,
   showEditInput = true,
-  viewMode = 'waiting' // waiting, playing, finished
+  viewMode = 'waiting', // waiting, playing, finished
+  showGroupIdentifiers = false,
+  getGroupIdentifier
 }) => {
+    const buildGroupIdentifier = (grupo, index) => {
+      if (typeof getGroupIdentifier === 'function') {
+        return getGroupIdentifier(grupo, index);
+      }
+      return grupo?.id ?? 'SIN-ID';
+    };
+
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState('');
 
@@ -76,13 +85,13 @@ const GroupsDisplay = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {grupos.map((grupo) => (
+      {grupos.map((grupo, index) => (
         <div 
           key={grupo.id} 
           className={`rounded-lg p-4 transition-all duration-200 ${getGroupStatusColor(grupo)} ${getViewModeStyles()}`}
         >
           {/* Header del grupo */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-start justify-between mb-3">
             {editingGroup === grupo.id && showEditInput ? (
               <div className="flex items-center gap-2 flex-1">
                 <input
@@ -112,17 +121,24 @@ const GroupsDisplay = ({
               </div>
             ) : (
               <>
-                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  {grupo.nombre}
-                  {allowEdit && showEditInput && viewMode === 'waiting' && (
-                    <button
-                      onClick={() => handleStartEdit(grupo)}
-                      className="text-xs text-blue-600 hover:text-blue-800"
-                    >
-                      ✏️
-                    </button>
+                <div>
+                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                    {grupo.nombre}
+                    {allowEdit && showEditInput && viewMode === 'waiting' && (
+                      <button
+                        onClick={() => handleStartEdit(grupo)}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </h3>
+                  {showGroupIdentifiers && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      ID acceso: {buildGroupIdentifier(grupo, index)}
+                    </p>
                   )}
-                </h3>
+                </div>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${
                     getMiembros(grupo).length === getMaxIntegrantes(grupo) ? 'bg-green-500' :

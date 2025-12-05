@@ -5,6 +5,27 @@ import { useProfesor } from '../components/ProfessorContext';
 const HomeView = () => {
   const navigate = useNavigate();
   const { profesor, juegos } = useProfesor();
+  const readStoredSession = () => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    try {
+      const raw = localStorage.getItem('last_profesor_session');
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.warn('No se pudo leer la última sesión almacenada:', error);
+      return null;
+    }
+  };
+
+  const readStoredPin = () => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return localStorage.getItem('last_profesor_game_pin');
+  };
+
+  const initialStoredSession = readStoredSession();
   const [stats, setStats] = useState({
     totalJuegos: 0,
     juegosPendientes: 0,
@@ -13,6 +34,10 @@ const HomeView = () => {
   });
   const [activeGame, setActiveGame] = useState(null);
   const [lastCreatedGame, setLastCreatedGame] = useState(null);
+  const [lastSessionInfo, setLastSessionInfo] = useState(initialStoredSession);
+  const [lastSessionPin, setLastSessionPin] = useState(() => {
+    return initialStoredSession?.pin || readStoredPin();
+  });
 
   useEffect(() => {
     // Calcular estadísticas basadas en los juegos
@@ -31,32 +56,74 @@ const HomeView = () => {
     setLastCreatedGame(latestGame);
   }, [juegos]);
 
-  const handleNavigateToGame = (juego) => {
-    if (!juego) {
-      navigate('/profesor/grupos');
+  useEffect(() => {
+    if (lastCreatedGame && lastCreatedGame.pin && typeof window !== 'undefined') {
+      localStorage.setItem('last_profesor_game_pin', lastCreatedGame.pin);
+      setLastSessionPin(lastCreatedGame.pin);
+    }
+  }, [lastCreatedGame]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
       return;
     }
 
-    if (juego.pin) {
-      const path = juego.estado === 'playing'
-        ? `/profesor/game-active/${juego.pin}`
-        : `/profesor/waiting-room/${juego.pin}`;
+    const syncSessionInfo = () => {
+      const stored = readStoredSession();
+      if (stored) {
+        setLastSessionInfo(stored);
+        setLastSessionPin(stored.pin);
+        return;
+      }
 
-      navigate(path, {
+      const storedPin = readStoredPin();
+      if (storedPin) {
+        setLastSessionPin(storedPin);
+      }
+    };
+
+    syncSessionInfo();
+    window.addEventListener('last-profesor-session-updated', syncSessionInfo);
+    window.addEventListener('storage', syncSessionInfo);
+
+    return () => {
+      window.removeEventListener('last-profesor-session-updated', syncSessionInfo);
+      window.removeEventListener('storage', syncSessionInfo);
+    };
+  }, []);
+
+  const handleNavigateToGame = (juego) => {
+    const pinDestino = juego?.pin || lastSessionInfo?.pin || lastSessionPin;
+
+    if (pinDestino) {
+      const routeHint =
+        juego?.route ||
+        (juego?.estado === 'playing' ? 'game-active' : null) ||
+        lastSessionInfo?.route;
+
+      const targetPath = routeHint === 'game-active'
+        ? `/profesor/game-active/${pinDestino}`
+        : `/profesor/waiting-room/${pinDestino}`;
+
+      const shouldSendState = Boolean(
+        juego && (juego.grupos || juego.nombre || juego.estado)
+      );
+
+      navigate(targetPath, shouldSendState ? {
         state: {
           gameData: juego,
-          grupos: juego.grupos || []
+          grupos: juego?.grupos || []
         }
-      });
+      } : undefined);
       return;
     }
 
-    if (juego.rutaAcceso) {
+    if (juego?.rutaAcceso) {
       navigate(juego.rutaAcceso);
       return;
     }
 
-    if (juego.id) {
+    if (juego?.id) {
       navigate(`/profesor/juegos/${juego.id}`);
       return;
     }
@@ -64,18 +131,68 @@ const HomeView = () => {
     navigate('/profesor/grupos');
   };
 
+  
+
+  const recentGames = juegos.slice(0, 3);
+
+  const participationData = [
+    { label: 'Ingeniería', value: 48, color: '#2E5E8C' },
+    { label: 'Administración', value: 32, color: '#00B8A9' },
+    { label: 'Diseño', value: 12, color: '#FDC328' },
+    { label: 'Otros', value: 8, color: '#E24872' }
+  ];
+  const participationTotal = participationData.reduce((sum, item) => sum + item.value, 0);
+  const participationGradient = participationData.reduce((acc, item, index) => {
+    const prevPercent = participationData
+      .slice(0, index)
+      .reduce((sum, current) => sum + current.value, 0);
+    const start = (prevPercent / participationTotal) * 360;
+    const end = ((prevPercent + item.value) / participationTotal) * 360;
+    const segment = `${item.color} ${start}deg ${end}deg`;
+    return acc ? `${acc}, ${segment}` : segment;
+  }, '');
+  const satisfactionScore = 4.3;
+  const satisfactionPercent = Math.min(100, (satisfactionScore / 5) * 100);
+  const resumeSource = lastSessionInfo || lastCreatedGame;
+  const resumeActionPayload = resumeSource || (lastSessionPin ? { pin: lastSessionPin } : null);
+  const resumePin = resumeActionPayload?.pin;
+  const canResumeSession = Boolean(resumePin);
+  const resumeGameName = resumeSource?.nombre || resumeSource?.gameName || 'Sesión pendiente';
+  const resumePhase = resumeSource?.faseActual || resumeSource?.phase || (resumeSource?.estado === 'playing' ? 'Juego activo' : 'Sala de espera');
+
   const quickActions = [
     {
-      title: 'Gestión de Grupos',
-      description: 'Crea y administra grupos de estudiantes con tecnología optimizada',
+      title: 'Crear juego',
+      description: 'Configura el PIN, grupos y fases de un nuevo juego',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6m13 8v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2m3-14h10a2 2 0 012 2v4" />
         </svg>
       ),
       action: () => navigate('/profesor/grupos'),
       bgColor: '#00B8A9',
       hoverColor: '#00a396'
+    },
+    {
+      title: 'Volver al último juego',
+      description: canResumeSession
+        ? `${resumeGameName} · PIN ${resumePin} · ${resumePhase}`
+        : 'Necesitas crear un juego para habilitar este acceso rápido',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m0 0l4-4m-4 4l-4-4M4 12h16" />
+        </svg>
+      ),
+      action: () => {
+        if (canResumeSession) {
+          handleNavigateToGame(resumeActionPayload);
+        } else {
+          navigate('/profesor/grupos');
+        }
+      },
+      bgColor: '#2E5E8C',
+      hoverColor: '#254c72',
+      disabled: !canResumeSession
     },
     {
       title: 'Mi Perfil',
@@ -90,8 +207,6 @@ const HomeView = () => {
       hoverColor: '#d13963'
     }
   ];
-
-  const recentGames = juegos.slice(0, 3);
 
   return (
     <div className="space-y-8">
@@ -175,44 +290,39 @@ const HomeView = () => {
       <div>
         <h2 className="text-2xl font-bold mb-6" style={{ color: '#2E5E8C' }}>Acciones Rápidas</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickActions.map((action, index) => (
-            <button
-              key={index}
-              onClick={action.action}
-              className="text-white p-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-              style={{ backgroundColor: action.bgColor }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = action.hoverColor}
-              onMouseLeave={(e) => e.target.style.backgroundColor = action.bgColor}
-            >
-              <div className="flex items-center mb-4">
-                {action.icon}
-                <h3 className="ml-3 text-lg font-semibold">{action.title}</h3>
-              </div>
-              <p className="text-sm opacity-90">{action.description}</p>
-            </button>
-          ))}
+          {quickActions.map((action, index) => {
+            const bgColor = action.disabled ? '#94a3b8' : action.bgColor;
+            const hoverColor = action.disabled ? '#94a3b8' : action.hoverColor;
+            return (
+              <button
+                key={index}
+                onClick={() => {
+                  if (!action.disabled) {
+                    action.action();
+                  }
+                }}
+                className={`text-white p-6 rounded-lg shadow-lg transition-all duration-200 ${
+                  action.disabled ? 'opacity-75 cursor-not-allowed' : 'hover:shadow-xl transform hover:scale-105'
+                }`}
+                style={{ backgroundColor: bgColor }}
+                onMouseEnter={(e) => {
+                  if (!action.disabled) {
+                    e.currentTarget.style.backgroundColor = hoverColor;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = bgColor;
+                }}
+              >
+                <div className="flex items-center mb-4">
+                  {action.icon}
+                  <h3 className="ml-3 text-lg font-semibold">{action.title}</h3>
+                </div>
+                <p className="text-sm opacity-90">{action.description}</p>
+              </button>
+            );
+          })}
         </div>
-      </div>
-
-      {/* Acceso directo al último juego configurado */}
-      <div className="bg-gradient-to-r from-[#2E5E8C] to-[#00B8A9] rounded-2xl p-6 text-white shadow-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div>
-          <p className="uppercase tracking-wide text-sm opacity-80 mb-1">Continuidad operativa</p>
-          <h3 className="text-2xl font-bold mb-2">Regresa al último flujo configurado</h3>
-          {lastCreatedGame ? (
-            <p className="text-white/90">
-              {lastCreatedGame.nombre || 'Juego sin título'} · Fase próxima: {lastCreatedGame.faseActual || 'Pendiente de asignar'}
-            </p>
-          ) : (
-            <p className="text-white/90">Todavía no has configurado ningún juego. Crea uno para habilitar el acceso rápido.</p>
-          )}
-        </div>
-        <button
-          onClick={() => handleNavigateToGame(lastCreatedGame)}
-          className="bg-white text-[#2E5E8C] font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-xl transition"
-        >
-          {lastCreatedGame ? 'Ir al flujo actual' : 'Crear juego'}
-        </button>
       </div>
 
       {/* Sección de Gráficos y Analytics */}
@@ -228,85 +338,29 @@ const HomeView = () => {
             </svg>
           </div>
           
-          {/* Simulación de gráfico de dona */}
-          <div className="flex items-center justify-center mb-4">
-            <div className="relative w-40 h-40">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="#E5E7EB"
-                  strokeWidth="10"
-                  fill="none"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="#2E5E8C"
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray="75 25"
-                  strokeDashoffset="0"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="#00B8A9"
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray="50 50"
-                  strokeDashoffset="-75"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="#FDC328"
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray="31 69"
-                  strokeDashoffset="-125"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="#E24872"
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray="19 81"
-                  strokeDashoffset="-156"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl font-bold" style={{ color: '#2E5E8C' }}>156</p>
-                  <p className="text-sm text-gray-500">Total</p>
-                </div>
+          {/* Gráfico de dona con conic-gradient */}
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative w-48 h-48">
+              <div
+                className="w-full h-full rounded-full"
+                style={{ background: `conic-gradient(${participationGradient})` }}
+              ></div>
+              <div className="absolute inset-6 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
+                <p className="text-3xl font-bold" style={{ color: '#2E5E8C' }}>156</p>
+                <p className="text-sm text-gray-500">Total</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#2E5E8C' }}></div>
-              <span>Ingeniería (48%)</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#00B8A9' }}></div>
-              <span>Administración (32%)</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#FDC328' }}></div>
-              <span>Diseño (12%)</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#E24872' }}></div>
-              <span>Otros (8%)</span>
-            </div>
+            {participationData.map((item) => (
+              <div key={item.label} className="flex items-center">
+                <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                <span>
+                  {item.label} ({item.value}%)
+                </span>
+              </div>
+            ))}
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-200">
@@ -319,67 +373,6 @@ const HomeView = () => {
           </div>
         </div>
 
-        {/* Gráfico de Progreso de Juegos */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold" style={{ color: '#2E5E8C' }}>
-              Progreso de Juegos
-            </h3>
-            <svg className="w-5 h-5" style={{ color: '#00B8A9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 002 2h2a2 2 0 012-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 00-2 2h-2a2 2 0 00-2 2v6a2 2 0 01-2 2H9z" />
-            </svg>
-          </div>
-
-          {/* Simulación de gráfico de barras */}
-          <div className="mb-4">
-            <div className="flex items-end justify-between h-32 mb-2">
-              <div className="flex flex-col items-center">
-                <div className="w-8 rounded-t" style={{ backgroundColor: '#2E5E8C', height: '80%' }}></div>
-                <span className="text-xs mt-1">Ene</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 rounded-t" style={{ backgroundColor: '#00B8A9', height: '60%' }}></div>
-                <span className="text-xs mt-1">Feb</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 rounded-t" style={{ backgroundColor: '#FDC328', height: '90%' }}></div>
-                <span className="text-xs mt-1">Mar</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 rounded-t" style={{ backgroundColor: '#E24872', height: '70%' }}></div>
-                <span className="text-xs mt-1">Abr</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 rounded-t" style={{ backgroundColor: '#00B8A9', height: '85%' }}></div>
-                <span className="text-xs mt-1">May</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-            <div className="text-center p-2 rounded" style={{ backgroundColor: '#f0f9ff', color: '#2E5E8C' }}>
-              <p className="font-bold text-lg">12</p>
-              <p className="text-xs">Completados</p>
-            </div>
-            <div className="text-center p-2 rounded" style={{ backgroundColor: '#f0fdfa', color: '#00B8A9' }}>
-              <p className="font-bold text-lg">5</p>
-              <p className="text-xs">En Progreso</p>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              <strong style={{ color: '#2E5E8C' }}>Descripción:</strong> Evolución mensual de juegos completados y en progreso.
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              <strong>Métrica:</strong> Incremento del 23% en finalización de juegos
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Métricas relevantes para profesores */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Nivel de Satisfacción */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
@@ -391,25 +384,29 @@ const HomeView = () => {
             </svg>
           </div>
 
-          {/* Simulación de gauge */}
+          {/* Gauge semi circular mejor alineado */}
           <div className="flex justify-center mb-4">
-            <div className="relative w-32 h-16">
-              <svg className="w-full h-full" viewBox="0 0 100 50">
+            <div className="relative w-52 h-32 flex items-center justify-center overflow-visible">
+              <svg className="w-full h-full overflow-visible" viewBox="0 0 120 70">
                 <path
-                  d="M 10 45 A 40 40 0 0 1 90 45"
+                  d="M10 60 A 50 50 0 0 1 110 60"
                   stroke="#E5E7EB"
-                  strokeWidth="8"
+                  strokeWidth="12"
                   fill="none"
+                  strokeLinecap="round"
                 />
                 <path
-                  d="M 10 45 A 40 40 0 0 1 75 25"
-                  stroke="#00B8A9"
-                  strokeWidth="8"
+                  d="M10 60 A 50 50 0 0 1 110 60"
+                  stroke="#2E5E8C"
+                  strokeWidth="12"
                   fill="none"
+                  strokeLinecap="round"
+                  pathLength="100"
+                  strokeDasharray={`${satisfactionPercent} ${100 - satisfactionPercent}`}
                 />
               </svg>
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                <p className="text-2xl font-bold" style={{ color: '#00B8A9' }}>4.3</p>
+              <div className="absolute bottom-2 text-center">
+                <p className="text-4xl font-bold" style={{ color: '#2E5E8C' }}>{satisfactionScore}</p>
                 <p className="text-xs text-gray-500">de 5</p>
               </div>
             </div>
@@ -423,81 +420,6 @@ const HomeView = () => {
               <strong>Métrica:</strong> +0.3 vs. mes anterior
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Panel de monitoreo en vivo */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-            <p className="text-sm uppercase tracking-wide text-slate-400">Panel de Monitoreo de Partidas Activas</p>
-            <h3 className="text-2xl font-bold text-[#2E5E8C] mt-1">{activeGame ? (activeGame.nombre || 'Partida en curso') : 'Sin partida activa'}</h3>
-            <p className="text-slate-500">Fase activa: <span className="font-semibold text-[#00B8A9]">{activeGame?.faseActual || 'En espera'}</span></p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${activeGame ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
-              {activeGame ? 'En vivo' : 'Inactivo'}
-            </span>
-            <button
-              onClick={() => handleNavigateToGame(activeGame)}
-              className="bg-[#2E5E8C] text-white px-5 py-2 rounded-xl shadow hover:bg-[#254869] transition"
-            >
-              {activeGame ? 'Abrir panel en vivo' : 'Configurar partida'}
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-slate-50 rounded-xl p-4">
-            <p className="text-xs uppercase text-slate-400">Equipos conectados</p>
-            <p className="text-3xl font-bold text-[#2E5E8C]">{activeGame?.equipos?.length || 0}</p>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <p className="text-xs uppercase text-slate-400">Tiempo restante</p>
-            <p className="text-3xl font-bold text-[#FDC328]">{activeGame?.tiempoRestante || '08:00'}</p>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <p className="text-xs uppercase text-slate-400">Fase siguiente</p>
-            <p className="text-3xl font-bold text-[#00B8A9]">{activeGame?.siguienteFase || 'Definir'}</p>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead>
-              <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                <th className="px-4 py-3 text-left">Equipo</th>
-                <th className="px-4 py-3 text-left">Fase</th>
-                <th className="px-4 py-3 text-left">Progreso</th>
-                <th className="px-4 py-3 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {(activeGame?.equipos && activeGame.equipos.length > 0 ? activeGame.equipos : [
-                { nombre: 'Equipo Alfa', faseActual: 'Ideación', progreso: 72, estado: 'Construyendo' },
-                { nombre: 'Equipo Beta', faseActual: 'Prototipo', progreso: 54, estado: 'Solicita ayuda' },
-                { nombre: 'Equipo Gamma', faseActual: 'Pitch', progreso: 88, estado: 'Listos para presentar' }
-              ]).map((equipo, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/60">
-                  <td className="px-4 py-3 text-sm font-semibold text-[#2E5E8C]">{equipo.nombre || `Equipo ${idx + 1}`}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{equipo.faseActual || activeGame?.faseActual || 'En progreso'}</td>
-                  <td className="px-4 py-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="h-2 rounded-full" style={{ width: `${equipo.progreso || 0}%`, backgroundColor: '#00B8A9' }}></div>
-                      </div>
-                      <span className="text-xs font-semibold text-slate-500" style={{ minWidth: '3rem' }}>{equipo.progreso || 0}%</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${equipo.estado === 'Solicita ayuda' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-600'}`}>
-                      {equipo.estado || 'En progreso'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -560,7 +482,7 @@ const HomeView = () => {
             <p className="mt-1 text-sm text-gray-500">Comienza creando tu primer juego para los estudiantes.</p>
             <div className="mt-6">
               <button
-                onClick={() => navigate('/profesor/crear')}
+                onClick={() => navigate('/profesor/grupos')}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white transition-colors duration-200"
                 style={{ backgroundColor: '#00B8A9' }}
                 onMouseEnter={(e) => e.target.style.backgroundColor = '#00a396'}

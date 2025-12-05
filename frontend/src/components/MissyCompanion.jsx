@@ -448,8 +448,7 @@ const MissyCompanion = ({ phase, showTokens, positioning = 'fixed' }) => {
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="font-size: 20px;">🤖</div>
         <div>
-          <div style="font-size: 16px;">Innovating Bot (IA Real)</div>
-          <div style="font-size: 11px; opacity: 0.9;">✅ Conectado a Chatbase</div>
+          <div style="font-size: 16px;">Chatbot Missi </div>
         </div>
       </div>
       <button style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 5px;">×</button>

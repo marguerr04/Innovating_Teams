@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { GoPersonFill } from 'react-icons/go';
+import { IoIosSettings } from 'react-icons/io';
+import { VscGraph } from 'react-icons/vsc';
 import { useProfesor } from '../components/ProfessorContext';
 
 const PerfilView = () => {
@@ -9,8 +12,8 @@ const PerfilView = () => {
     nombre: profesor?.nombre || '',
     email: profesor?.email || '',
     telefono: profesor?.telefono || '',
-    institucion: profesor?.institucion || '',
-    especialidad: profesor?.especialidad || '',
+    institucion: profesor?.institucion || 'Universidad del desarrollo',
+    especialidad: profesor?.especialidad || 'Ingeniería Informática',
     biografia: profesor?.biografia || '',
     configuracion: {
       notificacionesEmail: true,
@@ -129,7 +132,7 @@ const PerfilView = () => {
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-3xl font-bold text-indigo-600">
@@ -181,7 +184,8 @@ const PerfilView = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Información Personal */}
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
+              <h2 className="text-xl font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
+                <GoPersonFill className="text-blue-500" />
                 Información Personal
               </h2>
               
@@ -288,7 +292,8 @@ const PerfilView = () => {
 
             {/* Información Adicional */}
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
+              <h2 className="text-xl font-semibold text-gray-900 border-b pb-2 flex items-center gap-2">
+                <IoIosSettings className="text-blue-500" />
                 Información Adicional
               </h2>
               
@@ -325,7 +330,7 @@ const PerfilView = () => {
                       disabled={!isEditing}
                       onClick={() => handleConfigChange('notificacionesEmail', !formData.configuracion.notificacionesEmail)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        formData.configuracion.notificacionesEmail ? 'bg-indigo-600' : 'bg-gray-200'
+                        formData.configuracion.notificacionesEmail ? 'bg-blue-600' : 'bg-gray-200'
                       } ${!isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <span
@@ -346,7 +351,7 @@ const PerfilView = () => {
                       disabled={!isEditing}
                       onClick={() => handleConfigChange('notificacionesApp', !formData.configuracion.notificacionesApp)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        formData.configuracion.notificacionesApp ? 'bg-indigo-600' : 'bg-gray-200'
+                        formData.configuracion.notificacionesApp ? 'bg-blue-600' : 'bg-gray-200'
                       } ${!isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <span
@@ -405,7 +410,10 @@ const PerfilView = () => {
 
           {/* Estadísticas del Profesor */}
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Estadísticas</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <VscGraph className="text-blue-500" />
+              Estadísticas
+            </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -416,22 +424,22 @@ const PerfilView = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-blue-900">Juegos Creados</p>
+                    <p className="text-sm font-medium text-black-900">Juegos Creados</p>
                     <p className="text-2xl font-semibold text-blue-600">15</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg">
+              <div className="bg-orange-50 p-4 rounded-lg">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-green-900">Estudiantes Impactados</p>
-                    <p className="text-2xl font-semibold text-green-600">342</p>
+                    <p className="text-sm font-medium text-black-900">Estudiantes Impactados</p>
+                    <p className="text-2xl font-semibold text-orange-600">342</p>
                   </div>
                 </div>
               </div>
@@ -444,7 +452,7 @@ const PerfilView = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-purple-900">Horas de Juego</p>
+                    <p className="text-sm font-medium text-black-900">Horas de Juego</p>
                     <p className="text-2xl font-semibold text-purple-600">89</p>
                   </div>
                 </div>
